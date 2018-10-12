@@ -8,7 +8,7 @@ include(geo_sim_sdk)
 include_geo_sim_sdk()
 link_geo_sim_sdk()
 include_directories(${PROJECT_SOURCE_DIR})
-# include_directories(${PROJECT_SOURCE_DIR}/external/include)
+include_directories(${PROJECT_SOURCE_DIR}/3rd)
 
 # BOOST
 set(Boost_USE_STATIC_LIBS ON)
