@@ -1,11 +1,14 @@
 #include "init.h"
 #include <vector>
+#include <WindingNumber/UT_Array.h>
+#include <WindingNumber/UT_Array.cpp>
 #include <WindingNumber/UT_SolidAngle.h>
-
+#include <WindingNumber/UT_SolidAngle.cpp>
 typedef zjucad::matrix::matrix<size_t> mati_t;
 typedef zjucad::matrix::matrix<double> matd_t;
 using namespace zjucad::matrix;
 using namespace std;
+using namespace HDK_Sample;
 
 #define PI 3.14159265359
 namespace marval{
@@ -27,6 +30,7 @@ int build_bdbox(const matd_t &nods, matd_t & bdbox){
   return 0;
 }
 int get_inner_points(matd_t &points, const mati_t &surf, const matd_t &nods){
+  // #include <WindingNumber/UT_SolidAngle.cpp>
   using UT_Vector3T = UT_FixedVector<float,3>;
   UT_Vector3T * UT_nods;
 
@@ -37,7 +41,7 @@ int get_inner_points(matd_t &points, const mati_t &surf, const matd_t &nods){
     UT_nods[i] = UT_Vector3T(&nods_flo(0, i));
   }
   
-  HDK_Sample::UT_SolidAngle<float, float>  Comp_WN(int(surf.size(2)), &surf_int(0, 0), int(nods.size(2)), UT_nods);
+  UT_SolidAngle<float, float>  Comp_WN(int(surf.size(2)), &surf_int(0, 0), int(nods.size(2)), UT_nods);
   vector<int> inside_id;
 #pragma omp parallel for
   for(size_t i = 0; i < points.size(2); ++i){
@@ -50,7 +54,7 @@ int get_inner_points(matd_t &points, const mati_t &surf, const matd_t &nods){
 
   mati_t inside_mat(inside_id.size(), 1);
   points = points(colon(), inside_mat(colon(), 0));
-
+  
   return 0;
 }
 
@@ -78,8 +82,9 @@ int gen_points(const matd_t &nods, const mati_t &surf, const size_t &num_in_axis
     }
   }
 
+  cout << "raw points "<< points.size(2) << endl;
+
   res = get_inner_points(points, surf, nods);
 }
 
 }
-

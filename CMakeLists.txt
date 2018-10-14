@@ -102,6 +102,12 @@ if(JsonCpp_FOUND)
   include_directories(${JsonCpp_INCLUDE_DIRS})
 endif(JsonCpp_FOUND)
 
+#TBB
+find_package(TBB REQUIRED)
+if(TBB_FOUND)
+  message("-- TBB @ ${TBB_INCLUDE_DIRS}")
+  include_directories(${TBB_INCLUDE_DIRS})
+endif(TBB_FOUND)
 # CUDA
 # find_package(CUDA)		
 # if(CUDA_FOUND)
@@ -115,3 +121,4 @@ endif(JsonCpp_FOUND)
 # add_subdirectory(test)
 # add_subdirectory(coarsen)
 add_subdirectory(Point_Sys)
+add_subdirectory(3rd)

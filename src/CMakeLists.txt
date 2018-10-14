@@ -1,4 +1,3 @@
-
 file(GLOB header *.h)
 file(GLOB source *.cc *.c)
 
@@ -11,7 +10,7 @@ message("this is cmkae current source dir ${CMAKE_CURRENT_SOURCE_DIR}  ")
 #     set(CU_JACOBI_LIBRARY "")
 # endif(CUDA_FOUND)
 
-add_library(bigbang SHARED ${source} pbd_cons.f90 elasticity.f90 cosserat_rod.f90 nnls.c poly_elasticity.f90 nnet.f90 vox_elastic.f90 vox_dfdPF.f90 vox_elastic_mtr.f90 sdf.f90 quad_to_lin.f90 fem_basis.f90 hex_cons_law.f90 coro_basis_def_oper.f90)
+add_library(common SHARED ${source})
 target_link_libraries(bigbang
     jtf-mesh
     ${SuiteSparse_LIBRARIES}

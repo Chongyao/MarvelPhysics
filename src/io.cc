@@ -10,7 +10,7 @@
 using namespace std;
 using namespace zjucad::matrix;
 
-namespace bigbang {
+namespace marval {
 
 int read_fixed_verts(const char *filename, std::vector<size_t> &fixed) {
   fixed.clear();
