@@ -1,0 +1,71 @@
+load(cj_function)$
+load(hj_fortran2)$
+
+optimprefix: tt$
+
+f: openw("vox_elastic_mtr.f90")$
+
+val_jac_to_f90(func, func_in) :=
+block([p, jac, hes],
+  hj_fortran2(func, 'val, func_in),
+  p : makelist(concat ('x,i), i, length(func_in)),
+  jac : concat(func, "_jac"),
+  define(funmake(jac, p), calc_jac(apply(func, func_in), func_in[1])),
+  hj_fortran2(jac, 'jac, func_in),
+  return()
+)$
+
+block(
+  /* for isotropic hyperelastic material, with two args as parameters */
+  mtr:      genmatrix(mtr, 2, 1),
+  X:        genmatrix(X, 3, 8),
+  gw:       genmatrix(gw, 1, 1),      /* gaussian quadrature weights */
+  detDmH:   genmatrix(detDmH, 1, 1),
+  H_invDmH: genmatrix(H_invDmH, 8, 3),
+  R:        genmatrix(R, 3, 3),
+
+  /* DmH = dX/deps */
+  vox_stvk_at_quadr_mtr(mtr, X, H_invDmH, detDmH, gw) := block(
+    [mu, lam, F, E],
+    mu:  mtr[1,1],
+    lam: mtr[2,1],
+    F: X.H_invDmH,
+    E: (transpose(F).F-ident(3))/2,
+    gw*detDmH*(mu*mat_norm(E, frobenius)^2+lam/2*mat_trace(E)^2)
+  ),
+  with_stdout(f, val_jac_to_f90(vox_stvk_at_quadr_mtr, [mtr, X, H_invDmH, detDmH, gw])),
+
+  vox_neo_at_quadr_mtr(mtr, X, H_invDmH, detDmH, gw) := block(
+    [mu, lam, F, I1, J],
+    mu:  mtr[1,1],
+    lam: mtr[2,1],
+    F: X.H_invDmH,
+    I1: mat_trace(transpose(F).F),
+    J: determinant(F),
+    0.5*gw*detDmH*( mu*(I1-2*log(J)-3)+lam*(log(J))^2 )
+  ),
+  with_stdout(f, val_jac_to_f90(vox_neo_at_quadr_mtr, [mtr, X, H_invDmH, detDmH, gw])),
+
+  vox_linear_at_quadr_mtr(mtr, X, H_invDmH, detDmH, gw) := block(
+    [mu, lam, F, E],
+    mu:  mtr[1,1],
+    lam: mtr[2,1],
+    F: X.H_invDmH,
+    E: (transpose(F)+F)/2-ident(3),
+    gw*detDmH*(mu*mat_norm(E, frobenius)^2+lam/2*mat_trace(E)^2)
+  ),
+  with_stdout(f, val_jac_to_f90(vox_linear_at_quadr_mtr, [mtr, X, H_invDmH, detDmH, gw])),
+
+  vox_corotated_at_quadr_mtr(mtr, X, H_invDmH, R, detDmH, gw) := block(
+    [mu, lam, F],
+    mu:  mtr[1,1],
+    lam: mtr[2,1],
+    F: X.H_invDmH,
+    gw*detDmH*(mu*mat_norm(F-R, frobenius)^2+lam/2*mat_trace(transpose(R).F-ident(3))^2)
+  ),
+  with_stdout(f, val_jac_to_f90(vox_corotated_at_quadr_mtr, [mtr, X, H_invDmH, R, detDmH, gw])),
+
+  return()
+)$
+
+close(f)$

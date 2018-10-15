@@ -11,7 +11,7 @@ message("this is cmkae current source dir ${CMAKE_CURRENT_SOURCE_DIR}  ")
 # endif(CUDA_FOUND)
 
 add_library(common SHARED ${source})
-target_link_libraries(bigbang
+target_link_libraries(common
     jtf-mesh
     ${SuiteSparse_LIBRARIES}
     ${LBFGS_LIBRARIES}

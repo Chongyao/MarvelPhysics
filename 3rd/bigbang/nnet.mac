@@ -1,0 +1,73 @@
+load(cj_function)$
+load(hj_fortran2)$
+
+optimprefix: tt$
+
+f: openw("nnet.f90")$
+
+block(
+  [X, Y, HX, YH],
+
+  dimI: 3,
+  dimH: 6,
+  dimO: 1,
+  szHX: dimH*(dimI+1),
+  szYH: dimO*(dimH+1),
+
+  X: genmatrix(X, dimI, 1),
+  Y: genmatrix(Y, dimO, 1),
+  W: genmatrix(W, szHX+szYH, 1),
+  
+  sigmoid(x) := 1/(1+exp(-x)),
+
+  go_thru_nnet(W, X) := block(
+    [flatW, tmp, HX, YH, H],
+    flatW: FLATTEN(W),
+
+    tmp: [],
+    for i:1 thru szHX do
+      tmp: append(tmp, [ flatW[i] ]),
+    HX: RESHAPE(matrix(tmp), dimH, dimI+1),
+
+    tmp: [],
+    for i:1 thru szYH do
+      tmp: append(tmp, [ flatW[szHX+i] ]),
+    YH: RESHAPE(matrix(tmp), dimO, dimH+1),
+
+    H: genmatrix(H, dimH, 1),
+    
+    /* hidden layer */
+    for i:1 thru dimH do
+      H[i, 1]: sigmoid( submatrix(row(HX, i), dimI+1).X + HX[i, dimI+1] ),
+
+    /* output layer */
+    rtn: [],
+    for i:1 thru dimO do
+      rtn: append(rtn, [submatrix(row(YH, i), dimH+1).H + YH[i, dimH+1]]),
+
+    transpose(matrix(rtn))
+  ),
+  with_stdout(f, hj_fortran2(go_thru_nnet, 'val, [W, X])),
+
+  nnet_squared_error(W, X, Y) := matrix([ mat_norm(go_thru_nnet(W, X)-Y, frobenius)^2 ]),
+  with_stdout(f, val_jac_hes_to_f90(nnet_squared_error, [W, X, Y])),
+
+
+  /* simulation */
+  NODS: genmatrix(NODS, 2, 3),
+  Dm:   genmatrix(Dm, 2, 2),
+
+  nnet_tri_elas(NODS, Dm, W) := block(
+    [Ds, F, E, voigt],
+    Ds: addcol(col(NODS,2)-col(NODS,1), col(NODS,3)-col(NODS,1)),
+    F: Ds.Dm,
+    E: transpose(F).F,
+    voigt: transpose(matrix([ E[1,1], E[2,2], E[1,2] ])),
+    go_thru_nnet(W, voigt)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(nnet_tri_elas, [NODS, Dm, W])),
+
+  return()
+)$
+
+close(f)$

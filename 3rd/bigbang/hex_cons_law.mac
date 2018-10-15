@@ -1,0 +1,80 @@
+load("./cj_function.mac")$
+load("./hj_fortran2.mac")$
+
+optimprefix: tt$
+
+f: openw("hex_cons_law.f90")$
+
+block(
+  [F, R, mu, lam],
+  F:   genmatrix(F,   3, 3),
+  R:   genmatrix(R,   3, 3),
+  mu:  genmatrix(mu,  1, 1),
+  lam: genmatrix(lam, 1, 1),
+
+  hex_lin_F_at_qr(F, mu, lam) := block(
+    [E],
+    E: (transpose(F)+F)/2-ident(3),
+    mu*mat_norm(E, frobenius)^2+lam/2*mat_trace(E)^2
+  ),
+  with_stdout(f, val_jac_to_f90(hex_lin_F_at_qr, [F, mu, lam])),
+
+  hex_coro_F_at_qr(F, R, mu, lam) := block(
+    [E],
+    E: (transpose(F).R+transpose(R).F)/2-ident(3),
+    mu*mat_norm(E, frobenius)^2+lam/2*mat_trace(E)^2
+  ),
+  with_stdout(f, val_jac_hes_to_f90(hex_coro_F_at_qr, [F, R, mu, lam])),
+
+  hex_neo_F_at_qr(F, mu, lam) := block(
+    [I1, I3],
+    I1: mat_trace(transpose(F).F),
+    I3: determinant(F)^2,
+    mu/2*(I1-log(I3)-3)+lam/8*log(I3)^2
+  ),
+  with_stdout(f, val_jac_hes_to_f90(hex_neo_F_at_qr, [F, mu, lam])),
+
+  hex_stvk_F_at_qr(F, mu, lam) := block(
+    [E],
+    E: (transpose(F).F-ident(3))/2,
+    mu*mat_norm(E, frobenius)^2+lam/2*mat_trace(E)^2
+  ),
+  with_stdout(f, val_jac_hes_to_f90(hex_stvk_F_at_qr, [F, mu, lam])),
+
+  hex_sta_neo_F_at_qr(F, mu, lam) := block(
+    [new_mu, new_lam, alpha, IC, J],
+    new_mu: mu,
+    new_lam: lam+mu,
+    alpha: 1+new_mu[1,1]/new_lam[1,1]-new_mu[1,1]*new_lam[1,1]/4,
+    IC: mat_trace(transpose(F).F),
+    J: determinant(F),
+    new_mu/2*(IC-3)-new_mu*(J-1)+new_lam/2*(J-1)^2
+  ),
+  with_stdout(f, val_jac_hes_to_f90(hex_sta_neo_F_at_qr, [F, mu, lam])),
+
+  hex_bower_neo_F_at_qr(F, mu, lam) := block(
+    [J, Ic],
+    Ic: mat_trace(transpose(F).F),
+    J: determinant(F),
+    mu/2*(J^(-2/3)*Ic-3)+lam/2*(J-1)^2
+  ),
+  with_stdout(f, val_jac_hes_to_f90(hex_bower_neo_F_at_qr, [F, mu, lam])),
+
+  return()
+)$
+
+block(
+  [N, K],
+  N: genmatrix(N, 3, 6),
+  K: genmatrix(K, 3, 3),
+  
+  basis_mini_trace(N, K) := block(
+    [N1, N2],
+    N1: addcol(col(N, 1), col(N, 2), col(N, 3)),
+    N2: addcol(col(N, 4), col(N, 5), col(N, 6)),
+    matrix([ mat_trace(transpose(N1).K.N2) ])
+  ),
+  with_stdout(f, val_jac_hes_to_f90(basis_mini_trace, [N, K]))
+)$
+
+close(f)$

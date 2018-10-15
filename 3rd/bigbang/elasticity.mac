@@ -1,0 +1,277 @@
+load("./hj_fortran2.mac")$
+load("./cj_function.mac")$
+
+optimprefix : tt$
+
+f: openw("elasticity.f90")$
+
+/* BW98 */
+block(
+  [X, invUV, area],
+  X: genmatrix(X, 3, 3),
+  invUV: genmatrix(invUV, 2, 2),
+  area: genmatrix(area, 1, 1),
+  
+  bw98_stretch(X, invUV, area) := block(
+    [E, W],
+    E: addcol(col(X, 2)-col(X, 1), col(X, 3)-col(X, 1)),
+    W: E.invUV,
+    0.5*area*( (NORM(col(W, 1))-1.0)^2 + (NORM(col(W, 2))-1.0)^2 )
+  ),
+  with_stdout(f, val_jac_hes_to_f90(bw98_stretch, [X, invUV, area])),
+  
+  bw98_shear(X, invUV, area) := block(
+    [E, W],
+    E: addcol(col(X, 2)-col(X, 1), col(X, 3)-col(X, 1)),
+    W: E.invUV,
+    0.5*area*( (NORM(col(W, 1)+col(W, 2))-sqrt(2.0))^2 + (NORM(col(W, 1)-col(W, 2))-sqrt(2.0))^2 )
+  ),
+  with_stdout(f, val_jac_hes_to_f90(bw98_shear, [X, invUV, area])),
+  
+  return()
+)$
+
+/* FEM cloth */
+block(
+  [X, Dm, area, k],
+  X: genmatrix(X, 3, 3),
+  Dm: genmatrix(Dm, 2, 2),
+  area: genmatrix(area, 1, 1),
+  k: genmatrix(k, 4, 1),
+  
+  fem_stretch(X, Dm, area, k) := block(
+    [Ds, F, E, rtn],
+    Ds: addcol(col(X, 2)-col(X, 1), col(X, 3)-col(X, 1)),
+    F: Ds.Dm,
+    E: (transpose(F).F-ident(2))/2.0,
+    0.5*area*(k[1,1]*E[1,1]^2+k[3,1]*E[2,2]^2+2*k[2,1]*E[1,1]*E[2,2]+k[4,1]*E[1,2]^2)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(fem_stretch, [X, Dm, area, k])),
+  return()
+)$
+
+/* mass spring */
+block(
+  [X, d],
+  X: genmatrix(X, 3, 2),
+  d: genmatrix(d, 1, 1),
+
+  calc_edge_length(X) := block(
+    matrix([NORM(col(X, 1)-col(X, 2))])
+  ),
+  with_stdout(f, val_jac_hes_to_f90(calc_edge_length, [X])),
+
+  mass_spring(X, d) := block(
+    [curr_len, rtn],
+    curr_len: NORM(col(X, 1)-col(X, 2)),
+    rtn: (curr_len/d[1,1]-1)^2*d[1,1],
+    matrix([rtn])
+  ),
+  with_stdout(f, val_jac_hes_to_f90(mass_spring, [X, d])),
+
+  return()
+)$
+
+/* fourth-order polynomial spring */
+block(
+  [X, d],
+  X: genmatrix(X, 3, 2),
+  d: genmatrix(d, 1, 1),
+
+  poly_spring(X, d) := block(
+    matrix([ (NORM(col(X,1)-col(X,2))^2-d[1,1]^2)^2 ])
+  ),
+  with_stdout(f, val_jac_hes_to_f90(poly_spring, [X, d])),
+
+  return()
+)$
+
+/* hinge based bending */
+block(
+  [X, d, l, area],
+  X: genmatrix(X, 3, 4),
+  d: genmatrix(d, 1, 1),
+  l: genmatrix(l, 1, 1),
+  area: genmatrix(area, 1, 1),
+  
+  calc_dih_angle(X) := block(
+    [b, b1x2, b2x3, sint, cost],
+    b: addcol(col(X,2)-col(X,1), col(X,3)-col(X,2), col(X,4)-col(X,3)),
+    b1x2: CROSS(col(b,1), col(b,2)),
+    b2x3: CROSS(col(b,2), col(b,3)),
+    sint: DOT(CROSS(b1x2, b2x3), col(b,2)/NORM(col(b,2))),
+    cost: -DOT(b1x2, b2x3),
+    matrix([ atan2(sint, cost) ])
+  ),
+  with_stdout(f, val_jac_hes_to_f90(calc_dih_angle, [X])),
+  
+  surf_bending(X, d, l, area) := block(
+    [curr],
+    curr: calc_dih_angle(X),
+    (curr-d)^2*3*l^2/area[1,1]
+  ),
+  with_stdout(f, val_jac_hes_to_f90(surf_bending, [X, d, l, area])),
+  
+  return()
+)$
+
+/* curve bending */
+block(
+  [X, d1, d2],
+  X: genmatrix(X, 3, 4),
+  d1: genmatrix(d1, 1, 1),
+  d2: genmatrix(d2, 1, 1),
+  
+  line_bending(X, d1, d2) := block(
+    [e1, e2, Kb, rtn],
+    e1: col(X, 1)-col(X, 2),
+    e2: col(X, 3)-col(X, 4),
+    Kb: 2*CROSS(e1, e2)/(d1[1,1]*d2[1,1]+DOT(e1, e2)),
+    rtn: DOT(Kb, Kb)/(d1[1,1]+d2[1,1]),
+    matrix([rtn])
+  ),
+  with_stdout(f, val_jac_hes_to_f90(line_bending, [X, d1, d2])),
+  
+  return()
+)$
+
+block(
+  [X, d1, d2],
+  X: genmatrix(X, 3, 3),
+  d1: genmatrix(d1, 1, 1),
+  d2: genmatrix(d2, 1, 1),
+  
+  curve_bending(X, d1, d2) := block(
+    [e1, e2, Kb, rtn],
+    e1: col(X, 1)-col(X, 2),
+    e2: col(X, 2)-col(X, 3),
+    Kb: 2*CROSS(e1, e2)/(d1[1,1]*d2[1,1]+DOT(e1, e2)),
+    rtn: DOT(Kb, Kb)/(d1[1,1]+d2[1,1]),
+    matrix([rtn])
+  ),
+  with_stdout(f, val_jac_hes_to_f90(curve_bending, [X, d1, d2])),
+  
+  return()
+)$
+
+/* 2D elasticity */
+block(
+  [X, D, area, lam, miu],
+  X: genmatrix(X, 2, 3),
+  D: genmatrix(D, 2, 2),
+  area: genmatrix(area, 1, 1),
+  lam: genmatrix(lam, 1, 1),
+  miu: genmatrix(miu, 1, 1),
+
+  tri_linear_elas(X, D, area, lam, miu) := block(
+    [DS, F, E],
+    DS: addcol(col(X,2)-col(X,1), col(X,3)-col(X,1)),
+    F: DS.D,
+    E: 0.5*(transpose(F)+F)-ident(2),
+    area*(miu*mat_norm(E, frobenius)^2+0.5*lam*mat_trace(E)^2)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(tri_linear_elas, [X, D, area, lam, miu])),
+
+  tri_stvk_elas(X, D, area, lam, miu) := block(
+    [DS, F, E],
+    DS: addcol(col(X,2)-col(X,1), col(X,3)-col(X,1)),
+    F: DS.D,
+    E: (transpose(F).F-ident(2))/2,
+    area*(miu*mat_norm(E, frobenius)^2+0.5*lam*mat_trace(E)^2)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(tri_stvk_elas, [X, D, area, lam, miu])),
+
+  return()
+)$
+
+/* 3D elasticity */
+block(
+  [X, D, volume, lam, miu],
+  X: genmatrix(X, 3, 4),
+  D: genmatrix(D, 3, 3),
+  R: genmatrix(R, 3, 3),
+  volume: genmatrix(volume, 1, 1),
+  lam: genmatrix(lam, 1, 1),
+  miu: genmatrix(miu, 1, 1),
+  
+  tet_stvk(X, D, volume, lam, miu) := block(
+    [DS, F, E],
+    DS: addcol(col(X,2)-col(X,1), col(X,3)-col(X,1), col(X,4)-col(X,1)),
+    F: DS.D,
+    E: 0.5*(transpose(F).F-ident(3)),
+    volume*(miu*mat_norm(E, frobenius)^2+0.5*lam*mat_trace(E)^2)
+  ),  
+  with_stdout(f, val_jac_hes_to_f90(tet_stvk, [X, D, volume, lam, miu])),
+  
+  tet_linear(X, D, volume, lam, miu) := block(
+    [DS, F, e],
+    DS: addcol(col(X,2)-col(X,1), col(X,3)-col(X,1), col(X,4)-col(X,1)),
+    F: DS.D,
+    e: 0.5*(transpose(F)+F)-ident(3),
+    volume*(miu*mat_norm(e, frobenius)^2+0.5*lam*mat_trace(e)^2)
+  ),  
+  with_stdout(f, val_jac_hes_to_f90(tet_linear, [X, D, volume, lam, miu])),
+
+  tet_coro(X, D, R, volume, lam, miu) := block(
+    [DS, F],
+    DS: addcol(col(X,2)-col(X,1), col(X,3)-col(X,1), col(X,4)-col(X,1)),
+    F: DS.D,
+    E: (transpose(F).R+transpose(R).F)/2-ident(3),
+    volume*(miu*mat_norm(E, frobenius)^2+lam/2*mat_trace(E)^2)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(tet_coro, [X, D, R, volume, lam, miu])),
+
+  tet_neohookean(X, D, volume, lam, miu) := block(
+    [DS, F, I1, I3],
+    DS: addcol(col(X,2)-col(X,1), col(X,3)-col(X,1), col(X,4)-col(X,1)),
+    F: DS.D,
+    I1: mat_trace(transpose(F).F),
+    I3: determinant(transpose(F).F),
+    volume*(0.5*miu*(I1-log(I3)-3)+0.125*lam*log(I3)^2)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(tet_neohookean, [X, D, volume, lam, miu])),
+  
+  tet_arap(X, D, R, volume) := block(
+    [DS, F],
+    DS: addcol(col(X,2)-col(X,1), col(X,3)-col(X,1), col(X,4)-col(X,1)),
+    F: DS.D,
+    volume*(mat_norm(F-R, frobenius)^2)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(tet_arap, [X, D, R, volume])),
+  
+  return()
+)$
+
+/* hex elasticity */
+block(
+  [X, h, lam, miu],
+  X: genmatrix(X, 3, 8),
+  h: genmatrix(h, 1, 1),
+  lam: genmatrix(lam, 1, 1),
+  miu: genmatrix(miu, 1, 1),
+  
+  hex_linear(X, h, lam, miu) := block(
+    [G, F, E],
+    G: 1.0/(4*h[1,1])*matrix([-1, 1, -1, 1, -1, 1, -1, 1],
+			     [-1, -1, 1, 1, -1, -1, 1, 1],
+			     [-1, -1, -1, -1, 1, 1, 1, 1]),
+    F: X.transpose(G), /*transpose(G . transpose(X)),*/
+    E: 0.5*(transpose(F)+F)-ident(3),
+    h*h*h*(miu*mat_norm(E, frobenius)^2+0.5*lam*mat_trace(E)^2)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(hex_linear, [X, h, lam, miu])),
+  
+  hex_stvk(X, h, lam, miu) := block(
+    [G, F, E],
+    G: 1.0/(4*h[1,1])*matrix([-1, 1, -1, 1, -1, 1, -1, 1],
+			     [-1, -1, 1, 1, -1, -1, 1, 1],
+			     [-1, -1, -1, -1, 1, 1, 1, 1]),
+    F: X.transpose(G), /*transpose(G . transpose(X)),*/
+    E: 0.5*(transpose(F).F-ident(3)),
+    h*h*h*(miu*mat_norm(E, frobenius)^2+0.5*lam*mat_trace(E)^2)
+  ),
+  with_stdout(f, val_jac_hes_to_f90(hex_stvk, [X, h, lam, miu])),
+  return()
+)$
+bug_report()
+close(f)$

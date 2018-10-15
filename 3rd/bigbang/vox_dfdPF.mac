@@ -1,0 +1,27 @@
+load(hj_fortran2)$
+load(cj_function)$
+
+optimprefix: tt$
+
+f: openw("vox_dfdPF.f90")$
+
+block(
+  [PF, U, VT, G],
+  PF: genmatrix(PF, 3, 1),
+  U:  genmatrix(U,  3, 3),
+  VT: genmatrix(VT, 3, 3),
+  G:  genmatrix(G,  24, 9),
+  
+  vox_f(PF, U, VT, G) := block(
+    [diag, P],
+    diag: matrix([PF[1,1], 0, 0], [0, PF[2,1], 0], [0, 0, PF[3,1]]),
+    P: U.diag.VT,
+    G.transpose(matrix(FLATTEN(P)))
+  ),
+  vox_dfdpf(PF, U, VT, G) := GRAD(vox_f(PF, U, VT, G), PF),
+
+  with_stdout(f, hj_fortran2(vox_dfdpf, 'jac, [PF, U, VT, G])),
+  return()
+)$
+
+close(f)$

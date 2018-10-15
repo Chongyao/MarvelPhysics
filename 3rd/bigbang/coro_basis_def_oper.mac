@@ -1,0 +1,150 @@
+load("./cj_function.mac")$
+load("./hj_fortran2.mac")$
+
+optimprefix: tt$
+
+f: openw("coro_basis_def_oper.f90")$
+
+block(
+  [X, X0, R, Nu, Nx, dNude, dNxde, Dm],
+  X:  genmatrix(X,  2, 1),
+  X0: genmatrix(X0, 2, 1),
+  R:  genmatrix(R,  2, 2),
+  Nu:  genmatrix(Nu,  2, 1),
+  Nx:  genmatrix(Nx,  1, 1),
+  dNude: genmatrix(dNude, 2, 2),
+  dNxde: genmatrix(dNxde, 1, 2),
+  Dm:    genmatrix(Dm,    2, 2),
+
+  coro_ani_basis_df_2d(X, X0, R, Nu, Nx, dNude, dNxde, Dm) := block(
+    [diagNx, diagNu, u, dude],
+    diagNx: matrix([Nx[1,1], 0], [0, Nx[1,1]]),
+    diagNu: matrix([Nu[1,1], 0], [0, Nu[2,1]]),
+    u: R.diagNx.X0-diagNx.X0+R.diagNu.(transpose(R).X-X0),
+    dude: GRAD(u, Nu).dNude+GRAD(u, Nx).dNxde, /* 2x2 matrix */
+    matrix(FLATTEN(dude.Dm))                   /* 2x2 matrix */
+  ),
+  with_stdout(f, val_jac_to_f90(coro_ani_basis_df_2d, [X, X0, R, Nu, Nx, dNude, dNxde, Dm])),
+
+  return()
+)$
+
+block(
+  [X, X0, R, Nu, Nx, dNude, dNxde, Dm],
+  X:  genmatrix(X,  2, 1),
+  X0: genmatrix(X0, 2, 1),
+  R:  genmatrix(R,  2, 2),
+  Nu:  genmatrix(Nu,  2, 2),
+  Nx:  genmatrix(Nx,  1, 1),
+  dNude: genmatrix(dNude, 4, 2),
+  dNxde: genmatrix(dNxde, 1, 2),
+  Dm:    genmatrix(Dm,    2, 2),
+
+  coro_aug_ani_df_2d(X, X0, R, Nu, Nx, dNude, dNxde, Dm) := block(
+    [diagNx, u, dude],
+    diagNx: matrix([Nx[1,1], 0], [0, Nx[1,1]]),
+    u: R.diagNx.X0-diagNx.X0+R.Nu.(transpose(R).X-X0),
+    dude: GRAD(u, Nu).dNude+GRAD(u, Nx).dNxde, /* 2x2 matrix */
+    matrix(FLATTEN(dude.Dm))                   /* 2x2 matrix */
+  ),
+  with_stdout(f, val_jac_to_f90(coro_aug_ani_df_2d, [X, X0, R, Nu, Nx, dNude, dNxde, Dm])),
+
+  return()
+)$
+
+block(
+  [X, X0, R, Nu, Nx, dNude, dNxde, Dm],
+  X:   genmatrix(X,  2, 1),
+  X0:  genmatrix(X0, 2, 1),
+  R:   genmatrix(R,  2, 2),
+  Nu:    genmatrix(Nu,    1, 1),
+  Nx:    genmatrix(Nx,    1, 1),
+  dNude: genmatrix(dNude, 1, 2),
+  dNxde: genmatrix(dNxde, 1, 2),
+  Dm:    genmatrix(Dm,    2, 2),
+
+  coro_iso_basis_df_2d(X, X0, R, Nu, Nx, dNude, dNxde, Dm) := block(
+    [diagNx, diagNu, u, dude],
+    diagNx: matrix([Nx[1,1], 0], [0, Nx[1,1]]),
+    diagNu: matrix([Nu[1,1], 0], [0, Nu[1,1]]),
+    u: R.diagNx.X0-diagNx.X0+R.diagNu.(transpose(R).X-X0),
+    dude: GRAD(u, Nu).dNude+GRAD(u, Nx).dNxde, /* 2x2 matrix */
+    matrix(FLATTEN(dude.Dm))  /* 2x2 matrix */
+  ),
+  with_stdout(f, val_jac_to_f90(coro_iso_basis_df_2d, [X, X0, R, Nu, Nx, dNude, dNxde, Dm])),
+
+  return()
+)$
+
+block(
+  [X, X0, R, Nu, Nx, dNude, dNxde, Dm],
+  X:  genmatrix(X,  3, 1),
+  X0: genmatrix(X0, 3, 1),
+  R:  genmatrix(R,  3, 3),
+  Nu:  genmatrix(Nu,  3, 1),
+  Nx:  genmatrix(Nx,  1, 1),
+  dNude: genmatrix(dNude, 3, 3),
+  dNxde: genmatrix(dNxde, 1, 3),
+  Dm:    genmatrix(Dm,    3, 3),
+
+  coro_ani_basis_df_3d(X, X0, R, Nu, Nx, dNude, dNxde, Dm) := block(
+    [diagNx, diagNu, u, dude],
+    diagNx: matrix([Nx[1,1], 0, 0], [0, Nx[1,1], 0], [0, 0, Nx[1,1]]),
+    diagNu: matrix([Nu[1,1], 0, 0], [0, Nu[2,1], 0], [0, 0, Nu[3,1]]),
+    u: R.diagNx.X0-diagNx.X0+R.diagNu.(transpose(R).X-X0),
+    dude: GRAD(u, Nu).dNude+GRAD(u, Nx).dNxde,
+    matrix(FLATTEN(dude.Dm))
+  ),
+  with_stdout(f, val_jac_to_f90(coro_ani_basis_df_3d, [X, X0, R, Nu, Nx, dNude, dNxde, Dm])),
+
+  return()
+)$
+
+block(
+  [X, X0, R, Nu, Nx, dNude, dNxde, Dm],
+  X:  genmatrix(X,  3, 1),
+  X0: genmatrix(X0, 3, 1),
+  R:  genmatrix(R,  3, 3),
+  Nu:  genmatrix(Nu,  3, 3),
+  Nx:  genmatrix(Nx,  1, 1),
+  dNude: genmatrix(dNude, 9, 3),
+  dNxde: genmatrix(dNxde, 1, 3),
+  Dm:    genmatrix(Dm,    3, 3),
+
+  coro_aug_ani_df_3d(X, X0, R, Nu, Nx, dNude, dNxde, Dm) := block(
+    [diagNx, u, dude],
+    diagNx: matrix([Nx[1,1], 0, 0], [0, Nx[1,1], 0], [0, 0, Nx[1,1]]),
+    u: R.diagNx.X0-diagNx.X0+R.Nu.(transpose(R).X-X0),
+    dude: GRAD(u, Nu).dNude+GRAD(u, Nx).dNxde, /* 3x3 matrix */
+    matrix(FLATTEN(dude.Dm))                   /* 3x3 matrix */
+  ),
+  with_stdout(f, val_jac_to_f90(coro_aug_ani_df_3d, [X, X0, R, Nu, Nx, dNude, dNxde, Dm])),
+
+  return()
+)$
+
+block(
+  [X, X0, R, Nu, Nx, dNude, dNxde, Dm],
+  X:   genmatrix(X,  3, 1),
+  X0:  genmatrix(X0, 3, 1),
+  R:   genmatrix(R,  3, 3),
+  Nu:    genmatrix(Nu,    1, 1),
+  Nx:    genmatrix(Nx,    1, 1),
+  dNude: genmatrix(dNude, 1, 3),
+  dNxde: genmatrix(dNxde, 1, 3),
+  Dm:    genmatrix(Dm,    3, 3),
+
+  coro_iso_basis_df_3d(X, X0, R, Nu, Nx, dNude, dNxde, Dm) := block(
+    [diagNx, diagNu, u, dude],
+    diagNx: matrix([Nx[1,1], 0, 0], [0, Nx[1,1], 0], [0, 0, Nx[1,1]]),
+    diagNu: matrix([Nu[1,1], 0, 0], [0, Nu[1,1], 0], [0, 0, Nu[1,1]]),
+    u: R.diagNx.X0-diagNx.X0+R.diagNu.(transpose(R).X-X0),
+    dude: GRAD(u, Nu).dNude+GRAD(u, Nx).dNxde,
+    matrix(FLATTEN(dude.Dm))
+  ),
+  with_stdout(f, val_jac_to_f90(coro_iso_basis_df_3d, [X, X0, R, Nu, Nx, dNude, dNxde, Dm])),
+
+  return()
+)$
+
+close(f)$

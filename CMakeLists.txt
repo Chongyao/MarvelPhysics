@@ -116,9 +116,9 @@ endif(TBB_FOUND)
 #   include_directories(${CUDA_INCLUDE_DIRS})
 # endif(CUDA_FOUND)
 
-# add_subdirectory(src)
+add_subdirectory(3rd)
 # add_subdirectory(examples)
 # add_subdirectory(test)
 # add_subdirectory(coarsen)
 add_subdirectory(Point_Sys)
-add_subdirectory(3rd)
+
