@@ -3,8 +3,8 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-#include "src/config.h"
-#include "src/vtk.h"
+#include "bigbang/config.h"
+#include "bigbang/vtk.h"
 #include "collision.h"
 
 using namespace std;

@@ -5,7 +5,7 @@
 #include <Eigen/CholmodSupport>
 
 #include "arpaca.h"
-#include "src/config.h"
+#include "bigbang/config.h"
 #include "util.h"
 #include "def.h"
 #include "energy.h"

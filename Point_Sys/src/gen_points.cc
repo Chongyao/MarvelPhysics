@@ -1,11 +1,14 @@
-#include "init.h"
+#include "gen_points.h"
+
 #include <vector>
+#include <iostream>
+#include <cmath>
+
 #include <WindingNumber/UT_Array.h>
 #include <WindingNumber/UT_Array.cpp>
 #include <WindingNumber/UT_SolidAngle.h>
 #include <WindingNumber/UT_SolidAngle.cpp>
 
-#include <iostream>
 #include <zjucad/matrix/io.h>
 typedef zjucad::matrix::matrix<size_t> mati_t;
 typedef zjucad::matrix::matrix<double> matd_t;
@@ -55,11 +58,14 @@ int get_inner_points(matd_t &points, const mati_t &surf, const matd_t &nods){
     float sol_angle = Comp_WN.computeSolidAngle(query_point);
 
 #pragma omp critical
-    {cout << sol_angle << endl;
-    if (sol_angle/(4*PI) - 1 < 1e-20){}
-    inside_id.push_back(i);}
+    {
+      if (fabs(sol_angle - 4*PI) < 1){
+       
+        cout << sol_angle  <<endl;   
+        inside_id.push_back(i);
+      }
+    }
   }
-
   mati_t inside_mat(inside_id.size(), 1);
   copy (inside_id.begin(), inside_id.end(), &inside_mat(0, 0));
   matd_t points_tmp = points(colon(), inside_mat(colon(), 0));

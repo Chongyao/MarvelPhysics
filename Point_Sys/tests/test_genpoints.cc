@@ -7,7 +7,7 @@
 #include <jtflib/mesh/io.h>
 
 #include "bigbang/io.h"
-#include "Point_Sys/src/init.h"
+#include "Point_Sys/src/gen_points.h"
 using namespace marvel;
 using namespace std;
 using namespace bigbang;
@@ -29,10 +29,11 @@ int main(int argc, char** argv){
   matd_t points;
   gen_points(nods, surf, pt.get<size_t>("num_in_axis.value"), points);
   cout << pt.get<string>("points_out.value").c_str() << endl;
-  cout << "points" << points(colon(), colon(0, 10))<<endl;
+  // cout << "points" << points<<endl;
   point_write_to_vtk(pt.get<string>("points_out.value").c_str(), points);
   cout << "all done " << endl;
                                                                                                                         
 
   
 }
+

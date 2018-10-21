@@ -5,7 +5,7 @@
 #include <Eigen/Eigen>
 #include <zjucad/matrix/itr_matrix.h>
 
-#include "src/config.h"
+#include "bigbang/config.h"
 
 using namespace std;
 using namespace zjucad::matrix;
