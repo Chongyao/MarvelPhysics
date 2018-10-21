@@ -17,7 +17,7 @@ using namespace HDK_Sample;
 
 
 #define PI 3.14159265359
-namespace marval{
+namespace marvel{
 
 
 int build_bdbox(const matd_t &nods, matd_t & bdbox){

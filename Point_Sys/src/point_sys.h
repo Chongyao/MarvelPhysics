@@ -5,7 +5,7 @@
 typedef zjucad::matrix::matrix<size_t> mati_t;
 typedef zjucad::matrix::matrix<double> matd_t;
 
-namespace marval{
+namespace marvel{
 
 
 class Point_system{

@@ -11,7 +11,7 @@
 using mati_t=zjucad::matrix::matrix<size_t>;
 using matd_t=zjucad::matrix::matrix<double>;
 
-namespace marval {
+namespace marvel {
 
 int read_fixed_verts(const char *filename, std::vector<size_t> &fixed);
 

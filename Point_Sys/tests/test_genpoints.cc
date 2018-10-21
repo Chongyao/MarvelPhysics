@@ -8,7 +8,7 @@
 
 #include "bigbang/io.h"
 #include "Point_Sys/src/init.h"
-using namespace marval;
+using namespace marvel;
 using namespace std;
 using namespace bigbang;
 using namespace zjucad::matrix;
