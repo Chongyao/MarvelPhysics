@@ -24,7 +24,7 @@ endif(Boost_FOUND)
 find_package(Eigen3 REQUIRED)
 if(EIGEN3_FOUND)
   message("-- Eigen @ ${EIGEN3_INCLUDE_DIR}")
-  message("-- Eigen version: ${EIGEN3_VERSION}")
+  message("-- Eigen version: ${EIGEN3_VERSION}")j
   include_directories(${EIGEN3_INCLUDE_DIR})
 endif(EIGEN3_FOUND)
 

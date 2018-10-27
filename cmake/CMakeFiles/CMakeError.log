@@ -1,0 +1,55 @@
+Determining if the pthread_create exist failed with the following output:
+Change Dir: /home/zcy/Documents/projects/MarvelPhysics/cmake/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_5340d/fast"
+/usr/bin/make -f CMakeFiles/cmTC_5340d.dir/build.make CMakeFiles/cmTC_5340d.dir/build
+make[1]: Entering directory '/home/zcy/Documents/projects/MarvelPhysics/cmake/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_5340d.dir/CheckSymbolExists.c.o
+/usr/bin/cc    -o CMakeFiles/cmTC_5340d.dir/CheckSymbolExists.c.o   -c /home/zcy/Documents/projects/MarvelPhysics/cmake/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_5340d
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5340d.dir/link.txt --verbose=1
+/usr/bin/cc      -rdynamic CMakeFiles/cmTC_5340d.dir/CheckSymbolExists.c.o  -o cmTC_5340d 
+CMakeFiles/cmTC_5340d.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0x1b): undefined reference to `pthread_create'
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_5340d.dir/build.make:97: recipe for target 'cmTC_5340d' failed
+make[1]: *** [cmTC_5340d] Error 1
+make[1]: Leaving directory '/home/zcy/Documents/projects/MarvelPhysics/cmake/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_5340d/fast' failed
+make: *** [cmTC_5340d/fast] Error 2
+
+File /home/zcy/Documents/projects/MarvelPhysics/cmake/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+/* */
+#include <pthread.h>
+
+int main(int argc, char** argv)
+{
+  (void)argv;
+#ifndef pthread_create
+  return ((int*)(&pthread_create))[argc];
+#else
+  (void)argc;
+  return 0;
+#endif
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /home/zcy/Documents/projects/MarvelPhysics/cmake/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/bin/make" "cmTC_938ef/fast"
+/usr/bin/make -f CMakeFiles/cmTC_938ef.dir/build.make CMakeFiles/cmTC_938ef.dir/build
+make[1]: Entering directory '/home/zcy/Documents/projects/MarvelPhysics/cmake/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_938ef.dir/CheckFunctionExists.c.o
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_938ef.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.10/Modules/CheckFunctionExists.c
+Linking C executable cmTC_938ef
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_938ef.dir/link.txt --verbose=1
+/usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create    -rdynamic CMakeFiles/cmTC_938ef.dir/CheckFunctionExists.c.o  -o cmTC_938ef -lpthreads 
+/usr/bin/ld: cannot find -lpthreads
+collect2: error: ld returned 1 exit status
+CMakeFiles/cmTC_938ef.dir/build.make:97: recipe for target 'cmTC_938ef' failed
+make[1]: *** [cmTC_938ef] Error 1
+make[1]: Leaving directory '/home/zcy/Documents/projects/MarvelPhysics/cmake/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_938ef/fast' failed
+make: *** [cmTC_938ef/fast] Error 2
+
+

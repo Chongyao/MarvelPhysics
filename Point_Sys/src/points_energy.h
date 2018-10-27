@@ -20,6 +20,10 @@ class point_sys: public bigbang::Functional<double>{
   matd_t points;
   size_t dim;
   double rho;
+  size_t nearest_num;
+
+  
+  
 };
 }
 #endif
