@@ -9,9 +9,11 @@
 #include <WindingNumber/UT_SolidAngle.h>
 #include <WindingNumber/UT_SolidAngle.cpp>
 
-// typedef zjucad::matrix::matrix<size_t> mati_t;
-// typedef zjucad::matrix::matrix<double> matd_t;
-using namespace Eigen;
+#include <zjucad/matrix/io.h>
+typedef zjucad::matrix::matrix<size_t> mati_t;
+typedef zjucad::matrix::matrix<double> matd_t;
+
+using namespace zjucad::matrix;
 using namespace std;
 using namespace HDK_Sample;
 
@@ -21,12 +23,11 @@ using namespace HDK_Sample;
 namespace marvel{
 
 
-int build_bdbox(const MatrixXd &nods, MatrixXd & bdbox){
+int build_bdbox(const matd_t &nods, matd_t & bdbox){
   //simple bounding box
   bdbox = nods(colon(), 0)*ones<double>(1, 2);
-  bdbox = nods.col(0)*MatrixXd::Ones(1, 2);
-  for(size_t i = 0; i < nods.cols(); ++i){
-    for(size_t j = 0; j < nods.rows(); ++j){
+  for(size_t i = 0; i < nods.size(2); ++i){
+    for(size_t j = 0; j < nods.size(1); ++j){
       if(bdbox(j, 0) > nods(j, i))
         bdbox(j, 0) = nods(j ,i);
       if(bdbox(j, 1) < nods(j, i))
@@ -36,23 +37,23 @@ int build_bdbox(const MatrixXd &nods, MatrixXd & bdbox){
 
   return 0;
 }
-int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nods){
+int get_inner_points(matd_t &points, const mati_t &surf, const matd_t &nods){
   // #include <WindingNumber/UT_SolidAngle.cpp>
   using UT_Vector3T = UT_FixedVector<float,3>;
-  UT_Vector3T UT_nods[nods.cols()];
+  UT_Vector3T UT_nods[nods.size(2)];
 
   matrix<float> nods_flo = nods;
   matrix<int> surf_int = surf;
 #pragma omp parallel for
-  for(size_t i = 0; i < nods.cols(); ++i){
+  for(size_t i = 0; i < nods.size(2); ++i){
     UT_Vector3T vec_tmp;
     copy(nods_flo(colon(), i).begin(),nods_flo(colon(), i).end(), vec_tmp.vec);
     UT_nods[i] = vec_tmp;
   }
-  UT_SolidAngle<float, float>  Comp_WN(int(surf.cols()), &surf_int(0, 0), int(nods.cols()), UT_nods);
+  UT_SolidAngle<float, float>  Comp_WN(int(surf.size(2)), &surf_int(0, 0), int(nods.size(2)), UT_nods);
   vector<int> inside_id;
 #pragma omp parallel for
-  for(size_t i = 0; i < points.cols(); ++i){
+  for(size_t i = 0; i < points.size(2); ++i){
     UT_Vector3T query_point(&points(0, i));
     float sol_angle = Comp_WN.computeSolidAngle(query_point);
 
@@ -65,18 +66,18 @@ int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nod
       }
     }
   }
-  MatrixXi inside_mat(inside_id.size(), 1);
+  mati_t inside_mat(inside_id.size(), 1);
   copy (inside_id.begin(), inside_id.end(), &inside_mat(0, 0));
-  MatrixXd points_tmp = points(colon(), inside_mat(colon(), 0));
+  matd_t points_tmp = points(colon(), inside_mat(colon(), 0));
   points = points_tmp;
   
 
   return 0;
 }
 
-int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_axis, MatrixXd &points){
+int gen_points(const matd_t &nods, const mati_t &surf, const size_t &num_in_axis, matd_t &points){
   assert(num_in_axis > 1);
-  MatrixXd bdbox;
+  matd_t bdbox;
   int res = build_bdbox(nods, bdbox);
   cout << "bdbox: " << bdbox << endl;
   vector<double> intervals(3);
@@ -98,9 +99,9 @@ int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_
     }
   }
 
-  cout << "[INFO]genarate raw points done. size is " <<points.cols() << endl;
+  cout << "[INFO]genarate raw points done. size is " <<points.size(2) << endl;
   res = get_inner_points(points, surf, nods);
-  cout << "after select: "  << points.cols() << endl;
+  cout << "after select: "  << points.size(2) << endl;
 
   return 0;
 }

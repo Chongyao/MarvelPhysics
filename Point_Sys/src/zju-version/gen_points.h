@@ -2,7 +2,6 @@
 #define INIT_H
 #include <zjucad/matrix/matrix.h>
 #include <iostream>
-#include <eigen3/Eigen/Core>
 
 typedef zjucad::matrix::matrix<size_t> mati_t;
 typedef zjucad::matrix::matrix<double> matd_t;
