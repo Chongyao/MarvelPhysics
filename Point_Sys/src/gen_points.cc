@@ -23,7 +23,6 @@ namespace marvel{
 
 int build_bdbox(const MatrixXd &nods, MatrixXd & bdbox){
   //simple bounding box
-  bdbox = nods(colon(), 0)*ones<double>(1, 2);
   bdbox = nods.col(0)*MatrixXd::Ones(1, 2);
   for(size_t i = 0; i < nods.cols(); ++i){
     for(size_t j = 0; j < nods.rows(); ++j){
@@ -37,19 +36,17 @@ int build_bdbox(const MatrixXd &nods, MatrixXd & bdbox){
   return 0;
 }
 int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nods){
-  // #include <WindingNumber/UT_SolidAngle.cpp>
   using UT_Vector3T = UT_FixedVector<float,3>;
   UT_Vector3T UT_nods[nods.cols()];
 
-  matrix<float> nods_flo = nods;
-  matrix<int> surf_int = surf;
+  MatrixXf nods_flo = nods.cast<float>();
 #pragma omp parallel for
   for(size_t i = 0; i < nods.cols(); ++i){
     UT_Vector3T vec_tmp;
-    copy(nods_flo(colon(), i).begin(),nods_flo(colon(), i).end(), vec_tmp.vec);
+    copy(nods_flo.data(),nods_flo.data() +  nods_flo.size(), vec_tmp.vec);
     UT_nods[i] = vec_tmp;
   }
-  UT_SolidAngle<float, float>  Comp_WN(int(surf.cols()), &surf_int(0, 0), int(nods.cols()), UT_nods);
+  UT_SolidAngle<float, float>  Comp_WN(int(surf.cols()), surf.data(), int(nods.cols()), UT_nods);
   vector<int> inside_id;
 #pragma omp parallel for
   for(size_t i = 0; i < points.cols(); ++i){
@@ -65,11 +62,14 @@ int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nod
       }
     }
   }
-  MatrixXi inside_mat(inside_id.size(), 1);
-  copy (inside_id.begin(), inside_id.end(), &inside_mat(0, 0));
-  MatrixXd points_tmp = points(colon(), inside_mat(colon(), 0));
-  points = points_tmp;
   
+  MatrixXd points_tmp(points.rows(), inside_id.size());
+#pragma omp critical
+  for(size_t i = 0; i < inside_id.size(); ++i){
+    points_tmp.col(i) = points.col(inside_id[i]);
+  }
+  
+  points = points_tmp;  
 
   return 0;
 }
@@ -86,12 +86,12 @@ int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_
   }
 
   points.resize(3, num_in_axis*num_in_axis*num_in_axis);
-  size_t num_in_plane = num_in_axis*num_in_axis;
-// #pragma omp parallel for 
+  const size_t num_in_plane = num_in_axis*num_in_axis;
+#pragma omp parallel for 
   for(size_t i = 0; i < num_in_axis; ++i){
-    points(0, colon(num_in_plane*i, num_in_plane*(i + 1) - 1)) = ones<double>(1, num_in_plane)*(bdbox(0, 0)+ intervals[0]*i);
+    points.block(0, num_in_plane*i, 1, num_in_plane) = MatrixXd::Ones(1, num_in_plane)*(bdbox(0, 0)+ intervals[0]*i);
     for(size_t j = 0; j < num_in_axis; ++j){
-      points(1, colon(num_in_plane*i + num_in_axis*j, num_in_plane*i + num_in_axis*(j + 1) -  1)) = ones<double>(1, num_in_axis)*(bdbox(1,0) + intervals[1]*j);
+      points.block(1, num_in_plane*i + num_in_axis*j, 1, num_in_axis) = MatrixXd::Ones(1, num_in_axis)*(bdbox(1,0) + intervals[1]*j);
       for(size_t k = 0; k < num_in_axis; ++k){
         points(2, num_in_plane*i + num_in_axis*j + k) = bdbox(2, 0) + intervals[2]*k;
       }

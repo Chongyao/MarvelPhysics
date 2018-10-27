@@ -1,12 +1,12 @@
 #include <string>
 #include <iostream>
 
-#include <zjucad/matrix/matrix.h>
-#include <zjucad/matrix/io.h>
-#include <zjucad/ptree/ptree.h>
-#include <jtflib/mesh/io.h>
+// #include <zjucad/matrix/matrix.h>
+// #include <zjucad/matrix/io.h>
+// #include <zjucad/ptree/ptree.h>
+// #include <jtflib/mesh/io.h>  
 
-#include "bigbang/io.h"
+// #include "bigbang/io.h"
 #include "Point_Sys/src/gen_points.h"
 using namespace marvel;
 using namespace std;
