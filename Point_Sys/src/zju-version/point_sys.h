@@ -8,14 +8,14 @@ typedef zjucad::matrix::matrix<double> matd_t;
 namespace marvel{
 
 
-class Point_system{
- public:
-  Point_system();
- private:
-  matd_t points;
-  size_t num;
+// class Point_system{
+//  public:
+//   Point_system();
+//  private:
+//   matd_t points;
+//   size_t num;
   
-};
+// };
 
 
 }

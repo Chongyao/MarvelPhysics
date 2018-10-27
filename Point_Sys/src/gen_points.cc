@@ -40,12 +40,14 @@ int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nod
   UT_Vector3T UT_nods[nods.cols()];
 
   MatrixXf nods_flo = nods.cast<float>();
+
 #pragma omp parallel for
   for(size_t i = 0; i < nods.cols(); ++i){
     UT_Vector3T vec_tmp;
-    copy(nods_flo.data(),nods_flo.data() +  nods_flo.size(), vec_tmp.vec);
+    copy(nods_flo.col(i).data(), nods_flo.col(i).data() +  nods_flo.rows(), vec_tmp.vec);
     UT_nods[i] = vec_tmp;
   }
+
   UT_SolidAngle<float, float>  Comp_WN(int(surf.cols()), surf.data(), int(nods.cols()), UT_nods);
   vector<int> inside_id;
 #pragma omp parallel for
