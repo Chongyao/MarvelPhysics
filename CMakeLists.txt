@@ -8,6 +8,7 @@ include(geo_sim_sdk)
 include_geo_sim_sdk()
 link_geo_sim_sdk()
 include_directories(${PROJECT_SOURCE_DIR})
+include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/external)
 
 # BOOST
@@ -130,4 +131,5 @@ add_subdirectory(external)
 # add_subdirectory(test)
 # add_subdirectory(coarsen)
 add_subdirectory(Point_Sys)
+add_subdirectory(src)
 
