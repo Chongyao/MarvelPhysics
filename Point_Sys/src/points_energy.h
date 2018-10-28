@@ -18,6 +18,9 @@ class point_sys: public bigbang::Functional<double>{
   // int Hes(const double *x,  std::vector<Eigen::Triplet<double>> *hes) const;
  private:
   Eigen::MatrixXd points;
+  Eigen::MatrixXi NN;
+  Eigen::VectorXd sup_radi;
+  
   size_t dim;
   double rho;
   size_t nearest_num;
