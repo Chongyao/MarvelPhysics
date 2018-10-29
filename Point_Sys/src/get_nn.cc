@@ -1,6 +1,7 @@
 #include "get_nn.h"
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 using namespace std;
 using namespace Eigen;
 
@@ -65,14 +66,15 @@ struct pair_dis{
   double dis;
 };
 
-int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi){
-  NN = MatrixXi(10, points.cols());
-  sup_radi = VectorXd(points.cols());
+int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const size_t &nn_num){
+  assert(points.cols() > nn_num);
+  
+  NN.setZero(nn_num, points.cols());
+  sup_radi.setZero(points.cols());
   
   size_t points_num = points.cols();
   vector<pair_dis> pairs(points_num*(points_num - 1) / 2);
-  
-  auto id_calc = [=](size_t i, size_t j){return ((2*points_num - i - 1)*i/2) + j - i; };
+  auto id_calc = [=](size_t i, size_t j){return ((2*points_num - i - 1)*i/2) + j - i - 1; };
 #pragma omp parallel for
   for(size_t i = 0; i < points_num - 1; ++i){
     for(size_t j = i + 1; j < points_num; ++j){      
@@ -85,13 +87,13 @@ int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi){
   vector<int> count(points_num);
   size_t total = 0;
   for(size_t i = 0; i < pairs.size(); ++i){
-    if(total == 10*points_num) break;
+    if(total == nn_num*points_num) break;
     if(count[pairs[i].m] != -1){
       NN(count[pairs[i].m], pairs[i].m) = pairs[i].n;
-      sup_radi(pairs[i].m) += pairs[i].dis; 
+      sup_radi(pairs[i].m) += pairs[i].dis;
       count[pairs[i].m]++;
       total++;
-      if(count[pairs[i].m] == 10)
+      if(count[pairs[i].m] == nn_num)
         count[pairs[i].m] = -1;
     }
     if(count[pairs[i].n] != -1){
@@ -99,12 +101,17 @@ int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi){
       sup_radi(pairs[i].n) += pairs[i].dis;
       count[pairs[i].n]++;
       total++;
-      if(count[pairs[i].n] == 10)
+      if(count[pairs[i].n] == nn_num)
         count[pairs[i].n] = -1;
     }
   }
 
-  sup_radi*= 0.3;
+  sup_radi*= 3.0/nn_num;
+  cout << "done " << endl;
+  cout << NN.block(0,0,nn_num, 10) << endl;
+  cout << sup_radi.head(10) << endl;
+
+
   return 0;
 }
 

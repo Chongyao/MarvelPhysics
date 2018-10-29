@@ -22,8 +22,6 @@ typedef size_t value_type;
 typedef Eigen::Vector3i key_type;
 typedef std::vector<std::list<value_type>> table_type ;
 
-
-
 class spatial_hash{
  public:
   spatial_hash(const size_t &table_size_);

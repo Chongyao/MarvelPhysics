@@ -19,6 +19,9 @@ size_t point_sys::Nx() const{
   return dim;
 }
 
+int point_sys::calc_rhoi_vi(const double *x, const VectorXd &rho_i, const VectorXd &vol_i){
+  
+}
 
 
 

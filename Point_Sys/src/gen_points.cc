@@ -59,7 +59,7 @@ int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nod
     {
       if (fabs(sol_angle - 4*PI) < 1){
        
-        cout << sol_angle  <<endl;   
+        // cout << sol_angle  <<endl;   
         inside_id.push_back(i);
       }
     }
