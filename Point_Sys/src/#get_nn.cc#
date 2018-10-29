@@ -117,7 +117,7 @@ int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const siz
 }
 
 
-int find_NN(const Vector3i &query, const unordered_multimap<Vector3i,size_t> &points_hash, vector<pair_dis> &NN_cand, const size_t &nn_num){
+int find_NN(const Vector3i &query, const unordered_multimap<Vector3i,size_t> &points_hash, vector<pair_dis> &NN_cand, const size_t &nn_num, const Vector3i points){
   size_t cand_num = 0;
   int grid_delt = 0;
   //count for grid_delt;

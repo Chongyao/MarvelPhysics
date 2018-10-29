@@ -5,6 +5,20 @@
 #include<memory>
 #include<list>
 #include<Eigen/Core>
+
+namespace std{
+template <>
+struct hash<Eigen::Vector3i>{
+  typedef size_t result_type;
+  typedef Eigen::Vector3i argument_type;
+  size_t operator()(const Eigen::Vector3i &key) const{
+    // return  ( (key(0)*73856093) ^ (key(1)*19349663) ^ (key(2)*83492791) ) % 5999;
+    return  ( (key(0)*73856093) ^ (key(1)*19349663) ^ (key(2)*83492791) );          
+  }
+};
+  
+}//namespace: std
+
 namespace marvel{
 
 //hash table only for nearest neighbours
@@ -21,8 +35,6 @@ namespace marvel{
 typedef size_t value_type;
 typedef Eigen::Vector3i key_type;
 typedef std::vector<std::list<value_type>> table_type ;
-
-
 
 class spatial_hash{
  public:
@@ -42,9 +54,9 @@ class spatial_hash{
 
 //calculate nearest neighbours of N points
 int calc_NNN(const Eigen::MatrixXd &points, Eigen::MatrixXi &NN, Eigen::VectorXd &sup_radi, const size_t &nn_num);
-  
-  
-  
+
+int hash_NNN(const Eigen::MatrixXd &points, Eigen::MatrixXi &NN, Eigen::VectorXd &sup_radi, const size_t &nn_num);
+
 
 }
 

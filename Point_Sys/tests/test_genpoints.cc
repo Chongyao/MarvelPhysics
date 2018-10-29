@@ -36,7 +36,10 @@ int main(int argc, char** argv){
   VectorXd sup_radii;
   calc_NNN(points, NN, sup_radii, 10);
   cout << "E here"<< endl;
-
+  MatrixXd test;
+  test.setRandom(2, 4);
+  // cout << floor(test.array()/1.4).cast<int>() << endl;
+  cout <<test << test.col(1).maxCoeff() << endl;
 
 
   // cout << pt.get<string>("points_out.value").c_str() << endl;  
