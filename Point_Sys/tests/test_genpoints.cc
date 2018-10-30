@@ -35,13 +35,14 @@ int main(int argc, char** argv){
   MatrixXi NN;
   VectorXd sup_radii;
   calc_NNN(points, NN, sup_radii, 10);
-  cout << "E here"<< endl;
-  MatrixXd test;
-  test.setRandom(2, 4);
-  // cout << floor(test.array()/1.4).cast<int>() << endl;
-  cout <<test << test.col(1).maxCoeff() << endl;
 
-
+  cout << "spatial hash " <<endl;
+  MatrixXi NN_;
+  VectorXd sup_radii_;
+  spatial_hash SH(points, 10);
+  sup_radii_ = SH.get_sup_radi();
+  if(sup_radii_ == sup_radii)
+    cout << "true" <<endl;
   // cout << pt.get<string>("points_out.value").c_str() << endl;  
   // point_write_to_vtk(pt.get<string>("points_out.value").c_str(), points);
   cout << "all done " << endl;

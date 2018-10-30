@@ -8,35 +8,47 @@ using namespace Eigen;
 
 namespace marvel{
 
-spatial_hash::spatial_hash(const size_t &table_size_):table_size(table_size_){
-  prime_num = vector<size_t> {7373856093, 19349663, 83492791};
-  hash_table = make_shared<table_type>(table_size_);
-}
 
-bool spatial_hash::find_ele(const list<value_type> &bucket, const value_type &val){
-  for(auto &v : bucket){
-    if (v == val )
-      return true;
-  }
-  return false;  
-}
 
-size_t spatial_hash::hash_func(const key_type &key){
-  return  ( (key(0)*prime_num[0]) ^ (key(1)*prime_num[1]) ^ (key(2)*prime_num[2]) ) % table_size;
-}
-
-int spatial_hash::insert(const key_type &key, const value_type &value){
-  size_t table_id = hash_func(key);
-  if( !find_ele((*hash_table)[table_id], value) )
-    (*hash_table)[table_id].push_front(value);
-  return 0;
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<NEW VERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+spatial_hash::spatial_hash(const MatrixXd &points_, const size_t &nn_num_):points(points_), nn_num(nn_num_){
+  hash_NNN();
 }
 
 
-int spatial_hash::get_val(const key_type &key, std::list<value_type> &vals){
-  size_t table_id = hash_func(key);
-  vals = (*hash_table)[table_id];
-}
+
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<OLD VERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// spatial_hash::spatial_hash(const size_t &table_size_):table_size(table_size_){
+//   prime_num = vector<size_t> {7373856093, 19349663, 83492791};
+//   hash_table = make_shared<table_type>(table_size_);
+// }
+
+// bool spatial_hash::find_ele(const list<value_type> &bucket, const value_type &val){
+//   for(auto &v : bucket){
+//     if (v == val )
+//       return true;
+//   }
+//   return false;  
+// }
+
+// size_t spatial_hash::hash_func(const key_type &key){
+//   return  ( (key(0)*prime_num[0]) ^ (key(1)*prime_num[1]) ^ (key(2)*prime_num[2]) ) % table_size;
+// }
+
+// int spatial_hash::insert(const key_type &key, const value_type &value){
+//   size_t table_id = hash_func(key);
+//   if( !find_ele((*hash_table)[table_id], value) )
+//     (*hash_table)[table_id].push_front(value);
+//   return 0;
+// }
+
+
+// int spatial_hash::get_val(const key_type &key, std::list<value_type> &vals){
+//   size_t table_id = hash_func(key);
+//   vals = (*hash_table)[table_id];
+// }
+
+
 //TODO: use hash method or exist library
 // int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const size_t &nn_num){
 //   //init
@@ -61,11 +73,9 @@ int spatial_hash::get_val(const key_type &key, std::list<value_type> &vals){
 //   }
 // }
 
-struct pair_dis{
-  size_t m;
-  size_t n;
-  double dis;
-};
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<OLD VERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
 
 int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const size_t &nn_num){
   assert(points.cols() > nn_num);
@@ -117,41 +127,45 @@ int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const siz
 }
 
 
-int find_NN(const Vector3i &query, const unordered_multimap<Vector3i,size_t> &points_hash, vector<pair_dis> &NN_cand, const size_t &nn_num){
+int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
+
   size_t cand_num = 0;
   int grid_delt = 0;
   //count for grid_delt;
+
   do{
+    cand_num = 0;
     ++grid_delt;
     for(int p = -grid_delt; p < grid_delt + 1; ++p){
       for(int q = -grid_delt; q < grid_delt + 1; ++q){
         for(int r = -grid_delt; r < grid_delt + 1; ++r){
           Vector3i delt = {p, q, r};
-          cand_num += points_hash.count(points_dis.col(i) + delt);
+          cand_num += points_hash.count(points_dis.col(point_id) + delt);
         }
       }
     }
   }while(cand_num  < nn_num + 2);
-
+  
   // get NN_cand
   for(int p = -grid_delt; p < grid_delt + 1; ++p){
     for(int q = -grid_delt; q < grid_delt + 1; ++q){
       for(int r = -grid_delt; r < grid_delt + 1; ++r){
         Vector3i delt = {p, q, r};
-        auto range = points_hash.equal_range(points_dis.col(i) + delt);
-        if(range.first - range.second != 0){
-          for_each(range.first, range.second, [=](Vector3i &one_point){
-              NN_cand.push_back({i, x.second, (points.col(i) - points.col(x.second)).norm()});
+        auto range = points_hash.equal_range(points_dis.col(point_id) + delt);
+        if( range.first != range.second){
+          for_each(range.first, range.second, [&](unordered_multimap<Vector3i,size_t>::value_type  &one_point){
+              NN_cand.push_back({point_id, one_point.second, (points.col(point_id) - points.col(one_point.second)).norm()});
             });
         }
         
       }
     }
   }
+  return 0;
 }
 
 
-int hash_NNN(const Eigen::MatrixXd &points, Eigen::MatrixXi &NN, Eigen::VectorXd &sup_radi, const size_t &nn_num){
+int spatial_hash::hash_NNN(){
   assert(points.cols() > nn_num);
   //init data
   const size_t points_num = points.cols();
@@ -163,33 +177,42 @@ int hash_NNN(const Eigen::MatrixXd &points, Eigen::MatrixXi &NN, Eigen::VectorXd
   size_t table_size = size_t(floor(pow(points.cols(), 0.5)));
   
   //generate discretized 3D position
-  MatrixXi points_dis = floor(points.array()/cell_size).cast<int>();
-  Vector3i max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(1).maxCoeff()}
+  points_dis = floor(points.array()/cell_size).cast<int>();
+
+  Vector3i max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(1).maxCoeff()};
   
 
   //build hash_map
-  unordered_multimap<Vector3i, size_t> points_hash(table_size);
+  points_hash = unordered_multimap<Vector3i,size_t>(table_size);
 
   //insert elements
   for(size_t i = 0; i < points_num; ++i){
     points_hash.insert({points_dis.col(i), i});
   }
-
   //calc NN
   for(size_t i = 0; i < points_num; ++i){
     vector<pair_dis> NN_cand;
-    find_NN(points_dis.col(i), points_hash, NN_cand, nn_num);
-    sort(NN_cand.begin(), NN_cand.end(), [](const pair_dis &a, const pair_dis &b){return a.dis < b.dis;});    
+    find_NN(i, NN_cand);
+    sort(NN_cand.begin(), NN_cand.end(), [](const pair_dis &a, const pair_dis &b){return a.dis < b.dis;});
+    
     for(size_t j = 0; j < nn_num; ++j){
       NN(j, i) = NN_cand[j + 1].n;
       sup_radi[i] += NN_cand[j + 1].dis;
     }
   }
-
+  cout << "A hehre" << endl;
   sup_radi*= 3.0/nn_num;
   cout << "done " << endl;
   cout << NN.block(0,0,nn_num, 10) << endl;
   cout << sup_radi.head(10) << endl;
 
+  return 0;
+}
+
+const MatrixXi& spatial_hash::get_NN() const {
+  return NN;
+}
+const VectorXd& spatial_hash::get_sup_radi() const{
+  return sup_radi;
 }
 }//namespace:marvel
