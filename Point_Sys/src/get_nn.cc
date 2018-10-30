@@ -112,12 +112,8 @@ int spatial_hash::hash_NNN(){
       sup_radi[i] += NN_cand[j + 1].dis;
     }
   }
-  cout << "A hehre" << endl;
   sup_radi*= 3.0/nn_num;
-  cout << "done " << endl;
   cout << NN.block(0,0,nn_num, 10) << endl;
-  cout << sup_radi.head(10) << endl;
-
   return 0;
 }
 
@@ -127,4 +123,44 @@ const MatrixXi& spatial_hash::get_NN() const {
 const VectorXd& spatial_hash::get_sup_radi() const{
   return sup_radi;
 }
+int spatial_hash::get_friends(const size_t &point_id, const double &sup_radi, vector<size_t> &friends) const{
+  friends.clear();
+  
+  int grid_delt = 0;
+  bool has_friends = false;
+  bool has_points = false;
+  int once_more = 0;
+  do{
+    has_friends = false;
+    has_points = false;
+    vector<Vector3i> shell;
+    get_shell(points_dis.col(point_id), grid_delt, shell);
+
+    for(auto &one_grid : shell){
+      auto range = points_hash.equal_range(one_grid);
+
+      if( range.first != range.second){
+        has_points = true;
+        for_each(range.first, range.second, [&](const unordered_multimap<Vector3i,size_t>::value_type  &one_point){
+            double dis = (points.col(one_point.second) - points.col(point_id)).norm();
+            if(dis < sup_radi && dis != 0){
+              friends.push_back(one_point.second);
+              has_friends = true;
+            }
+          });
+      }
+    }
+    ++grid_delt;
+
+    if(has_points && !has_friends)
+      ++once_more;
+  }while(has_friends || once_more < 2);
+  return 0;
+}
+int spatial_hash::update_points(const Eigen::MatrixXd &points_){
+  points = points_;
+  hash_NNN();
+  return 0;
+}
+
 }//namespace:marvel
