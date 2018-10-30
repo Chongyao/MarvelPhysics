@@ -7,11 +7,13 @@
 #include <libigl/include/igl/readOBJ.h>
 #include "Point_Sys/src/get_nn.h"
 
+#include <chrono>
+
 using namespace marvel;
 using namespace std;
 using namespace Eigen;
 using namespace igl;
-
+using namespace chrono;
 
 int main(int argc, char** argv){
 
@@ -26,25 +28,45 @@ int main(int argc, char** argv){
 
   surf.transposeInPlace();
   nods.transposeInPlace();
-  
-                                                                                                                        
   MatrixXd points;
   gen_points(nods, surf, pt.get<size_t>("num_in_axis.value"), points);
 
   
   MatrixXi NN;
   VectorXd sup_radii;
+  auto start = system_clock::now();
   calc_NNN(points, NN, sup_radii, 10);
+  auto end = system_clock::now();
+  auto duration = duration_cast<microseconds>(end - start);
+  cout <<  "花费了" 
+       << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+       << "秒" << endl;
+
 
   cout << "spatial hash " <<endl;
   MatrixXi NN_;
   VectorXd sup_radii_;
+  start = system_clock::now();
   spatial_hash SH(points, 10);
+
+  Vector3i query = {-20, 10, 11};
+  vector<Vector3i> shell;
+  SH.get_shell(query, 2, shell);
+  cout << "size " << shell.size() << endl;
+  for(auto &i : shell){
+    cout << i << endl << endl;;
+  }
+  
+  
+  end = system_clock::now();
+  duration = duration_cast<microseconds>(end - start);
+  cout <<  "花费了" 
+       << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+       << "秒" << endl;
+  
   sup_radii_ = SH.get_sup_radi();
   if(sup_radii_ == sup_radii)
     cout << "true" <<endl;
-  // cout << pt.get<string>("points_out.value").c_str() << endl;  
-  // point_write_to_vtk(pt.get<string>("points_out.value").c_str(), points);
   cout << "all done " << endl;
                                                                                                                         
 

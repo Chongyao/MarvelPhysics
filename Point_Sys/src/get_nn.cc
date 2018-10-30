@@ -76,7 +76,7 @@ spatial_hash::spatial_hash(const MatrixXd &points_, const size_t &nn_num_):point
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<OLD VERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SIMPLE VVERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const size_t &nn_num){
   assert(points.cols() > nn_num);
   
@@ -125,7 +125,44 @@ int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const siz
 
   return 0;
 }
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SIMPLE VVERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<NEW VVERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Vector3i> &shell){
+  //init
+  shell.clear();
+
+  auto loop = [&](const int &face, const int &face_axis, const int &radi_1, const int &radi_2){
+    cout << "face "<< face << " max " << max_id(face_axis) << " min " << min_id(face_axis) <<endl;
+    if(face <= max_id(face_axis) && face >= min_id(face_axis) ){
+      int axis_1 = (face_axis + 1)%3, axis_2 = (face_axis + 2)%3;
+// #pragma omp parallel for    
+      for(int j = query(axis_1) - radi_1; j < query(axis_1) + radi_1 + 1; ++j){
+        for(int k = query(axis_2) - radi_2; k < query(axis_2) + radi_2 + 1; ++k){
+          Vector3i one_grid;
+          one_grid[face_axis] = face;
+          one_grid[axis_1] = j;
+          one_grid[axis_2] = k;
+          // cout <<"one grid"<< one_grid << endl;
+          shell.push_back(one_grid);
+        }
+      }    
+
+    }
+    else{
+      cout << "beyond bound" <<endl;
+    }
+  };
+
+  loop(query(0) - radi, 0, radi, radi);
+  loop(query(0) + radi, 0, radi, radi);
+  loop(query(1) - radi, 1, radi, radi - 1);
+  loop(query(1) + radi, 1, radi, radi - 1);
+  loop(query(2) - radi, 2, radi - 1, radi - 1);
+  loop(query(2) + radi, 2, radi - 1, radi - 1);
+  return 0;
+}
 
 int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
 
@@ -178,8 +215,9 @@ int spatial_hash::hash_NNN(){
   
   //generate discretized 3D position
   points_dis = floor(points.array()/cell_size).cast<int>();
-
-  Vector3i max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(1).maxCoeff()};
+  max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(1).maxCoeff()};
+  min_id = {points_dis.row(0).minCoeff(), points_dis.row(1).minCoeff(), points_dis.row(1).minCoeff()};
+  
   
 
   //build hash_map

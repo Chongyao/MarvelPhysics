@@ -30,6 +30,8 @@ class point_sys: public bigbang::Functional<double>{
   double scal_fac;
 
   int calc_rhoi_vi(const double *x, const Eigen::VectorXd &rho_i, const Eigen::VectorXd &vol_i);
+  int calc_defo_gra(const double *x, double *def_gra);
+  
   
 };
 }
