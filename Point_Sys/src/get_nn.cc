@@ -10,63 +10,10 @@ namespace marvel{
 
 
 
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<NEW VERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 spatial_hash::spatial_hash(const MatrixXd &points_, const size_t &nn_num_):points(points_), nn_num(nn_num_){
   hash_NNN();
 }
 
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SIMPLE VVERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const size_t &nn_num){
-  assert(points.cols() > nn_num);
-  
-  NN.setZero(nn_num, points.cols());
-  sup_radi.setZero(points.cols());
-  
-  size_t points_num = points.cols();
-  vector<pair_dis> pairs(points_num*(points_num - 1) / 2);
-  auto id_calc = [=](size_t i, size_t j){return ((2*points_num - i - 1)*i/2) + j - i - 1; };
-#pragma omp parallel for
-  for(size_t i = 0; i < points_num - 1; ++i){
-    for(size_t j = i + 1; j < points_num; ++j){      
-      pairs[id_calc(i ,j)] = {i, j, (points.col(i) - points.col(j)).norm()};
-    }
-  }
-
-  sort(pairs.begin(), pairs.end(), [](const pair_dis &a, const pair_dis &b){return a.dis < b.dis;});
-
-  vector<int> count(points_num);
-  size_t total = 0;
-  for(size_t i = 0; i < pairs.size(); ++i){
-    if(total == nn_num*points_num) break;
-    if(count[pairs[i].m] != -1){
-      NN(count[pairs[i].m], pairs[i].m) = pairs[i].n;
-      sup_radi(pairs[i].m) += pairs[i].dis;
-      count[pairs[i].m]++;
-      total++;
-      if(count[pairs[i].m] == nn_num)
-        count[pairs[i].m] = -1;
-    }
-    if(count[pairs[i].n] != -1){
-      NN(count[pairs[i].n], pairs[i].n) = pairs[i].m;
-      sup_radi(pairs[i].n) += pairs[i].dis;
-      count[pairs[i].n]++;
-      total++;
-      if(count[pairs[i].n] == nn_num)
-        count[pairs[i].n] = -1;
-    }
-  }
-
-  sup_radi*= 3.0/nn_num;
-  cout << "done " << endl;
-  cout << NN.block(0,0,nn_num, 10) << endl;
-  cout << sup_radi.head(10) << endl;
-
-
-  return 0;
-}
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SIMPLE VVERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<NEW VVERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Vector3i> &shell){
   assert(radi > -1);
@@ -149,6 +96,7 @@ int spatial_hash::hash_NNN(){
   points_hash = unordered_multimap<Vector3i,size_t>(table_size);
 
   //insert elements
+#pragma parallel omp for
   for(size_t i = 0; i < points_num; ++i){
     points_hash.insert({points_dis.col(i), i});
   }

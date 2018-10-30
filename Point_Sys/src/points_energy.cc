@@ -6,7 +6,7 @@ namespace marvel{
 
 point_sys::point_sys(const MatrixXd  &points_, const double &rho_, const double &vol_all_):
     points(points_), rho(rho_), vol_all(vol_all_), dim(points_.cols()){
-  calc_NNN(points, NN, sup_radi, 10);
+  // calc_NNN(points, NN, sup_radi, 10);
 
   //init
   double mass_total = rho*vol_all;

@@ -32,35 +32,20 @@ int main(int argc, char** argv){
   gen_points(nods, surf, pt.get<size_t>("num_in_axis.value"), points);
 
   
-  MatrixXi NN;
-  VectorXd sup_radii;
-  auto start = system_clock::now();
-  calc_NNN(points, NN, sup_radii, 10);
-  auto end = system_clock::now();
-  auto duration = duration_cast<microseconds>(end - start);
-  cout <<  "花费了" 
-       << double(duration.count()) * microseconds::period::num / microseconds::period::den 
-       << "秒" << endl;
+
 
 
   cout << "spatial hash " <<endl;
   MatrixXi NN_;
   VectorXd sup_radii_;
-  start = system_clock::now();
+  auto start = system_clock::now();
   spatial_hash SH(points, 10);
-  end = system_clock::now();
-  duration = duration_cast<microseconds>(end - start);
+  auto end = system_clock::now();
+  auto duration = duration_cast<microseconds>(end - start);
   cout <<  "花费了" 
        << double(duration.count()) * microseconds::period::num / microseconds::period::den 
        << "秒" << endl;
   
-  sup_radii_ = SH.get_sup_radi();
-  if(sup_radii_ == sup_radii)
-    cout << "true" <<endl;
-  else{
-    cout << "not equal" << endl;
-    cout <<"error is " << (sup_radii_ - sup_radii).norm() << endl;
-  }
 
   cout << "all done " << endl;
                                                                                                                         
