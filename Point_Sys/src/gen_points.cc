@@ -50,12 +50,12 @@ int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nod
 
   UT_SolidAngle<float, float>  Comp_WN(int(surf.cols()), surf.data(), int(nods.cols()), UT_nods);
   vector<int> inside_id;
-#pragma omp parallel for
+// #pragma omp parallel for
   for(size_t i = 0; i < points.cols(); ++i){
     UT_Vector3T query_point(&points(0, i));
     float sol_angle = Comp_WN.computeSolidAngle(query_point);
 
-#pragma omp critical
+// #pragma omp critical
     {
       if (fabs(sol_angle - 4*PI) < 1){
        
@@ -66,7 +66,7 @@ int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nod
   }
   
   MatrixXd points_tmp(points.rows(), inside_id.size());
-#pragma omp critical
+#pragma omp parallel for
   for(size_t i = 0; i < inside_id.size(); ++i){
     points_tmp.col(i) = points.col(inside_id[i]);
   }

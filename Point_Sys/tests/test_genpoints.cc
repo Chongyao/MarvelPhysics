@@ -48,16 +48,6 @@ int main(int argc, char** argv){
   VectorXd sup_radii_;
   start = system_clock::now();
   spatial_hash SH(points, 10);
-
-  Vector3i query = {-20, 10, 11};
-  vector<Vector3i> shell;
-  SH.get_shell(query, 2, shell);
-  cout << "size " << shell.size() << endl;
-  for(auto &i : shell){
-    cout << i << endl << endl;;
-  }
-  
-  
   end = system_clock::now();
   duration = duration_cast<microseconds>(end - start);
   cout <<  "花费了" 
@@ -67,6 +57,11 @@ int main(int argc, char** argv){
   sup_radii_ = SH.get_sup_radi();
   if(sup_radii_ == sup_radii)
     cout << "true" <<endl;
+  else{
+    cout << "not equal" << endl;
+    cout <<"error is " << (sup_radii_ - sup_radii).norm() << endl;
+  }
+
   cout << "all done " << endl;
                                                                                                                         
 

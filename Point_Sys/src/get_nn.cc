@@ -130,11 +130,11 @@ int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const siz
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<NEW VVERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Vector3i> &shell){
+  assert(radi > -1);
   //init
   shell.clear();
 
   auto loop = [&](const int &face, const int &face_axis, const int &radi_1, const int &radi_2){
-    cout << "face "<< face << " max " << max_id(face_axis) << " min " << min_id(face_axis) <<endl;
     if(face <= max_id(face_axis) && face >= min_id(face_axis) ){
       int axis_1 = (face_axis + 1)%3, axis_2 = (face_axis + 2)%3;
 // #pragma omp parallel for    
@@ -144,23 +144,24 @@ int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::
           one_grid[face_axis] = face;
           one_grid[axis_1] = j;
           one_grid[axis_2] = k;
-          // cout <<"one grid"<< one_grid << endl;
           shell.push_back(one_grid);
         }
       }    
 
     }
-    else{
-      cout << "beyond bound" <<endl;
-    }
   };
+  if(radi > 0){
+    loop(query(0) - radi, 0, radi, radi);
+    loop(query(0) + radi, 0, radi, radi);
+    loop(query(1) - radi, 1, radi, radi - 1);
+    loop(query(1) + radi, 1, radi, radi - 1);
+    loop(query(2) - radi, 2, radi - 1, radi - 1);
+    loop(query(2) + radi, 2, radi - 1, radi - 1);
+  }
+  else{
+    shell.push_back(query);
+  }
 
-  loop(query(0) - radi, 0, radi, radi);
-  loop(query(0) + radi, 0, radi, radi);
-  loop(query(1) - radi, 1, radi, radi - 1);
-  loop(query(1) + radi, 1, radi, radi - 1);
-  loop(query(2) - radi, 2, radi - 1, radi - 1);
-  loop(query(2) + radi, 2, radi - 1, radi - 1);
   return 0;
 }
 
@@ -171,33 +172,70 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
   //count for grid_delt;
 
   do{
-    cand_num = 0;
-    ++grid_delt;
-    for(int p = -grid_delt; p < grid_delt + 1; ++p){
-      for(int q = -grid_delt; q < grid_delt + 1; ++q){
-        for(int r = -grid_delt; r < grid_delt + 1; ++r){
-          Vector3i delt = {p, q, r};
-          cand_num += points_hash.count(points_dis.col(point_id) + delt);
-        }
+    vector<Vector3i> shell;
+    get_shell(points_dis.col(point_id), grid_delt, shell);
+    for(auto &grid : shell){
+      auto range = points_hash.equal_range(grid);
+      if( range.first != range.second){
+        for_each(range.first, range.second, [&](unordered_multimap<Vector3i,size_t>::value_type  &one_point){
+            NN_cand.push_back({point_id, one_point.second, (points.col(point_id) - points.col(one_point.second)).norm()});
+          });
       }
     }
-  }while(cand_num  < nn_num + 2);
-  
-  // get NN_cand
-  for(int p = -grid_delt; p < grid_delt + 1; ++p){
-    for(int q = -grid_delt; q < grid_delt + 1; ++q){
-      for(int r = -grid_delt; r < grid_delt + 1; ++r){
-        Vector3i delt = {p, q, r};
-        auto range = points_hash.equal_range(points_dis.col(point_id) + delt);
-        if( range.first != range.second){
-          for_each(range.first, range.second, [&](unordered_multimap<Vector3i,size_t>::value_type  &one_point){
-              NN_cand.push_back({point_id, one_point.second, (points.col(point_id) - points.col(one_point.second)).norm()});
-            });
-        }
-        
-      }
+    ++grid_delt;
+  }while(NN_cand.size() < nn_num + 2);
+  //calculate once more  
+  vector<Vector3i> shell;
+  get_shell(points_dis.col(point_id), grid_delt, shell);
+  for(auto &grid : shell){
+    auto range = points_hash.equal_range(grid);
+    if( range.first != range.second){
+      for_each(range.first, range.second, [&](unordered_multimap<Vector3i,size_t>::value_type  &one_point){
+          NN_cand.push_back({point_id, one_point.second, (points.col(point_id) - points.col(one_point.second)).norm()});
+        });
     }
   }
+  
+  // do{
+  //   cand_num = 0;
+  //   ++grid_delt;
+  //   for(int p = -grid_delt; p < grid_delt + 1; ++p){
+  //     for(int q = -grid_delt; q < grid_delt + 1; ++q){
+  //       for(int r = -grid_delt; r < grid_delt + 1; ++r){
+  //         Vector3i delt = {p, q, r};
+  //         cand_num += points_hash.count(points_dis.col(point_id) + delt);
+  //       }
+  //     }
+  //   }
+  // }while(cand_num  < nn_num + 2);
+  // cand_num = 0;
+  // ++grid_delt;
+  // for(int p = -grid_delt; p < grid_delt + 1; ++p){
+  //   for(int q = -grid_delt; q < grid_delt + 1; ++q){
+  //     for(int r = -grid_delt; r < grid_delt + 1; ++r){
+  //       Vector3i delt = {p, q, r};
+  //       cand_num += points_hash.count(points_dis.col(point_id) + delt);
+  //     }
+  //   }
+  // }
+    
+  
+  // // get NN_cando
+  // for(int p = -grid_delt; p < grid_delt + 1; ++p){
+  //   for(int q = -grid_delt; q < grid_delt + 1; ++q){
+  //     for(int r = -grid_delt; r < grid_delt + 1; ++r){
+  //       Vector3i delt = {p, q, r};
+  //       auto range = points_hash.equal_range(points_dis.col(point_id) + delt);
+  //       if( range.first != range.second){
+  //         for_each(range.first, range.second, [&](unordered_multimap<Vector3i,size_t>::value_type  &one_point){
+  //             NN_cand.push_back({point_id, one_point.second, (points.col(point_id) - points.col(one_point.second)).norm()});
+  //           });
+  //       }
+        
+  //     }
+  //   }
+  // }
+
   return 0;
 }
 
@@ -215,8 +253,8 @@ int spatial_hash::hash_NNN(){
   
   //generate discretized 3D position
   points_dis = floor(points.array()/cell_size).cast<int>();
-  max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(1).maxCoeff()};
-  min_id = {points_dis.row(0).minCoeff(), points_dis.row(1).minCoeff(), points_dis.row(1).minCoeff()};
+  max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(2).maxCoeff()};
+  min_id = {points_dis.row(0).minCoeff(), points_dis.row(1).minCoeff(), points_dis.row(2).minCoeff()};
   
   
 
