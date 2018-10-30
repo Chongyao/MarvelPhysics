@@ -15,67 +15,6 @@ spatial_hash::spatial_hash(const MatrixXd &points_, const size_t &nn_num_):point
   hash_NNN();
 }
 
-
-
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<OLD VERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-// spatial_hash::spatial_hash(const size_t &table_size_):table_size(table_size_){
-//   prime_num = vector<size_t> {7373856093, 19349663, 83492791};
-//   hash_table = make_shared<table_type>(table_size_);
-// }
-
-// bool spatial_hash::find_ele(const list<value_type> &bucket, const value_type &val){
-//   for(auto &v : bucket){
-//     if (v == val )
-//       return true;
-//   }
-//   return false;  
-// }
-
-// size_t spatial_hash::hash_func(const key_type &key){
-//   return  ( (key(0)*prime_num[0]) ^ (key(1)*prime_num[1]) ^ (key(2)*prime_num[2]) ) % table_size;
-// }
-
-// int spatial_hash::insert(const key_type &key, const value_type &value){
-//   size_t table_id = hash_func(key);
-//   if( !find_ele((*hash_table)[table_id], value) )
-//     (*hash_table)[table_id].push_front(value);
-//   return 0;
-// }
-
-
-// int spatial_hash::get_val(const key_type &key, std::list<value_type> &vals){
-//   size_t table_id = hash_func(key);
-//   vals = (*hash_table)[table_id];
-// }
-
-
-//TODO: use hash method or exist library
-// int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const size_t &nn_num){
-//   //init
-//   NN = MatrixXi(10, points.cols());
-//   sup_radi = VectorXd(points.cols());
-
-//   size_t cell_size = size_t(floor(pow(points.cols()/nn_num, 1/3)));
-//   size_t table_size = size_t(floor(pow(points.cols(), 0.5)));
-
-//   MatrixXi points_dis(points.rows(), points.cols()); 
-//   points_dis = points.cast<int>();
-  
-
-//   //make hash table
-//   spatial_hash points_hash(table_size);
-//   for(size_t i = 0; i < points.cols(); ++i){
-//     points_hash.insert(points_dis.col(i), i);
-//   }
-
-//   //
-//   for(size_t i = 0; i < points.cols(); ++i){
-//   }
-// }
-
-//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<OLD VERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<SIMPLE VVERSION>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 int calc_NNN(const MatrixXd &points, MatrixXi &NN, VectorXd &sup_radi, const size_t &nn_num){
   assert(points.cols() > nn_num);
@@ -137,7 +76,6 @@ int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::
   auto loop = [&](const int &face, const int &face_axis, const int &radi_1, const int &radi_2){
     if(face <= max_id(face_axis) && face >= min_id(face_axis) ){
       int axis_1 = (face_axis + 1)%3, axis_2 = (face_axis + 2)%3;
-// #pragma omp parallel for    
       for(int j = query(axis_1) - radi_1; j < query(axis_1) + radi_1 + 1; ++j){
         for(int k = query(axis_2) - radi_2; k < query(axis_2) + radi_2 + 1; ++k){
           Vector3i one_grid;
@@ -151,12 +89,9 @@ int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::
     }
   };
   if(radi > 0){
-    loop(query(0) - radi, 0, radi, radi);
-    loop(query(0) + radi, 0, radi, radi);
-    loop(query(1) - radi, 1, radi, radi - 1);
-    loop(query(1) + radi, 1, radi, radi - 1);
-    loop(query(2) - radi, 2, radi - 1, radi - 1);
-    loop(query(2) + radi, 2, radi - 1, radi - 1);
+    for(size_t i = 0; i < 6; ++i){
+      loop(i%2 == 0?query(i/2) - radi:query(i/2) + radi, i/2, i<4?radi : radi - 1, i<2?radi : radi - 1); 
+    }
   }
   else{
     shell.push_back(query);
@@ -169,8 +104,9 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
 
   size_t cand_num = 0;
   int grid_delt = 0;
+  // bool once_more = false;
+  int once_more = 0;
   //count for grid_delt;
-
   do{
     vector<Vector3i> shell;
     get_shell(points_dis.col(point_id), grid_delt, shell);
@@ -183,59 +119,10 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
       }
     }
     ++grid_delt;
-  }while(NN_cand.size() < nn_num + 2);
-  //calculate once more  
-  vector<Vector3i> shell;
-  get_shell(points_dis.col(point_id), grid_delt, shell);
-  for(auto &grid : shell){
-    auto range = points_hash.equal_range(grid);
-    if( range.first != range.second){
-      for_each(range.first, range.second, [&](unordered_multimap<Vector3i,size_t>::value_type  &one_point){
-          NN_cand.push_back({point_id, one_point.second, (points.col(point_id) - points.col(one_point.second)).norm()});
-        });
-    }
-  }
-  
-  // do{
-  //   cand_num = 0;
-  //   ++grid_delt;
-  //   for(int p = -grid_delt; p < grid_delt + 1; ++p){
-  //     for(int q = -grid_delt; q < grid_delt + 1; ++q){
-  //       for(int r = -grid_delt; r < grid_delt + 1; ++r){
-  //         Vector3i delt = {p, q, r};
-  //         cand_num += points_hash.count(points_dis.col(point_id) + delt);
-  //       }
-  //     }
-  //   }
-  // }while(cand_num  < nn_num + 2);
-  // cand_num = 0;
-  // ++grid_delt;
-  // for(int p = -grid_delt; p < grid_delt + 1; ++p){
-  //   for(int q = -grid_delt; q < grid_delt + 1; ++q){
-  //     for(int r = -grid_delt; r < grid_delt + 1; ++r){
-  //       Vector3i delt = {p, q, r};
-  //       cand_num += points_hash.count(points_dis.col(point_id) + delt);
-  //     }
-  //   }
-  // }
-    
-  
-  // // get NN_cando
-  // for(int p = -grid_delt; p < grid_delt + 1; ++p){
-  //   for(int q = -grid_delt; q < grid_delt + 1; ++q){
-  //     for(int r = -grid_delt; r < grid_delt + 1; ++r){
-  //       Vector3i delt = {p, q, r};
-  //       auto range = points_hash.equal_range(points_dis.col(point_id) + delt);
-  //       if( range.first != range.second){
-  //         for_each(range.first, range.second, [&](unordered_multimap<Vector3i,size_t>::value_type  &one_point){
-  //             NN_cand.push_back({point_id, one_point.second, (points.col(point_id) - points.col(one_point.second)).norm()});
-  //           });
-  //       }
-        
-  //     }
-  //   }
-  // }
-
+    if (NN_cand.size() > nn_num + 2)
+      // once_more = !once_more;
+      once_more++;
+  }while(NN_cand.size() < nn_num + 2 || once_more<2);
   return 0;
 }
 
@@ -266,6 +153,7 @@ int spatial_hash::hash_NNN(){
     points_hash.insert({points_dis.col(i), i});
   }
   //calc NN
+#pragma parallel omp for
   for(size_t i = 0; i < points_num; ++i){
     vector<pair_dis> NN_cand;
     find_NN(i, NN_cand);
