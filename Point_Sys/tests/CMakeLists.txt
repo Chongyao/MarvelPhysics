@@ -12,3 +12,10 @@ target_link_libraries(test_wdnb
   tbb
   zjucad-ptree
   jtf-mesh)
+
+
+add_executable(test_energy test_energy.cc)
+target_link_libraries(test_energy
+  PointSys
+  zjucad-ptree
+  )

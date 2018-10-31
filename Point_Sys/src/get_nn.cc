@@ -129,7 +129,6 @@ const VectorXd& spatial_hash::get_sup_radi() {
 }
 int spatial_hash::get_friends(const size_t &point_id, const double &sup_radi, vector<size_t> &friends) const{
   friends.clear();
-  
   int grid_delt = 0;
   bool has_friends = false;
   bool has_points = false;
