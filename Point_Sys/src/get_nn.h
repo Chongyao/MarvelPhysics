@@ -32,20 +32,22 @@ class spatial_hash{
  public:
   spatial_hash(const Eigen::MatrixXd &points_, const size_t &nn_num_);
   const Eigen::MatrixXi& get_NN() const;
-  const Eigen::VectorXd& get_sup_radi() const;
+  const Eigen::VectorXd& get_sup_radi();
 
-  int get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Eigen::Vector3i> &shell);
+  int get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Eigen::Vector3i> &shell) const ;
   int get_friends(const size_t &point_id, const double &sup_radim, std::vector<size_t> &friends) const;
   int update_points(const Eigen::MatrixXd &points_);
  private:
 
   Eigen::MatrixXd points;
   size_t nn_num;
-
+  size_t points_num;
   std::unordered_multimap<Eigen::Vector3i, size_t> points_hash;
   Eigen::MatrixXi points_dis;
+
   Eigen::MatrixXi NN;
   Eigen::VectorXd sup_radi;
+  
   Eigen::Vector3i max_id;
   Eigen::Vector3i min_id;
   int find_NN(const size_t &point_id, std::vector<pair_dis> &NN_cand);

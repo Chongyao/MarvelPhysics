@@ -10,12 +10,12 @@ namespace marvel{
 
 
 
-spatial_hash::spatial_hash(const MatrixXd &points_, const size_t &nn_num_):points(points_), nn_num(nn_num_){
+spatial_hash::spatial_hash(const MatrixXd &points_, const size_t &nn_num_):points(points_), points_num(points_.cols()), nn_num(nn_num_){
   hash_NNN();
 }
 
 
-int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Vector3i> &shell){
+int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Vector3i> &shell) const {
   assert(radi > -1);
   //init
   shell.clear();
@@ -75,11 +75,8 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
 
 
 int spatial_hash::hash_NNN(){
-  assert(points.cols() > nn_num);
-  //init data
-  const size_t points_num = points.cols();
+  //init
   NN.setZero(nn_num, points_num);
-  sup_radi.setZero(points_num);
 
   //set hash parameter
   double cell_size = pow(points.cols()/nn_num, 1/3);
@@ -101,7 +98,21 @@ int spatial_hash::hash_NNN(){
     points_hash.insert({points_dis.col(i), i});
   }
   //calc NN
-#pragma parallel omp for
+
+  return 0;
+}
+
+const MatrixXi& spatial_hash::get_NN() const {
+  return NN;
+}
+const VectorXd& spatial_hash::get_sup_radi() {
+  assert(points.cols() > nn_num);
+
+  //init data
+
+  sup_radi.setZero(points_num);
+  
+  #pragma parallel omp for
   for(size_t i = 0; i < points_num; ++i){
     vector<pair_dis> NN_cand;
     find_NN(i, NN_cand);
@@ -114,13 +125,6 @@ int spatial_hash::hash_NNN(){
   }
   sup_radi*= 3.0/nn_num;
   cout << NN.block(0,0,nn_num, 10) << endl;
-  return 0;
-}
-
-const MatrixXi& spatial_hash::get_NN() const {
-  return NN;
-}
-const VectorXd& spatial_hash::get_sup_radi() const{
   return sup_radi;
 }
 int spatial_hash::get_friends(const size_t &point_id, const double &sup_radi, vector<size_t> &friends) const{

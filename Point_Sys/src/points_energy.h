@@ -18,23 +18,33 @@ class point_sys: public bigbang::Functional<double>{
  private:
   Eigen::MatrixXd points_;
   Eigen::MatrixXi NN_;
-  Eigen::VectorXd sup_radi_;
+
   
-  size_t dim_;
-  double rho_;
+  const size_t dim_;
+  const double rho_;
 
   size_t nearest_num_;
   double vol_all_;
 
   double scal_fac_;
 
-  int calc_rhoi_vi(const double *x, const Eigen::VectorXd &rho_i, const Eigen::VectorXd &vol_i);
+  int calc_rhoi_vi(const double *x);
   int calc_defo_gra(const double *x, double *def_gra);
 
   spatial_hash SH_;
 
-  double kernel(const double &h, const double &r);
-  double kernel(const Eigen::Vector3d &xj, const Eigen::Vector3d &xi, const double &r);
+  double kernel(const double &r, const double &h);
+  double kernel(const Eigen::Vector3d &xj, const Eigen::Vector3d &xi, const double &h);
+  double kernel(const size_t &i, const size_t &j);
+
+  //point info
+  Eigen::VectorXd mass_i_;
+  Eigen::VectorXd sup_radi_;
+  
+  Eigen::VectorXd rho_i_;
+  Eigen::VectorXd vol_i_;
+
+  
   
 };
 }
