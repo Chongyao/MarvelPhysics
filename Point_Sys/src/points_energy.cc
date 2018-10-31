@@ -31,20 +31,22 @@ size_t point_sys::Nx() const{
   return dim_;
 }
 int point_sys::calc_fri() const{
-  friends_.clear();
-  weig_.clear();
+  // friends_.clear();
+  // weig_.clear();
+  friends_ = vector<vector<size_t>>(dim_);
+  weig_ = vector<vector<double>>(dim_);
+#pragma parallel omp for  
   for(size_t i = 0; i < dim_; ++i){
     vector<size_t> one_fris;
     vector<double> weig_of_one_p;
     SH_.get_friends(i, sup_radi_(i), one_fris);
-    for(auto f : one_fris){
-      cout << f <<" ";
-    }cout << endl;
-    cout << "D here"<< endl;
-    friends_.push_back(one_fris);
+    // friends_.push_back(one_fris);
+    friends_[i] = one_fris;
     for(auto one_fri : one_fris){
       weig_of_one_p.push_back(kernel(i, one_fri));
     }
+    // weig_.push_back
+    weig_[i] = weig_of_one_p;
   }
 }
 
@@ -55,7 +57,6 @@ int point_sys::calc_rhoi_vi(const double *x) const{
   vol_i_.setZero(dim_);
 
   calc_fri();
-  cout << "C here"<< endl;
   assert(friends_.size() > 0 && weig_.size() > 0);
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
@@ -64,7 +65,6 @@ int point_sys::calc_rhoi_vi(const double *x) const{
   }
 
   vol_i_ = mass_i_.array() / rho_i_.array();
-
   return 0;
 }
 double point_sys::kernel(const double &r, const double &h) const {
@@ -99,12 +99,13 @@ int point_sys::calc_defo_gra(const double *x, double *def_gra) const{
     b.setZero(9);
     
     for(size_t j = 0; j < friends_[i].size(); ++j){
-      Vector3d xij = points_curr.col(friends_[i][j]) - points_curr.col(i);
+      Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
       sys_mat += weig_[i][j]*xij*xij.transpose();
       for(size_t k = 0; k < 3; ++k){
         b.segment(3*k, 3) += (disp(k, friends_[i][j]) - disp(k, i))*weig_[i][j]*xij;        
       }
     }
+    cout << sys_mat << b << endl;
 
     for(size_t k = 0; k < 3; ++k){
       //TODO: use better solver considering the sysmertic
