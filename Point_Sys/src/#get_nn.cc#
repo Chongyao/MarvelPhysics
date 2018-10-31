@@ -149,14 +149,11 @@ int spatial_hash::get_friends(const size_t &point_id, const double &sup_radi, ve
   
   friends.clear();
   int grid_delt = 0;
-  // bool has_friends = false;
   bool has_outer_points = false;
   int once_more = 0;
   int touch_bd = 0;
   
   do{
-    // has_friends = false;
-    // has_points = false;
     vector<Vector3i> shell;
     touch_bd = get_shell(points_dis.col(point_id), grid_delt, shell);
 
@@ -164,15 +161,10 @@ int spatial_hash::get_friends(const size_t &point_id, const double &sup_radi, ve
     for(auto &one_grid : shell){
       auto range = points_hash.equal_range(one_grid);
       if( range.first != range.second){
-        // has_points = true;
-
         for_each(range.first, range.second, [&](const unordered_multimap<Vector3i,size_t>::value_type  &one_point){
             double dis = (points.col(one_point.second) - points.col(point_id)).norm();
-
             if(dis < sup_radi && dis != 0){
-              cout << "dis " << dis << endl;
               friends.push_back(one_point.second);
-              // has_friends = true;
             }
             else if (dis != 0){
               has_outer_points = true;
@@ -183,7 +175,6 @@ int spatial_hash::get_friends(const size_t &point_id, const double &sup_radi, ve
     ++grid_delt;
     if(touch_bd == -1)
       break;
-    // if(has_points && !has_friends)
     if(has_outer_points)
       ++once_more;
     

@@ -6,10 +6,11 @@
 #include <libigl/include/igl/readOBJ.h>
 #include <Eigen/Core>
 
+#include "Point_Sys/src/geometry.h"
 #include "Point_Sys/src/gen_points.h"
 #include "Point_Sys/src/get_nn.h"
 #include "Point_Sys/src/points_energy.h"
-#include "Point_Sys/src/geometry.h"
+
 
 
 
@@ -35,11 +36,18 @@ int main(int argc, char** argv){
   MatrixXd points;
   gen_points(nods, surf, pt.get<size_t>("num_in_axis.value"), points);
 
-  // point_sys PS(points, pt.get<double>, )
-
-
-                                                                                                                        
-
   
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>POINTS<<<<<<<<<<<<<<<<<<" << endl;
+  cout << points.block(0, 0, 3, points.cols() > 10?10:points.cols()) << endl;
+  //calc volume 
+  double volume = clo_surf_vol(nods, surf);
+  
+  point_sys PS(points, pt.get<double>("rho.value"), volume, 4);
+  MatrixXd points_curr = points.array();
+  MatrixXd def_gra(9, points.cols());
+  
+  PS.calc_defo_gra(points_curr.data(), def_gra.data());
+  cout << def_gra.block(0, 0, 9, 10) << endl;
 }
+
 

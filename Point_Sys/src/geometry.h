@@ -6,6 +6,6 @@
 namespace marvel{
 
 double clo_surf_vol(const Eigen::MatrixXd &nods, const Eigen::MatrixXi &surf);
-}//namespcae : marvel
 
+}//namespcae : marvel
 #endif

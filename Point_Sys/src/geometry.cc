@@ -1,5 +1,4 @@
 #include "geometry.h"
-
 #include <Eigen/LU>
 
 using namespace Eigen;

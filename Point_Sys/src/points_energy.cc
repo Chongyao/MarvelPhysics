@@ -2,6 +2,7 @@
 #include "get_nn.h"
 #include <cmath>
 #include <Eigen/LU>
+#include <iostream>
 #define PI 3.14159265359
 
 using namespace std;
@@ -29,13 +30,17 @@ point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &v
 size_t point_sys::Nx() const{
   return dim_;
 }
-int point_sys::calc_fri(){
+int point_sys::calc_fri() const{
   friends_.clear();
   weig_.clear();
   for(size_t i = 0; i < dim_; ++i){
     vector<size_t> one_fris;
     vector<double> weig_of_one_p;
     SH_.get_friends(i, sup_radi_(i), one_fris);
+    for(auto f : one_fris){
+      cout << f <<" ";
+    }cout << endl;
+    cout << "D here"<< endl;
     friends_.push_back(one_fris);
     for(auto one_fri : one_fris){
       weig_of_one_p.push_back(kernel(i, one_fri));
@@ -43,13 +48,14 @@ int point_sys::calc_fri(){
   }
 }
 
-int point_sys::calc_rhoi_vi(const double *x){
+int point_sys::calc_rhoi_vi(const double *x) const{
   //init
-  Map<const MatrixXd, 0, OuterStride<> > points_curr(x, 3, dim_, OuterStride<>(dim_));
+  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
   rho_i_.setZero(dim_);
   vol_i_.setZero(dim_);
 
   calc_fri();
+  cout << "C here"<< endl;
   assert(friends_.size() > 0 && weig_.size() > 0);
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
@@ -61,27 +67,28 @@ int point_sys::calc_rhoi_vi(const double *x){
 
   return 0;
 }
-double point_sys::kernel(const double &r, const double &h){
+double point_sys::kernel(const double &r, const double &h) const {
   if(r < h)
     return 315*pow((h*h - r*r), 3)/(64*PI*pow(h, 9));
   else
     return 0;
 }
-double point_sys::kernel(const Eigen::Vector3d &xj, const Eigen::Vector3d &xi, const double &h){
+double point_sys::kernel(const Eigen::Vector3d &xj, const Eigen::Vector3d &xi, const double &h) const{
   double r = (xj - xi).norm();
   return kernel(r, h);
 }
 
-double point_sys::kernel(const size_t &i, const size_t &j){
+double point_sys::kernel(const size_t &i, const size_t &j) const{
   double r = (points_.col(j) - points_.col(i)).norm();
   return kernel(r, sup_radi_(i));
 }
 
 
-int point_sys::calc_defo_gra(const double *x, double *def_gra){
-  Map<const MatrixXd, 0, OuterStride<> > points_curr(x, 3, dim_, OuterStride<>(dim_));
-  Map<MatrixXd, 0, OuterStride<> > d_u(def_gra, 9, dim_, OuterStride<>(dim_));
-
+int point_sys::calc_defo_gra(const double *x, double *def_gra) const{
+  pre_compute(x);
+  cout << "A here" << endl;
+  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
+  Map< Matrix<double, Dynamic, Dynamic> > d_u(def_gra, 9, dim_);  
   MatrixXd disp = points_curr - points_;
   
   for(size_t i = 0; i < dim_; ++i){
@@ -108,7 +115,11 @@ int point_sys::calc_defo_gra(const double *x, double *def_gra){
   return 0;
 }
 
-
+int point_sys::pre_compute(const double *x) const {
+  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
+  SH_.update_points(points_curr);
+  calc_rhoi_vi(x);
+}
 
 }//namespace : marvel
 
