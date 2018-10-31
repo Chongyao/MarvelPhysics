@@ -77,7 +77,7 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
 int spatial_hash::hash_NNN(){
   //init
   NN.setZero(nn_num, points_num);
-
+  points_hash.clear();
   //set hash parameter
   double cell_size = pow(points.cols()/nn_num, 1/3);
   size_t table_size = size_t(floor(pow(points.cols(), 0.5)));
@@ -139,6 +139,7 @@ int spatial_hash::get_friends(const size_t &point_id, const double &sup_radi, ve
     has_points = false;
     vector<Vector3i> shell;
     get_shell(points_dis.col(point_id), grid_delt, shell);
+
 
     for(auto &one_grid : shell){
       auto range = points_hash.equal_range(one_grid);

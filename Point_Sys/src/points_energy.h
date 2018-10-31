@@ -16,7 +16,7 @@ class point_sys: public bigbang::Functional<double>{
   // int Gra(const double *x, double *gra) const;
   // int Hes(const double *x,  std::vector<Eigen::Triplet<double>> *hes) const;
  private:
-  Eigen::MatrixXd points_;
+  const Eigen::MatrixXd points_;
   Eigen::MatrixXi NN_;
 
   
@@ -27,7 +27,6 @@ class point_sys: public bigbang::Functional<double>{
   double vol_all_;
 
   double scal_fac_;
-
   int calc_rhoi_vi(const double *x);
   int calc_defo_gra(const double *x, double *def_gra);
 
@@ -45,7 +44,10 @@ class point_sys: public bigbang::Functional<double>{
   Eigen::VectorXd vol_i_;
 
   
-  
+
+  std::vector<std::vector<size_t>> friends_;
+  std::vector<std::vector<double>> weig_;
+  int calc_fri();
 };
 }
 #endif
