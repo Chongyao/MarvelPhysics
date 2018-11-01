@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 namespace marvel{
-energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(9, dim_){}
+energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(9, dim_), strain_(9, dim_), stress_(9, dim_), pre_F_(9, dim_){}
 
 int energy_dat::save_ele_mat(const size_t &ele_id, const size_t &rows, const MatrixXd &ele_mat, MatrixXd &whole_mat){
   whole_mat.col(ele_id) = Map<const VectorXd>(ele_mat.data(), rows);
@@ -20,6 +20,13 @@ int energy_dat::save_ele_gra(const size_t &ele_id, const MatrixXd &ele_mat){
 int energy_dat::save_ele_hes(const size_t &ele_id, const MatrixXd &ele_mat){
   return save_ele_mat(ele_id, 3, ele_mat, hes_);    
 }
+int energy_dat::save_ele_strain(const size_t &ele_id, const MatrixXd &ele_mat){
+  return save_ele_mat(ele_id, 9, ele_mat, strain_);    
+}
+int energy_dat::save_ele_stress(const size_t &ele_id, const MatrixXd &ele_mat){
+  return save_ele_mat(ele_id, 9, ele_mat, stress_);    }
+int energy_dat::save_ele_pre_F(const size_t &ele_id, const MatrixXd &ele_mat){
+  return save_ele_mat(ele_id, 9, ele_mat, pre_F_);    }
 
 
 //TODO:: look for a way to return a pointer to the 

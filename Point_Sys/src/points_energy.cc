@@ -2,6 +2,8 @@
 #include "get_nn.h"
 #include <cmath>
 #include <Eigen/SVD>
+#include <Eigen/LU>
+#include <Eigen/Geometry>
 #include <iostream>
 #define PI 3.14159265359
 
@@ -9,8 +11,35 @@ using namespace std;
 using namespace Eigen;
 namespace marvel{
 
-point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const size_t &nearest_num):
-    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), nearest_num_(nearest_num),SH_(points, nearest_num){
+
+
+Matrix3d safe_inv(const MatrixXd& sys_mat){
+  //TODO: use better solver considering the sysmertic
+  JacobiSVD<MatrixXd> svd(sys_mat, ComputeThinU | ComputeThinV);
+
+  auto sin_val = svd.singularValues();
+  Matrix3d inv_sin_val;
+  for(size_t p = 0; p < 3; ++p){
+    inv_sin_val(p, p) = sin_val(p)>0?1/sin_val(p):0;
+  }
+  return std::move(svd.matrixV() * inv_sin_val * svd.matrixU().transpose());
+}
+
+void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra, const double &You, const double &Poi){
+  //TODO:add more consititutive law
+  //St.Venant-Kirchhof model
+  double G = You/(2 + 2*Poi);
+  double lam = You*Poi/(1+Poi)/(1-2*Poi);
+  double trace = strain(0,0) + strain(1, 1) + strain(1, 1);
+  stress = def_gra*(2*G*strain + lam*trace*MatrixXd::Identity(3, 3));
+}
+
+
+
+
+
+point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const size_t &nearest_num, const double &kv):
+    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), nearest_num_(nearest_num),SH_(points, nearest_num), kv_(kv){
 
   sup_radi_ = SH_.get_sup_radi();
   mass_i_.setZero(dim_);
@@ -73,10 +102,6 @@ double point_sys::kernel(const double &r, const double &h) const {
   else
     return 0;
 }
-double point_sys::kernel(const Eigen::Vector3d &xj, const Eigen::Vector3d &xi, const double &h) const{
-  double r = (xj - xi).norm();
-  return kernel(r, h);
-}
 
 double point_sys::kernel(const size_t &i, const size_t &j) const{
   double r = (points_.col(j) - points_.col(i)).norm();
@@ -87,8 +112,6 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
 int point_sys::calc_defo_gra(const double *_x, energy_dat &dat_str) const{
   pre_compute(_x);
   Map<const Matrix<double, Dynamic, Dynamic> > points_curr(_x, 3, dim_);
-  // Map< Matrix<double, Dynamic, Dynamic> > d_u(dat_str.def_gra_, 9, dim_);
-  // Map< Matrix<double, Dynamic, Dynamic> > inv_A_all(dat_str.inv_A_all_, 9, dim_);  
   MatrixXd disp = points_curr - points_;
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
@@ -106,25 +129,17 @@ int point_sys::calc_defo_gra(const double *_x, energy_dat &dat_str) const{
       }
     }
 
+    //clac inverse of sys_mat by SVD
+    auto inv_A = safe_inv(sys_mat);
+    dat_str.save_ele_inv_all(i, inv_A);
+    
     for(size_t k = 0; k < 3; ++k){
-      //TODO: use better solver considering the sysmertic
-      JacobiSVD<MatrixXd> svd(sys_mat, ComputeThinU | ComputeThinV);
-
-     auto sin_val = svd.singularValues();
-      Matrix3d inv_sin_val;
-      for(size_t p = 0; p < 3; ++p){
-        inv_sin_val(p, p) = sin_val(p)>0?1/sin_val(p):0;
-      }
-      
-      auto inv_A = svd.matrixV() * inv_sin_val * svd.matrixU().transpose();
       one_du.row(k) = (inv_A * b.segment(3*k, 3)).transpose();
-      // one_du.segment(3*k, 3) = inv_A * b.segment(3*k, 3);
-      // one_du.segment(3*k, 3) = svd.solve(b.segment(3*k, 3));      
     }
     MatrixXd F = one_du.transpose()*one_du + MatrixXd::Identity(3, 3);
     cout << F <<endl;
-    // d_u.col(i) = Map<VectorXd>(F.data(), 9);
     dat_str.save_ele_def_gra(i, F);
+
   }
   return 0;
 }
@@ -137,14 +152,45 @@ int point_sys::pre_compute(const double *x) const {
   calc_rhoi_vi(x);
 }
 int point_sys::Gra(const double *x, energy_dat &dat_str) const{
+  dat_str.gra_.setZero(3, dim_);
   //map the data
   Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
-  Map<const Matrix<double, Dynamic, Dynamic> > def_gra(_def_gra, 9, dim_);
-  Map<const Matrix<double, Dynamic, Dynamic> > inv_A_all(_inv_A_all, 9, dim_);
-  Map< Matrix<double, Dynamic, Dynamic> > gra(_gra, 9, dim_);
+  // calc strain
+#pragma parallel omp for
+  for(size_t i = 0; i < dim_; ++i){
+    Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
+    //calculate strain and stress
+    Matrix3d strain = def_gra.transpose()*def_gra - MatrixXd::Identity(3, 3);
+    dat_str.save_ele_strain(i, strain);
+    Matrix3d stress;
+    cons_law(strain, stress, def_gra, Young_, Poission_);
+    dat_str.save_ele_stress(i, stress);
+    //calculate Fv
+    Matrix3d f_pre_mat;
+    Matrix3d gra_def_gra;
+    auto trans_def_gra = def_gra.transpose();
+    for(int i = 0; i < 3; ++i){
+      Vector3d cross1 = trans_def_gra.col((i+1)%3), cross2 = trans_def_gra.col((i+2)%3);
+      gra_def_gra.col(i) = cross1.cross(cross2);
+    }
+    gra_def_gra.transposeInPlace();
 
-  // Matrix
-  
+    //assemble Fe and Fv
+    Map<MatrixXd> inv_A(dat_str.inv_A_all_.col(i).data(), 3, 3);
+    Matrix3d pre_F = -vol_i_(i)*(2*def_gra*stress*kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
+    dat_str.save_ele_pre_F(i, pre_F);
+
+    //add to gra_
+    Vector3d di;
+    for(size_t j = 0; j < friends_.size(); ++j){
+      double w = weig_[i][j];
+      Vector3d xij = (points_.col(j) - points_.col(i));
+      di += -w*xij;
+      dat_str.save_ele_gra(j, w*pre_F*xij);
+    }
+    dat_str.save_ele_gra(i, pre_F*di);
+  }
+  return 0;
   
 }
 

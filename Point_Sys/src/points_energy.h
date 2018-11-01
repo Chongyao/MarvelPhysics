@@ -16,7 +16,7 @@ namespace marvel{
 // class point_sys: public bigbang::Functional<double>{
 class point_sys{
  public:
-  point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const size_t &nearest_num);
+  point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const size_t &nearest_num, const double &kv);
   size_t Nx() const ;
   int calc_defo_gra(const double *_x, energy_dat &dat_str) const;
   int Gra(const double *_x, energy_dat &dat_str) const;
@@ -32,6 +32,7 @@ class point_sys{
   const double rho_;
   const double Poission_;
   const double Young_;
+  const double kv_;
   
   double vol_all_;
   double scal_fac_;
@@ -43,7 +44,6 @@ class point_sys{
   int calc_fri() const;
   
   double kernel(const double &r, const double &h) const;
-  double kernel(const Eigen::Vector3d &xj, const Eigen::Vector3d &xi, const double &h) const;
   double kernel(const size_t &i, const size_t &j) const;
 
   //point info
