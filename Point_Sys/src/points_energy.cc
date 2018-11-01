@@ -1,7 +1,7 @@
 #include "points_energy.h"
 #include "get_nn.h"
 #include <cmath>
-#include <Eigen/LU>
+#include <Eigen/SVD>
 #include <iostream>
 #define PI 3.14159265359
 
@@ -109,7 +109,8 @@ int point_sys::calc_defo_gra(const double *x, double *def_gra) const{
 
     for(size_t k = 0; k < 3; ++k){
       //TODO: use better solver considering the sysmertic
-      one_du.segment(3*k, 3) = sys_mat.lu() .solve(b.segment(3*k, 3));      
+      JacobiSVD<MatrixXd> svd(sys_mat, ComputeThinU | ComputeThinV);
+      one_du.segment(3*k, 3) = svd.solve(b.segment(3*k, 3));      
     }
     d_u.col(i) = one_du;    
   }
