@@ -9,8 +9,8 @@ using namespace std;
 using namespace Eigen;
 namespace marvel{
 
-point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &vol_all, const size_t &nearest_num):
-    points_(points), rho_(rho), vol_all_(vol_all), dim_(points_.cols()), nearest_num_(nearest_num),SH_(points, nearest_num){
+point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const size_t &nearest_num):
+    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), nearest_num_(nearest_num),SH_(points, nearest_num){
 
   sup_radi_ = SH_.get_sup_radi();
   mass_i_.setZero(dim_);
@@ -84,13 +84,13 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
 }
 
 
-int point_sys::calc_defo_gra(const double *x, double *def_gra) const{
-  pre_compute(x);
-  cout << "A here" << endl;
-  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
-  Map< Matrix<double, Dynamic, Dynamic> > d_u(def_gra, 9, dim_);  
+int point_sys::calc_defo_gra(const double *_x, double *_def_gra, double *_inv_A_all) const{
+  pre_compute(_x);
+  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(_x, 3, dim_);
+  Map< Matrix<double, Dynamic, Dynamic> > d_u(_def_gra, 9, dim_);
+  Map< Matrix<double, Dynamic, Dynamic> > inv_A_all(_inv_A_all, 9, dim_);  
   MatrixXd disp = points_curr - points_;
-  
+#pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     VectorXd one_du(9);
     Matrix3d sys_mat;
@@ -105,12 +105,20 @@ int point_sys::calc_defo_gra(const double *x, double *def_gra) const{
         b.segment(3*k, 3) += (disp(k, friends_[i][j]) - disp(k, i))*weig_[i][j]*xij;        
       }
     }
-    cout << sys_mat << b << endl;
 
     for(size_t k = 0; k < 3; ++k){
       //TODO: use better solver considering the sysmertic
       JacobiSVD<MatrixXd> svd(sys_mat, ComputeThinU | ComputeThinV);
-      one_du.segment(3*k, 3) = svd.solve(b.segment(3*k, 3));      
+
+      auto sin_val = svd.singularValues();
+      Matrix3d inv_sin_val;
+      for(size_t i = 0; i < 3; ++i){
+        inv_sin_val(i, i) = sin_val(i)>0?1/sin_val(i):0;
+      }
+      
+      auto inv_A = svd.matrixV() * inv_sin_val * svd.matrixU().transpose();
+      one_du.segment(3*k, 3) = inv_A * b.segment(3*k, 3);
+      // one_du.segment(3*k, 3) = svd.solve(b.segment(3*k, 3));      
     }
     d_u.col(i) = one_du;    
   }

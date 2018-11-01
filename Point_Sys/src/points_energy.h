@@ -11,18 +11,23 @@ namespace marvel{
 // class point_sys: public bigbang::Functional<double>{
 class point_sys{
  public:
-  point_sys(const Eigen::MatrixXd &points, const double &rho, const double &vol_all, const size_t &nearest_num);
+  point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const size_t &nearest_num);
   size_t Nx() const ;
+  int calc_defo_gra(const double *_x, double *_def_gra, double *_inv_A_all) const;
+  // int Gra(const double *x, double *gra) const;
   // int Val(const double *x, double *val) const;
   // int Gra(const double *x, double *gra) const;
   // int Hes(const double *x,  std::vector<Eigen::Triplet<double>> *hes) const;
-  int calc_defo_gra(const double *x, double *def_gra) const;
+
  private:
   const Eigen::MatrixXd points_;
   Eigen::MatrixXi NN_;
   
   const size_t dim_;
   const double rho_;
+  const double Poission_;
+  const double Young_;
+  
   double vol_all_;
   double scal_fac_;
   mutable spatial_hash SH_;
