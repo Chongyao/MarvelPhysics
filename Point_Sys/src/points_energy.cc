@@ -92,7 +92,7 @@ int point_sys::calc_defo_gra(const double *_x, double *_def_gra, double *_inv_A_
   MatrixXd disp = points_curr - points_;
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
-    VectorXd one_du(9);
+    Matrix3d one_du;
     Matrix3d sys_mat;
     VectorXd b(9);
     sys_mat.setZero(3, 3);
@@ -112,15 +112,18 @@ int point_sys::calc_defo_gra(const double *_x, double *_def_gra, double *_inv_A_
 
       auto sin_val = svd.singularValues();
       Matrix3d inv_sin_val;
-      for(size_t i = 0; i < 3; ++i){
-        inv_sin_val(i, i) = sin_val(i)>0?1/sin_val(i):0;
+      for(size_t p = 0; p < 3; ++p){
+        inv_sin_val(p, p) = sin_val(p)>0?1/sin_val(p):0;
       }
       
       auto inv_A = svd.matrixV() * inv_sin_val * svd.matrixU().transpose();
-      one_du.segment(3*k, 3) = inv_A * b.segment(3*k, 3);
+      one_du.row(k) = (inv_A * b.segment(3*k, 3)).transpose();
+      // one_du.segment(3*k, 3) = inv_A * b.segment(3*k, 3);
       // one_du.segment(3*k, 3) = svd.solve(b.segment(3*k, 3));      
     }
-    d_u.col(i) = one_du;    
+    MatrixXd F = one_du.transpose()*one_du + MatrixXd::Identity(3, 3);
+    cout << F <<endl;
+    d_u.col(i) = Map<VectorXd>(F.data(), 9);    
   }
   return 0;
 }

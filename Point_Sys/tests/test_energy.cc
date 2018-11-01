@@ -43,7 +43,7 @@ int main(int argc, char** argv){
   double volume = clo_surf_vol(nods, surf);
   
   point_sys PS(points, pt.get<double>("rho.value"), pt.get<double>("Young.value"), pt.get<double>("Poission.value"), volume, 4);
-  MatrixXd points_curr = points.array()*0.6;
+  MatrixXd points_curr = points.array() + 1;
   MatrixXd def_gra(9, points.cols());
   MatrixXd inv_A_all(9, points.cols());  
   PS.calc_defo_gra(points_curr.data(), def_gra.data(), inv_A_all.data());
