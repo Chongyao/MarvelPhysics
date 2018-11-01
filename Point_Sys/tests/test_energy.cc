@@ -47,12 +47,16 @@ int main(int argc, char** argv){
   double volume = clo_surf_vol(nods, surf);
   
   point_sys PS(points, pt.get<double>("rho.value"), pt.get<double>("Young.value"), pt.get<double>("Poission.value"), volume, 4, 1);
-  MatrixXd points_curr = points.array() + 1;
+  Matrix3d change;
+  change << 1, 0, 0,
+      0, 2, 0,
+      0, 0, 5;
+  MatrixXd points_curr = change*points;
   // MatrixXd def_gra(9, points.cols());
   // MatrixXd inv_A_all(9, points.cols());
 
   energy_dat dat_str (points.cols());
-  
+  PS.pre_compute(points_curr.data(), dat_str);
   PS.calc_defo_gra(points_curr.data(), dat_str);
   cout << dat_str.def_gra_.block(0, 0, 9, 10) << endl;
 

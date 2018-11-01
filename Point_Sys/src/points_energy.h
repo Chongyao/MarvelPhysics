@@ -18,6 +18,7 @@ class point_sys{
  public:
   point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const size_t &nearest_num, const double &kv);
   size_t Nx() const ;
+  int pre_compute(const double *x,energy_dat &dat_str) const ;//calc once
   int calc_defo_gra(const double *_x, energy_dat &dat_str) const;
   int Gra(const double *_x, energy_dat &dat_str) const;
   // int Gra(const double *x, double *gra) const;
@@ -39,7 +40,7 @@ class point_sys{
   mutable spatial_hash SH_;
   size_t nearest_num_;
 
-  int pre_compute(const double *x) const ;
+
   int calc_rhoi_vi(const double *x) const;
   int calc_fri() const;
   

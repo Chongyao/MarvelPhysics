@@ -108,36 +108,28 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
   return kernel(r, sup_radi_(i));
 }
 
-
 int point_sys::calc_defo_gra(const double *_x, energy_dat &dat_str) const{
-  pre_compute(_x);
   Map<const Matrix<double, Dynamic, Dynamic> > points_curr(_x, 3, dim_);
   MatrixXd disp = points_curr - points_;
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d one_du;
-    Matrix3d sys_mat;
     VectorXd b(9);
-    sys_mat.setZero(3, 3);
     b.setZero(9);
-    
     for(size_t j = 0; j < friends_[i].size(); ++j){
       Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
-      sys_mat += weig_[i][j]*xij*xij.transpose();
       for(size_t k = 0; k < 3; ++k){
         b.segment(3*k, 3) += (disp(k, friends_[i][j]) - disp(k, i))*weig_[i][j]*xij;        
       }
     }
-
-    //clac inverse of sys_mat by SVD
-    auto inv_A = safe_inv(sys_mat);
-    dat_str.save_ele_inv_all(i, inv_A);
     
+    //clac inverse of sys_mat by SVD
+    
+    Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     for(size_t k = 0; k < 3; ++k){
       one_du.row(k) = (inv_A * b.segment(3*k, 3)).transpose();
     }
     MatrixXd F = one_du.transpose()*one_du + MatrixXd::Identity(3, 3);
-    cout << F <<endl;
     dat_str.save_ele_def_gra(i, F);
 
   }
@@ -146,10 +138,25 @@ int point_sys::calc_defo_gra(const double *_x, energy_dat &dat_str) const{
 
 
 
-int point_sys::pre_compute(const double *x) const {
+int point_sys::pre_compute(const double *x, energy_dat &dat_str) const {
   Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
   SH_.update_points(points_curr);
   calc_rhoi_vi(x);
+ #pragma parallel omp for
+  for(size_t i = 0; i < dim_; ++i){
+    Matrix3d sys_mat;
+    sys_mat.setZero(3, 3);
+    assert(friends_[i].size() >= 3);
+    for(size_t j = 0; j < friends_[i].size(); ++j){
+      Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
+      sys_mat += weig_[i][j]*xij*xij.transpose();
+      
+    }
+    
+    auto inv_A = safe_inv(sys_mat);
+    dat_str.save_ele_inv_all(i, inv_A);
+  }
+  return 0;
 }
 int point_sys::Gra(const double *x, energy_dat &dat_str) const{
   dat_str.gra_.setZero(3, dim_);
