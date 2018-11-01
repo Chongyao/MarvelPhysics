@@ -84,11 +84,11 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
 }
 
 
-int point_sys::calc_defo_gra(const double *_x, double *_def_gra, double *_inv_A_all) const{
+int point_sys::calc_defo_gra(const double *_x, energy_dat &dat_str) const{
   pre_compute(_x);
   Map<const Matrix<double, Dynamic, Dynamic> > points_curr(_x, 3, dim_);
-  Map< Matrix<double, Dynamic, Dynamic> > d_u(_def_gra, 9, dim_);
-  Map< Matrix<double, Dynamic, Dynamic> > inv_A_all(_inv_A_all, 9, dim_);  
+  // Map< Matrix<double, Dynamic, Dynamic> > d_u(dat_str.def_gra_, 9, dim_);
+  // Map< Matrix<double, Dynamic, Dynamic> > inv_A_all(dat_str.inv_A_all_, 9, dim_);  
   MatrixXd disp = points_curr - points_;
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
@@ -110,7 +110,7 @@ int point_sys::calc_defo_gra(const double *_x, double *_def_gra, double *_inv_A_
       //TODO: use better solver considering the sysmertic
       JacobiSVD<MatrixXd> svd(sys_mat, ComputeThinU | ComputeThinV);
 
-      auto sin_val = svd.singularValues();
+     auto sin_val = svd.singularValues();
       Matrix3d inv_sin_val;
       for(size_t p = 0; p < 3; ++p){
         inv_sin_val(p, p) = sin_val(p)>0?1/sin_val(p):0;
@@ -123,16 +123,31 @@ int point_sys::calc_defo_gra(const double *_x, double *_def_gra, double *_inv_A_
     }
     MatrixXd F = one_du.transpose()*one_du + MatrixXd::Identity(3, 3);
     cout << F <<endl;
-    d_u.col(i) = Map<VectorXd>(F.data(), 9);    
+    // d_u.col(i) = Map<VectorXd>(F.data(), 9);
+    dat_str.save_ele_def_gra(i, F);
   }
   return 0;
 }
+
+
 
 int point_sys::pre_compute(const double *x) const {
   Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
   SH_.update_points(points_curr);
   calc_rhoi_vi(x);
 }
+int point_sys::Gra(const double *x, energy_dat &dat_str) const{
+  //map the data
+  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
+  Map<const Matrix<double, Dynamic, Dynamic> > def_gra(_def_gra, 9, dim_);
+  Map<const Matrix<double, Dynamic, Dynamic> > inv_A_all(_inv_A_all, 9, dim_);
+  Map< Matrix<double, Dynamic, Dynamic> > gra(_gra, 9, dim_);
+
+  // Matrix
+  
+  
+}
+
 
 }//namespace : marvel
 
