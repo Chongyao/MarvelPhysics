@@ -4,6 +4,7 @@
 
 #include <zjucad/ptree/ptree.h>
 #include <libigl/include/igl/readOBJ.h>
+#include <libigl/include/igl/writeOBJ.h>
 #include <Eigen/Core>
 
 #include "Point_Sys/src/geometry.h"
@@ -57,8 +58,51 @@ int main(int argc, char** argv){
 
   energy_dat dat_str (points.cols());
   PS.pre_compute(points_curr.data(), dat_str);
-  PS.calc_defo_gra(points_curr.data(), dat_str);
-  cout << dat_str.def_gra_.block(0, 0, 9, 10) << endl;
+  
+  double delt_t = 0.01;
+  MatrixXd displace;
+  MatrixXd velocity;
+  MatrixXd acce;
+  MatrixXd new_acce;
+  MatrixXd gra;
+  displace.setZero(3, points.cols());
+  velocity.setZero(3, points.cols());
+  acce.setZero(3, points.cols());
+  gra.setZero(3, points.cols());
+  new_acce.setZero(3, points.cols());
+  size_t max_iter = 5;
+  for(size_t i = 0; i < max_iter; ++i){
+    
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>disp<<<<<<<<<<<<<<<<<<" << endl;
+    cout << "iter is "<<endl<< i << endl;
+    cout << "displace is "<<endl<< displace.block(0, 0, 3, 5) << endl;
+    cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 5) << endl;
+    cout << "acce is " <<endl<< acce.block(0, 0, 3, 5) << endl;
+
+    PS.calc_defo_gra(displace.data(), dat_str);
+    // cout << "def_gra " << dat_str.def_gra_.block(0, 0, 9, 5) << endl;
+    PS.Gra(displace.data(), dat_str);
+    // cout << "elasitic force " << dat_str.gra_.block(0, 0, 3, 5) << endl;    
+    PS.gravity(displace.data(), dat_str, 9.8);
+    // cout << "gravity " << dat_str.gra_.block(0, 0, 3, 5) << endl;    
+    for(size_t j = 0; j < points.cols(); ++j){
+      assert(PS.get_mass(j) > 0);
+      new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j);
+    }
+
+    displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
+    velocity += 0.5*(new_acce + acce)*delt_t;
+    acce = new_acce;
+
+    dat_str.set_zero();
+  }
+
+  //done
+  points += displace;
+  
+  // writeOBJ(pt.get<string>("surf.value").c_str(), nods, surf);
+
+  
 
 
   // auto tmp = MatrixXd::Random(9, 1);

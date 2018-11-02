@@ -19,9 +19,12 @@ Matrix3d safe_inv(const MatrixXd& sys_mat){
 
   auto sin_val = svd.singularValues();
   Matrix3d inv_sin_val;
+  inv_sin_val.setZero(3, 3);
+  
   for(size_t p = 0; p < 3; ++p){
     inv_sin_val(p, p) = sin_val(p)>0?1/sin_val(p):0;
   }
+  
   return std::move(svd.matrixV() * inv_sin_val * svd.matrixU().transpose());
 }
 
@@ -48,12 +51,10 @@ point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Y
   double mass_sigma = (sup_radi_/3).array().cube().sum();
   scal_fac_ = mass_total/mass_sigma;
   mass_i_ = (scal_fac_*rho_*sup_radi_).array().cube();
-  // for(size_t i = 0; i < dim_; ++i){
-  //   mass_i(i) = scal_fac_ * pow(sup_radi(i) , 3)*rho_;
-  // }
+}
 
-
-
+double point_sys::get_mass(const size_t &i) const{
+  return mass_i_(i);
 }
 
 size_t point_sys::Nx() const{
@@ -79,9 +80,8 @@ int point_sys::calc_fri() const{
   }
 }
 
-int point_sys::calc_rhoi_vi(const double *x) const{
+int point_sys::calc_rhoi_vi() const{
   //init
-  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
   rho_i_.setZero(dim_);
   vol_i_.setZero(dim_);
 
@@ -108,9 +108,8 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
   return kernel(r, sup_radi_(i));
 }
 
-int point_sys::calc_defo_gra(const double *_x, energy_dat &dat_str) const{
-  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(_x, 3, dim_);
-  MatrixXd disp = points_curr - points_;
+int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
+  Map<const Matrix<double, Dynamic, Dynamic> > _disp(disp, 3, dim_);
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d one_du;
@@ -119,16 +118,18 @@ int point_sys::calc_defo_gra(const double *_x, energy_dat &dat_str) const{
     for(size_t j = 0; j < friends_[i].size(); ++j){
       Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
       for(size_t k = 0; k < 3; ++k){
-        b.segment(3*k, 3) += (disp(k, friends_[i][j]) - disp(k, i))*weig_[i][j]*xij;        
+        b.segment(3*k, 3) += (_disp(k, friends_[i][j]) - _disp(k, i))*weig_[i][j]*xij;        
       }
     }
     
     //clac inverse of sys_mat by SVD
     
     Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
+    
     for(size_t k = 0; k < 3; ++k){
       one_du.row(k) = (inv_A * b.segment(3*k, 3)).transpose();
     }
+    
     MatrixXd F = one_du.transpose()*one_du + MatrixXd::Identity(3, 3);
     dat_str.save_ele_def_gra(i, F);
 
@@ -138,10 +139,12 @@ int point_sys::calc_defo_gra(const double *_x, energy_dat &dat_str) const{
 
 
 
-int point_sys::pre_compute(const double *x, energy_dat &dat_str) const {
-  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
-  SH_.update_points(points_curr);
-  calc_rhoi_vi(x);
+int point_sys::pre_compute(const double *disp, energy_dat &dat_str) const {
+  // Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
+  //elasiticity do not updata
+  // SH_.update_points(points_curr);
+  //
+  calc_rhoi_vi();
  #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
@@ -154,14 +157,15 @@ int point_sys::pre_compute(const double *x, energy_dat &dat_str) const {
     }
     
     auto inv_A = safe_inv(sys_mat);
+    
     dat_str.save_ele_inv_all(i, inv_A);
   }
   return 0;
 }
-int point_sys::Gra(const double *x, energy_dat &dat_str) const{
+int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
   dat_str.gra_.setZero(3, dim_);
   //map the data
-  Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
+  // Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
   // calc strain
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
@@ -173,12 +177,11 @@ int point_sys::Gra(const double *x, energy_dat &dat_str) const{
     cons_law(strain, stress, def_gra, Young_, Poission_);
     dat_str.save_ele_stress(i, stress);
     //calculate Fv
-    Matrix3d f_pre_mat;
     Matrix3d gra_def_gra;
     auto trans_def_gra = def_gra.transpose();
-    for(int i = 0; i < 3; ++i){
-      Vector3d cross1 = trans_def_gra.col((i+1)%3), cross2 = trans_def_gra.col((i+2)%3);
-      gra_def_gra.col(i) = cross1.cross(cross2);
+    for(int j = 0; j < 3; ++j){
+      Vector3d cross1 = trans_def_gra.col((j+1)%3), cross2 = trans_def_gra.col((j+2)%3);
+      gra_def_gra.col(j) = cross1.cross(cross2);
     }
     gra_def_gra.transposeInPlace();
 
@@ -189,6 +192,7 @@ int point_sys::Gra(const double *x, energy_dat &dat_str) const{
 
     //add to gra_
     Vector3d di;
+    di.setZero(3);
     for(size_t j = 0; j < friends_.size(); ++j){
       double w = weig_[i][j];
       Vector3d xij = (points_.col(j) - points_.col(i));
@@ -196,9 +200,27 @@ int point_sys::Gra(const double *x, energy_dat &dat_str) const{
       dat_str.save_ele_gra(j, w*pre_F*xij);
     }
     dat_str.save_ele_gra(i, pre_F*di);
+    
   }
+  
+  // Map<const Matrix<double, Dynamic, Dynamic> > points_acce(acce, 3, dim_);
+  // for(size_t i = 0; i < dim_; ++i){
+    
+  //   points_acce.col(i) = mass_i_(i);
+  // }
   return 0;
   
+}
+
+
+int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &gravity) const{
+
+  MatrixXd g(3, dim_);
+  g.setZero(3, dim_);
+  g.row(2) = VectorXd::Constant(dim_, -gravity).transpose();
+  Map<MatrixXd> Gra(dat_str.gra_.data(), 3, dim_);
+  Gra += g;
+  return 0;
 }
 
 

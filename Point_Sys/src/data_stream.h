@@ -11,8 +11,8 @@ struct energy_dat{
 
   //data stream
   const size_t dim_;
-
-
+  
+  // energy_dat(const energy_dat &other);
   //save data by element
   int save_ele_def_gra(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_inv_all(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
@@ -21,6 +21,8 @@ struct energy_dat{
   int save_ele_strain(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_stress(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_pre_F(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
+
+  int set_zero();
   //get data by element
   // Eigen::MatrixXd& ele_def_gra(const size_t &ele_id);
   // Eigen::MatrixXd& ele_inv_all(const size_t &ele_id);
@@ -35,7 +37,7 @@ struct energy_dat{
   Eigen::MatrixXd stress_;
   Eigen::MatrixXd pre_F_;
   // const Eigen::MatrixXd& ele_mat(const size_t &ele_id, const size_t &rows, const size_t &cols, Eigen::MatrixXd &mat);
-  int save_ele_mat(const size_t &ele_id, const size_t &rows, const Eigen::MatrixXd &ele_mat, Eigen::MatrixXd &whole_mat);
+  int save_ele_mat(const size_t &ele_id, const size_t &rows, const Eigen::MatrixXd &ele_mat, Eigen::MatrixXd &whole_mat, bool if_plus);
 };
 
 }
