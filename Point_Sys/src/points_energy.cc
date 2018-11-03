@@ -41,8 +41,8 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
 
 
 
-point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const size_t &nearest_num, const double &kv):
-    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), nearest_num_(nearest_num),SH_(points, nearest_num), kv_(kv){
+point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const spatial_hash &SH):
+    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), SH_(SH), kv_(kv){
 
   sup_radi_ = SH_.get_sup_radi();
   mass_i_.setZero(dim_);
@@ -69,7 +69,7 @@ int point_sys::calc_fri() const{
   for(size_t i = 0; i < dim_; ++i){
     vector<size_t> one_fris;
     vector<double> weig_of_one_p;
-    SH_.get_friends(i, sup_radi_(i), one_fris);
+    SH_.get_friends(points_.col(i), sup_radi_(i), one_fris);
     // friends_.push_back(one_fris);
     friends_[i] = one_fris;
     for(auto one_fri : one_fris){
@@ -202,15 +202,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     dat_str.save_ele_gra(i, pre_F*di);
   }
   
-
-  
-  // Map<const Matrix<double, Dynamic, Dynamic> > points_acce(acce, 3, dim_);
-  // for(size_t i = 0; i < dim_; ++i){
-    
-  //   points_acce.col(i) = mass_i_(i);
-  // }
   return 0;
-  
 }
 
 

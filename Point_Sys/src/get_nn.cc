@@ -97,7 +97,7 @@ int spatial_hash::hash_NNN(){
   NN.setZero(nn_num, points_num);
   points_hash.clear();
   //set parameter
-  double cell_size = pow(points.cols()/nn_num, 1/3);
+  cell_size = pow(points.cols()/nn_num, 1/3);
 
   //generate discretized 3D position
   points_dis = floor(points.array()/cell_size).cast<int>();
@@ -145,24 +145,26 @@ const VectorXd& spatial_hash::get_sup_radi() {
   sup_radi*= 3.0/nn_num;
   return sup_radi;
 }
-int spatial_hash::get_friends(const size_t &point_id, const double &sup_radi, vector<size_t> &friends) const{
+int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vector<size_t> &friends) const{
   
   friends.clear();
   int grid_delt = 0;
   bool has_outer_points = false;
   int once_more = 0;
   int touch_bd = 0;
+
+  Vector3i center_grid = floor(query.array()/cell_size).cast<int>();
   
   do{
     vector<Vector3i> shell;
-    touch_bd = get_shell(points_dis.col(point_id), grid_delt, shell);
+    touch_bd = get_shell(center_grid, grid_delt, shell);
 
 
     for(auto &one_grid : shell){
       auto range = points_hash.equal_range(one_grid);
       if( range.first != range.second){
         for_each(range.first, range.second, [&](const unordered_multimap<Vector3i,size_t>::value_type  &one_point){
-            double dis = (points.col(one_point.second) - points.col(point_id)).norm();
+            double dis = (points.col(one_point.second) - query).norm();
             if(dis < sup_radi && dis != 0){
               friends.push_back(one_point.second);
             }

@@ -35,7 +35,8 @@ class spatial_hash{
   const Eigen::VectorXd& get_sup_radi();
 
   int get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Eigen::Vector3i> &shell) const ;
-  int get_friends(const size_t &point_id, const double &sup_radi, std::vector<size_t> &friends) const;
+  // int get_friends(const size_t &point_id, const double &sup_radi, std::vector<size_t> &friends) const;
+  int get_friends(const Eigen::Vector3d &query, const double &sup_radi, std::vector<size_t>&friends) const;
   int update_points(const Eigen::MatrixXd &points_);
  private:
 
@@ -53,6 +54,7 @@ class spatial_hash{
   int find_NN(const size_t &point_id, std::vector<pair_dis> &NN_cand);
   int hash_NNN();
 
+  double cell_size;
 
 };
 
