@@ -16,7 +16,7 @@ namespace marvel{
 // class point_sys: public bigbang::Functional<double>{
 class point_sys{
  public:
-  point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const spatial_hash &SH);
+  point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const std::vector<std::vector<size_t>> &friends, const Eigen::VectorXd &sup_radi );
   size_t Nx() const ;
 
   int pre_compute(const double *disp,energy_dat &dat_str) const ;//calc once
@@ -40,12 +40,12 @@ class point_sys{
   
   double vol_all_;
   double scal_fac_;
-  mutable spatial_hash SH_;
+  // mutable spatial_hash SH_;
   size_t nearest_num_;
 
 
   int calc_rhoi_vi() const;
-  int calc_fri() const;
+  int calc_weig() const;
   
   double kernel(const double &r, const double &h) const;
   double kernel(const size_t &i, const size_t &j) const;

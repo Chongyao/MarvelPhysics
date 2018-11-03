@@ -8,7 +8,8 @@ namespace marvel{
 
 class deform_surf{
  public:
-  deform_surf(const Eigen::MatrixXi &surf, const Eigen::MatirxXd &nods, const Eigen::Matrix &sam_points);
+  //TODO: do not use copy construct!!
+  deform_surf(const Eigen::MatrixXi &surf, const Eigen::MatirxXd &nods, const Eigen::Matrix &sam_points, const spatial_hash &SH);
  private:
   const Eigen::MatrixXi surf_;
   Eigen::MatrixXd nods_;

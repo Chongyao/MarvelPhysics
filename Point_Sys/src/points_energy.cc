@@ -41,10 +41,11 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
 
 
 
-point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const spatial_hash &SH):
-    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), SH_(SH), kv_(kv){
+point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const vector<vector<size_t>> &friends, const VectorXd &sup_radi):
+    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), kv_(kv), friends_(friends), sup_radi_(sup_radi){
 
-  sup_radi_ = SH_.get_sup_radi();
+  // sup_radi_ = SH_.get_sup_radi();
+  
   mass_i_.setZero(dim_);
   //init
   double mass_total = rho*vol_all;
@@ -60,22 +61,15 @@ double point_sys::get_mass(const size_t &i) const{
 size_t point_sys::Nx() const{
   return dim_;
 }
-int point_sys::calc_fri() const{
-  // friends_.clear();
-  // weig_.clear();
-  friends_ = vector<vector<size_t>>(dim_);
+int point_sys::calc_weig() const{
+  // friends_ = vector<vector<size_t>>(dim_);
   weig_ = vector<vector<double>>(dim_);
 #pragma parallel omp for  
   for(size_t i = 0; i < dim_; ++i){
-    vector<size_t> one_fris;
     vector<double> weig_of_one_p;
-    SH_.get_friends(points_.col(i), sup_radi_(i), one_fris);
-    // friends_.push_back(one_fris);
-    friends_[i] = one_fris;
-    for(auto one_fri : one_fris){
+    for(auto one_fri : friends_[i]){
       weig_of_one_p.push_back(kernel(i, one_fri));
     }
-    // weig_.push_back
     weig_[i] = weig_of_one_p;
   }
 }
@@ -85,8 +79,9 @@ int point_sys::calc_rhoi_vi() const{
   rho_i_.setZero(dim_);
   vol_i_.setZero(dim_);
 
-  calc_fri();
+  calc_weig();
   assert(friends_.size() > 0 && weig_.size() > 0);
+#pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
       rho_i_(i) += mass_i_(i)*weig_[i][j];
@@ -149,6 +144,7 @@ int point_sys::pre_compute(const double *disp, energy_dat &dat_str) const {
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
     sys_mat.setZero(3, 3);
+    
     assert(friends_[i].size() >= 3);
     for(size_t j = 0; j < friends_[i].size(); ++j){
       Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);

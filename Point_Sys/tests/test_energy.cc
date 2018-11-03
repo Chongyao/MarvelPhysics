@@ -40,25 +40,32 @@ int main(int argc, char** argv){
   nods.transposeInPlace();
   MatrixXd points;
   gen_points(nods, surf, pt.get<size_t>("num_in_axis.value"), points);
-
+  size_t dim = points.cols();
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>POINTS<<<<<<<<<<<<<<<<<<" << endl;
-  cout << points.block(0, 0, 3, points.cols() > 10?10:points.cols()) << endl;
+  cout << points.block(0, 0, 3, dim > 10?10:dim) << endl;
   //calc volume 
   double volume = clo_surf_vol(nods, surf);
 
-  spatial_hash SH(points, 10);
+  spatial_hash SH(points, 4);
+  VectorXd sup_radi = SH.get_sup_radi();
+  vector<vector<size_t>> friends_all(dim);
+
+#pragma parallel omp for
+  for(size_t i = 0; i < dim; ++i){
+    SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
+  }
   
-  point_sys PS(points, pt.get<double>("rho.value"), pt.get<double>("Young.value"), pt.get<double>("Poission.value"), volume, 1, SH);
+  point_sys PS(points, pt.get<double>("rho.value"), pt.get<double>("Young.value"), pt.get<double>("Poission.value"), volume, 1, friends_all, sup_radi);
   Matrix3d change;
   change << 1, 0, 0,
       0, 2, 0,
       0, 0, 5;
   MatrixXd points_curr = change*points;
-  // MatrixXd def_gra(9, points.cols());
-  // MatrixXd inv_A_all(9, points.cols());
+  // MatrixXd def_gra(9, dim);
+  // MatrixXd inv_A_all(9, dim);
 
-  energy_dat dat_str (points.cols());
+  energy_dat dat_str (dim);
   PS.pre_compute(points_curr.data(), dat_str);
   
   double delt_t = 0.01;
@@ -67,11 +74,11 @@ int main(int argc, char** argv){
   MatrixXd acce;
   MatrixXd new_acce;
   MatrixXd gra;
-  displace.setZero(3, points.cols());
-  velocity.setZero(3, points.cols());
-  acce.setZero(3, points.cols());
-  gra.setZero(3, points.cols());
-  new_acce.setZero(3, points.cols());
+  displace.setZero(3, dim);
+  velocity.setZero(3, dim);
+  acce.setZero(3, dim);
+  gra.setZero(3, dim);
+  new_acce.setZero(3, dim);
   size_t max_iter = 5;
   for(size_t i = 0; i < max_iter; ++i){
     
@@ -86,7 +93,7 @@ int main(int argc, char** argv){
     PS.Gra(displace.data(), dat_str);
     // cout << "elasitic force " << dat_str.gra_.block(0, 0, 3, 5) << endl;    
     PS.gravity(displace.data(), dat_str, 9.8);
-    for(size_t j = 0; j < points.cols(); ++j){
+    for(size_t j = 0; j < dim; ++j){
       assert(PS.get_mass(j) > 0);
       new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j);
     }
