@@ -1,0 +1,14 @@
+# Hashes of file build rules.
+e11a5a013c69277d1eeb423bda56df98 external/bigbang/coro_basis_def_oper.f90
+097587e65c705e3ed8e9ba43280ae90d external/bigbang/cosserat_rod.f90
+f43dc357413c15836f976505704860ba external/bigbang/elasticity.f90
+f9534da5d86c14d83f7c37091e2e9320 external/bigbang/fem_basis.f90
+1a0edcc7bb02750b49c4ba5bd44dcfa4 external/bigbang/hex_cons_law.f90
+ac9042e1e847b3be170f2c17123eaf42 external/bigbang/nnet.f90
+3c99c6bdd8959ff8ffb6141dd45eeaf3 external/bigbang/pbd_cons.f90
+9fdf7ff3fc8d6945ba1abf813e80333a external/bigbang/poly_elasticity.f90
+042a2c2b5465adcbe8839bbd2ea93933 external/bigbang/quad_to_lin.f90
+6c060c379b2bad6e4e904f92b50de0ab external/bigbang/sdf.f90
+e0135c752ea7d150daee9ff7e063fcd4 external/bigbang/vox_dfdPF.f90
+fa495925d6dcc47c6b50e8d2c4a9d2fa external/bigbang/vox_elastic.f90
+7551e40137a5d12e4e745e9f70651df0 external/bigbang/vox_elastic_mtr.f90

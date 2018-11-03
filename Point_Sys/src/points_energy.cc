@@ -189,19 +189,20 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     Map<MatrixXd> inv_A(dat_str.inv_A_all_.col(i).data(), 3, 3);
     Matrix3d pre_F = -vol_i_(i)*(2*def_gra*stress*kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
     dat_str.save_ele_pre_F(i, pre_F);
-
+    
     //add to gra_
     Vector3d di;
     di.setZero(3);
-    for(size_t j = 0; j < friends_.size(); ++j){
+    for(size_t j = 0; j < friends_[i].size(); ++j){
       double w = weig_[i][j];
       Vector3d xij = (points_.col(j) - points_.col(i));
       di += -w*xij;
       dat_str.save_ele_gra(j, w*pre_F*xij);
     }
     dat_str.save_ele_gra(i, pre_F*di);
-    
   }
+  
+
   
   // Map<const Matrix<double, Dynamic, Dynamic> > points_acce(acce, 3, dim_);
   // for(size_t i = 0; i < dim_; ++i){

@@ -1,0 +1,86 @@
+/home/zcy/Downloads/clion-2018.2.5/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/zcy/Documents/projects/MarvelPhysics
+-- The C compiler identification is GNU 7.3.0
+-- The CXX compiler identification is GNU 7.3.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+Linux/64/gcc3
+-- Boost version: 1.65.1
+-- Found the following Boost libraries:
+--   filesystem
+--   system
+--   program_options
+-- Boost @ /usr/include
+-- Found Eigen3: /usr/include/eigen3 (Required is at least version "2.91.0") 
+-- Eigen @ /usr/include/eigen3
+-- Eigen version: 3.3.4
+/usr/lib/petscdir/3.7.7
+-- Found PETSc: /usr/lib/petscdir/3.7.7/x86_64-linux-gnu-real/include;/usr/lib/petscdir/3.7.7/x86_64-linux-gnu-real/include  
+-- PETSc @ /usr/lib/petscdir/3.7.7/x86_64-linux-gnu-real/include;/usr/lib/petscdir/3.7.7/x86_64-linux-gnu-real/include
+-- PETSc version: 
+-- Found UMFPACK: /usr/include/suitesparse  
+-- Umfpack @ /usr/include/suitesparse
+-- SuiteSparse @ /usr/include/suitesparse
+-- SuiteSparse libs @ optimized;/usr/lib/x86_64-linux-gnu/libamd.so;debug;/usr/lib/x86_64-linux-gnu/libcamd.so;/usr/lib/x86_64-linux-gnu/libccolamd.so;/usr/lib/x86_64-linux-gnu/libcolamd.so;/usr/lib/x86_64-linux-gnu/libcholmod.so;/usr/lib/x86_64-linux-gnu/libspqr.so;/usr/lib/x86_64-linux-gnu/libldl.so;/usr/lib/x86_64-linux-gnu/libbtf.so;/usr/lib/x86_64-linux-gnu/libklu.so;/usr/lib/x86_64-linux-gnu/libcxsparse.so;/usr/lib/x86_64-linux-gnu/libumfpack.so
+-- Found PkgConfig: /usr/bin/pkg-config (found version "0.29.1") 
+-- Found LBFGS: /usr/lib/x86_64-linux-gnu/liblbfgs.so  
+-- LBFGS @ /usr/include
+-- IPOPT HSL LIBRARY DIR /usr/local/lib
+-- IPOPT FIND QUIETLY 
+IPOPT_HSL_LIBRARY_DIR found at /usr/local/lib 
+-- Found IPOPT: /usr/lib/libipopt.so  
+-- IPOPT @ /usr/include/coin
+-- IPOPT lib @ /usr/lib/libipopt.so
+-- Found ALGLIB: /usr/lib/x86_64-linux-gnu/libalglib.so  
+-- Alglib @ /usr/include/libalglib
+-- Alglibs @ /usr/lib/x86_64-linux-gnu/libalglib.so
+-- Found Arpack library
+-- Found Glog: /usr/local/include  
+-- GLOG @ /usr/local/include
+-- Found GTest: /usr/local/lib/libgtest.a  
+-- GTEST @ /usr/local/include
+-- Found JsonCpp: /usr/lib/x86_64-linux-gnu/libjsoncpp.so (found version "1.7.4") 
+-- JsonCpp @ /usr/include/jsoncpp
+-- Found TBB: /usr/include (found version "2017.0")  
+-- TBB @ /usr/include
+-- The Fortran compiler identification is GNU 7.3.0
+-- Check for working Fortran compiler: /usr/bin/gfortran
+-- Check for working Fortran compiler: /usr/bin/gfortran  -- works
+-- Detecting Fortran compiler ABI info
+-- Detecting Fortran compiler ABI info - done
+-- Checking whether /usr/bin/gfortran supports Fortran 90
+-- Checking whether /usr/bin/gfortran supports Fortran 90 -- yes
+this is cmkae current source dir /home/zcy/Documents/projects/MarvelPhysics/external/bigbang  
+-- Configuring done
+CMake Warning at external/bigbang/CMakeLists.txt:89 (add_library):
+  Cannot generate a safe linker search path for target bigbang because files
+  in some directories may conflict with libraries in implicit directories:
+
+    link library [libalglib.so] in /usr/lib/x86_64-linux-gnu may be hidden by files in:
+      /home/zcy/usr/Linux/64/gcc3/lib
+
+  Some of these libraries may not be found correctly.
+
+
+CMake Warning at Point_Sys/tests/CMakeLists.txt:8 (add_executable):
+  Cannot generate a safe linker search path for target test_wdnb because
+  files in some directories may conflict with libraries in implicit
+  directories:
+
+    link library [libalglib.so] in /usr/lib/x86_64-linux-gnu may be hidden by files in:
+      /home/zcy/usr/Linux/64/gcc3/lib
+
+  Some of these libraries may not be found correctly.
+
+
+-- Generating done
+-- Build files have been written to: /home/zcy/Documents/projects/MarvelPhysics/cmake-build-debug

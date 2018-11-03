@@ -80,11 +80,11 @@ int main(int argc, char** argv){
     cout << "acce is " <<endl<< acce.block(0, 0, 3, 5) << endl;
 
     PS.calc_defo_gra(displace.data(), dat_str);
-    // cout << "def_gra " << dat_str.def_gra_.block(0, 0, 9, 5) << endl;
+    cout << "def_gra " << dat_str.def_gra_.block(0, 0, 9, 5) << endl;
     PS.Gra(displace.data(), dat_str);
-    // cout << "elasitic force " << dat_str.gra_.block(0, 0, 3, 5) << endl;    
+    cout << "elasitic force " << dat_str.gra_.block(0, 0, 3, 5) << endl;    
     PS.gravity(displace.data(), dat_str, 9.8);
-    // cout << "gravity " << dat_str.gra_.block(0, 0, 3, 5) << endl;    
+    cout << "gravity " << dat_str.gra_.block(0, 0, 3, 5) << endl;    
     for(size_t j = 0; j < points.cols(); ++j){
       assert(PS.get_mass(j) > 0);
       new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j);
