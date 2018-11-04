@@ -20,19 +20,18 @@ class deform_surf{
 };
 
 
-
+//TODO::complete this update
 /********************************CLASS deform_surf_MLS******************************/
 template<typename T>
 class deform_surf_MLS : public deform_surf<T>{
  public:
   deform_surf_MLS(const Eigen::MatrixXi &surf, const Eigen::Matrix<T,-1,-1> &nods, const Eigen::Matrix<T, -1, -1> &sam_points, const std::vector<std::vector<size_t>> &friends, const T &kernel_cof);
-  Eigen::Matrix<T, -1, -1> update_surf(const Eigen::Matrix<T, -1 ,-1>& moved_points_dis, const Eigen::Matrix<T, -1, -1> &dis_gra_all) const;
+  Eigen::Matrix<T, -1, -1> update_surf(const Eigen::Matrix<T, -1 ,-1>& moved_points_dis, const Eigen::Matrix<T, -1, -1> &def_gra_all) const;
  private:
   std::vector<std::vector<size_t>> friends_;
   T kernel_cof_;
   T kernel(const T &r, const T &h) const;
   T kernel(const size_t &vertex_id, const size_t &point_id, const T &h) const;
-  
 };
 
 
@@ -67,5 +66,5 @@ class deform_surf_LI : public deform_surf<T>{
 
 
 }//namespace: marvel
-#include "gen_surf.h"
+#include "gen_surf.imp"
 #endif

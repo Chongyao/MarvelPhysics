@@ -12,6 +12,7 @@
 #include "Point_Sys/src/get_nn.h"
 #include "Point_Sys/src/points_energy.h"
 #include "Point_Sys/src/data_stream.h"
+#include "Point_Sys/src/gen_surf.h"
 
 
 
@@ -44,6 +45,7 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>POINTS<<<<<<<<<<<<<<<<<<" << endl;
   cout << points.block(0, 0, 3, dim > 10?10:dim) << endl;
+  auto points_curr = points;
   //calc volume 
   double volume = clo_surf_vol(nods, surf);
 
@@ -57,16 +59,20 @@ int main(int argc, char** argv){
   }
   
   point_sys PS(points, pt.get<double>("rho.value"), pt.get<double>("Young.value"), pt.get<double>("Poission.value"), volume, 1, friends_all, sup_radi);
-  Matrix3d change;
-  change << 1, 0, 0,
-      0, 2, 0,
-      0, 0, 5;
-  MatrixXd points_curr = change*points;
-  // MatrixXd def_gra(9, dim);
-  // MatrixXd inv_A_all(9, dim);
 
   energy_dat dat_str (dim);
   PS.pre_compute(points_curr.data(), dat_str);
+
+  //construct deform_surf_MLS
+  double kernel_cof = pt.get<double>("ker_cof.value");
+  vector<vector<size_t>> vet_fris(nods.cols());
+  for(size_t j = 0; j < nods.cols(); ++j){
+    vector<size_t> fris;
+    SH.get_friends(nods.col(j), kernel_cof, fris);
+    vet_fris[j] = fris;
+  }
+  deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
+  
   
   double delt_t = 0.01;
   MatrixXd displace;
@@ -74,12 +80,16 @@ int main(int argc, char** argv){
   MatrixXd acce;
   MatrixXd new_acce;
   MatrixXd gra;
+  MatrixXd vet_displace;
   displace.setZero(3, dim);
   velocity.setZero(3, dim);
   acce.setZero(3, dim);
   gra.setZero(3, dim);
   new_acce.setZero(3, dim);
+  vet_displace.setZero(3, nods.cols());
   size_t max_iter = 5;
+  
+
   for(size_t i = 0; i < max_iter; ++i){
     
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>disp<<<<<<<<<<<<<<<<<<" << endl;
@@ -99,16 +109,19 @@ int main(int argc, char** argv){
     }
 
     displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
+    vet_displace = DS.update_surf(displace, dat_str.def_gra_);
     velocity += 0.5*(new_acce + acce)*delt_t;
     acce = new_acce;
 
     dat_str.set_zero();
+
+    writeOBJ(pt.get<string>("res.value").c_str() + to_string(i) + ".obj", nods + vet_displace, surf);    
   }
 
   //done
   points += displace;
   
-  // writeOBJ(pt.get<string>("surf.value").c_str(), nods, surf);
+
 
   
 

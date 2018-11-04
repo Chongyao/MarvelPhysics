@@ -271,18 +271,6 @@ LBFGS_INCLUDE_DIR:PATH=/usr/include
 //Path to a library.
 LBFGS_LIBRARY:FILEPATH=/usr/lib/x86_64-linux-gnu/liblbfgs.so
 
-//Path to a file.
-LIBIGL_INCLUDE_DIR:PATH=LIBIGL_INCLUDE_DIR-NOTFOUND
-
-//Use OpenGL
-LIBIGL_WITH_OPENGL:BOOL=ON
-
-//Use GLFW
-LIBIGL_WITH_OPENGL_GLFW:BOOL=ON
-
-//Use OpenGL viewer
-LIBIGL_WITH_VIEWER:BOOL=ON
-
 //Value Computed by CMake
 MarvalPhysics_BINARY_DIR:STATIC=/home/zcy/Documents/projects/MarvelPhysics/cmake
 
@@ -300,6 +288,9 @@ PETSC_LIBRARIES:FILEPATH=/usr/lib/x86_64-linux-gnu/libpetsc.so
 
 //pkg-config executable
 PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
+
+//Dependencies for the target
+PointSys_LIB_DEPENDS:STATIC=general;tbb;
 
 //Path to a file.
 SuiteSparse_AMD_INCLUDE_DIR:PATH=/usr/include/suitesparse
@@ -558,7 +549,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=1
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=6
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
