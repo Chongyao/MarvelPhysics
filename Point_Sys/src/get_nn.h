@@ -31,7 +31,10 @@ struct pair_dis{
 class spatial_hash{
  public:
   spatial_hash(const Eigen::MatrixXd &points_, const size_t &nn_num_);
-  const Eigen::MatrixXi& get_NN() const;
+
+  const Eigen::MatrixXi& get_NN(const size_t &nn_num_) ;
+  const Eigen::MatrixXi& get_NN() ;
+  const Eigen::VectorXd& get_sup_radi(const size_t &nn_num_);
   const Eigen::VectorXd& get_sup_radi();
 
   int get_shell(const Eigen::Vector3i &query, const int &radi, std::vector<Eigen::Vector3i> &shell) const ;
@@ -52,6 +55,7 @@ class spatial_hash{
   Eigen::Vector3i max_id;
   Eigen::Vector3i min_id;
   int find_NN(const size_t &point_id, std::vector<pair_dis> &NN_cand);
+  int find_NN(const size_t &point_id, std::vector<pair_dis> &NN_cand, const size_t &nn_num_);
   int hash_NNN();
 
   double cell_size;

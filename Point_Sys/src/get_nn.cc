@@ -61,6 +61,9 @@ int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::
 }
 
 int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
+  return std::move(find_NN(point_id, NN_cand, nn_num));
+}
+int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand, const size_t &nn_num_){
   
   size_t cand_num = 0;
   int grid_delt = 0;
@@ -81,13 +84,13 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
       }
     }
     ++grid_delt;
-    if (NN_cand.size() > nn_num + 2)
+    if (NN_cand.size() > nn_num_ + 2)
       // once_more = !once_more;
       once_more++;
     if(touch_bd)
       break;
     
-  }while(NN_cand.size() < nn_num + 2 || once_more<2);
+  }while(NN_cand.size() < nn_num_ + 2 || once_more<2);
   return 0;
 }
 
@@ -113,18 +116,25 @@ int spatial_hash::hash_NNN(){
   for(size_t i = 0; i < points_num; ++i){
     points_hash.insert({points_dis.col(i), i});
   }
-
              
              
 
   return 0;
 }
 
-const MatrixXi& spatial_hash::get_NN() const {
+const MatrixXi& spatial_hash::get_NN(const size_t &nn_num_) {
+  auto useless_sup_radi = get_sup_radi(nn_num_);
+  
   return NN;
 }
-const VectorXd& spatial_hash::get_sup_radi() {
-  assert(points.cols() > nn_num);
+const MatrixXi& spatial_hash::get_NN(){
+  return std::move(get_NN(nn_num));
+}
+const VectorXd& spatial_hash::get_sup_radi(){
+  return std::move(get_sup_radi(nn_num));
+}
+const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
+  assert(points.cols() > nn_num_);
 
   //init data
 
@@ -133,16 +143,16 @@ const VectorXd& spatial_hash::get_sup_radi() {
   #pragma parallel omp for
   for(size_t i = 0; i < points_num; ++i){
     vector<pair_dis> NN_cand;
-    find_NN(i, NN_cand);
+    find_NN(i, NN_cand, nn_num_);
     sort(NN_cand.begin(), NN_cand.end(), [](const pair_dis &a, const pair_dis &b){return a.dis < b.dis;});
     
-    for(size_t j = 0; j < nn_num; ++j){
+    for(size_t j = 0; j < nn_num_; ++j){
       NN(j, i) = NN_cand[j + 1].n;
       sup_radi[i] += NN_cand[j + 1].dis;
     }
   }
   
-  sup_radi*= 3.0/nn_num;
+  sup_radi*= 3.0/nn_num_;
   return sup_radi;
 }
 int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vector<size_t> &friends) const{
