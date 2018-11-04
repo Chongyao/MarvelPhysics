@@ -1,9 +1,10 @@
 #include "gen_surf.h"
 #include <Eigen/Core>
 #include <cmath>
-
+#include <iostream>
 
 using namespace Eigen;
+using namespace std;
 namespace marvel{
 
 /********************************CLASS deform_surf******************************/
@@ -35,7 +36,6 @@ Matrix<T, -1, -1> deform_surf_MLS<T>::update_surf(const Matrix<T, -1 ,-1>& moved
     Matrix<T, 3, 1> ver_dis;
     T scal_fac = 0;
     ver_dis.setZero(3, 1);
-    
     for(size_t j = 0; j < friends_[i].size(); ++j){
       Matrix<T, 3, 1> rij = this->sam_points_.col(j) - this->nods_.col(i);
       T gas_weig = kernel(rij.norm(), kernel_cof_);
@@ -43,6 +43,7 @@ Matrix<T, -1, -1> deform_surf_MLS<T>::update_surf(const Matrix<T, -1 ,-1>& moved
       scal_fac += gas_weig;
       Map<const Matrix<T, -1, -1>> def_gra(def_gra_all.col(j).data(), 3, 3);
       auto dis_gra = def_gra - Matrix<T, -1, -1>::Identity(3, 3);
+      
       ver_dis += gas_weig*(moved_points_dis.col(i) + dis_gra.transpose()*rij);
     }//every friend
 

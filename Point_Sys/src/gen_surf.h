@@ -20,7 +20,10 @@ class deform_surf{
 };
 
 
-//TODO::complete this update
+//TODO::complete update_surf() function  in this class.
+//There is a .imp file which store implement of this template class.
+//This function receive displacement of sampled points and calculate the displacement of vertexs of the surface. the def_gra_all strores the defomation of gradients in 9Xnum_of_vertexs. Each col flatten a 3X3 deformation of one sampled point by colwise.
+//friend_ store index of sampled points in distance h to one vertex.
 /********************************CLASS deform_surf_MLS******************************/
 template<typename T>
 class deform_surf_MLS : public deform_surf<T>{
