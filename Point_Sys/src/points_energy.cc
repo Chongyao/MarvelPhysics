@@ -33,7 +33,7 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
   //St.Venant-Kirchhof model
   double G = You/(2 + 2*Poi);
   double lam = You*Poi/(1+Poi)/(1-2*Poi);
-  double trace = strain(0,0) + strain(1, 1) + strain(1, 1);
+  double trace = strain(0, 0) + strain(1, 1) + strain(2, 2);
   stress = def_gra*(2*G*strain + lam*trace*MatrixXd::Identity(3, 3));
 }
 
