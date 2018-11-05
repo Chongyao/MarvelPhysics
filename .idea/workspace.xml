@@ -14,6 +14,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c593bbd6-e4d3-4ee1-a5c4-6fada7c8bec6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/gen_surf.imp" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/gen_surf.imp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_SolidAngle.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_SolidAngle.h" afterDir="false" />
@@ -43,12 +45,12 @@
           <entry key="cc" value="2" />
           <entry key="h" value="2" />
           <entry key="imp" value="1" />
-          <entry key="test_energy (disassembly)" value="1" />
+          <entry key="test_energy (disassembly)" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Disassembly" value="1" />
+          <entry key="Disassembly" value="2" />
           <entry key="ObjectiveC" value="5" />
         </counts>
       </usages-collector>
@@ -81,15 +83,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="mock:///test_energy (disassembly)">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" selection-start-line="5" selection-end-line="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file:///usr/include/eigen3/Eigen/src/Core/Block.h">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="167">
@@ -101,8 +94,17 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_surf.imp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="446">
-              <caret line="46" column="78" lean-forward="true" selection-start-line="46" selection-start-column="78" selection-end-line="46" selection-end-column="78" />
+            <state relative-caret-position="221">
+              <caret line="39" selection-start-line="39" selection-end-line="39" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="mock:///test_energy (disassembly)">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="75">
+              <caret line="5" selection-start-line="5" selection-end-line="5" />
             </state>
           </provider>
         </entry>
@@ -234,12 +236,12 @@
       <option name="presentableId" value="Default" />
       <updated>1541146306711</updated>
       <workItem from="1541146308864" duration="463000" />
-      <workItem from="1541414790755" duration="347000" />
+      <workItem from="1541414790755" duration="1606000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="810000" />
+    <option name="totallyTimeSpent" value="2069000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1680" y="-1" width="1920" height="1080" extended-state="6" />
@@ -309,8 +311,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_surf.imp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="446">
-          <caret line="46" column="78" lean-forward="true" selection-start-line="46" selection-start-column="78" selection-end-line="46" selection-end-column="78" />
+        <state relative-caret-position="221">
+          <caret line="39" selection-start-line="39" selection-end-line="39" />
         </state>
       </provider>
     </entry>

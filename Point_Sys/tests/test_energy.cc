@@ -107,7 +107,7 @@ int main(int argc, char** argv){
       assert(PS.get_mass(j) > 0);
       new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j);
     }
-
+    
     displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
     vet_displace = DS.update_surf(displace, dat_str.def_gra_);
     velocity += 0.5*(new_acce + acce)*delt_t;
