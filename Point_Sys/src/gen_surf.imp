@@ -32,20 +32,26 @@ T deform_surf_MLS<T>::kernel(const T &r, const T &h) const {
 template<typename T>
 Matrix<T, -1, -1> deform_surf_MLS<T>::update_surf(const Matrix<T, -1 ,-1>& moved_points_dis, const Matrix<T, -1, -1> &def_gra_all) const {
   Matrix<T, -1, -1> nods_dis(3, this->nods_.cols());
-  for(size_t i = 0; i < this->nods_.size(); ++i){
+  for(size_t i = 0; i < this->nods_.cols(); ++i){
     Matrix<T, 3, 1> ver_dis;
     T scal_fac = 0;
     ver_dis.setZero(3, 1);
+    
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>friends_size<<<<<<<<<<<<<<<<<<" << endl;
+    cout << friends_[i].size() << endl;
+    assert(friends_[i].size() > 0);
     for(size_t j = 0; j < friends_[i].size(); ++j){
-      Matrix<T, 3, 1> rij = this->sam_points_.col(friends_[i][j]) - this->nods_.col(i);
+      size_t fri_id = friends_[i][j];
+      
+      Matrix<T, 3, 1> rij = this->sam_points_.col(fri_id) - this->nods_.col(i);
       T gas_weig = kernel(rij.norm(), kernel_cof_);
       
       scal_fac += gas_weig;
-      Map<const Matrix<T, -1, -1>> def_gra(def_gra_all.col(j).data(), 3, 3);
+      Map<const Matrix<T, -1, -1>> def_gra(def_gra_all.col(fri_id).data(), 3, 3);
       auto dis_gra = def_gra - Matrix<T, -1, -1>::Identity(3, 3);
-      ver_dis += gas_weig*(moved_points_dis.col(j) + dis_gra.transpose()*rij);
+      ver_dis += gas_weig*(moved_points_dis.col(fri_id) + dis_gra.transpose()*rij);
     }//every friend
-
+    assert(scal_fac > 0);
     nods_dis.col(i) = ver_dis/scal_fac;
   }//every nod
 

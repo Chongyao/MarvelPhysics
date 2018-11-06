@@ -191,6 +191,7 @@ int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vec
       ++once_more;
     
   }while(!has_outer_points || once_more < 2);
+  assert(friends.size() > 0);
   return 0;
 }
 int spatial_hash::update_points(const Eigen::MatrixXd &points_){

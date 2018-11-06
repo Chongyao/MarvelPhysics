@@ -110,12 +110,13 @@ int main(int argc, char** argv){
     
     displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
     vet_displace = DS.update_surf(displace, dat_str.def_gra_);
+    cout << "vet displace " <<endl<< vet_displace.block(0, 0, 3, 5) << endl;
     velocity += 0.5*(new_acce + acce)*delt_t;
     acce = new_acce;
 
     dat_str.set_zero();
 
-    writeOBJ(pt.get<string>("res.value").c_str() + to_string(i) + ".obj", nods + vet_displace, surf);    
+    writeOBJ(pt.get<string>("res.value").c_str() + to_string(i) + ".obj", (nods + vet_displace).transpose(), surf.transpose());    
   }
 
   //done
