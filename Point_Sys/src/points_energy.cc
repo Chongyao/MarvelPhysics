@@ -206,7 +206,7 @@ int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &grav
 
   MatrixXd g(3, dim_);
   g.setZero(3, dim_);
-  g.row(2) = VectorXd::Constant(dim_, -gravity).transpose();
+  g.row(2) = VectorXd::Constant(dim_, -gravity).cwiseProduct(mass_i_).transpose();
   Map<MatrixXd> Gra(dat_str.gra_.data(), 3, dim_);
   Gra += g;
   return 0;
