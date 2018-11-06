@@ -11,5 +11,5 @@ points_out = $(OUT_DIR)/$(model_name).vtk
 num_in_axis=5
 
 test_genpoints: $(EXE)
-	$(EXE) surf=$(surf) points_out=$(points_out) num_in_axis=$(num_in_axis) rho=5 Poission=$(poi) Young=$(Young) res=$(OUT_DIR)/$(model_name) ker_cof=20
+	$(EXE) surf=$(surf) points_out=$(points_out) num_in_axis=$(num_in_axis) rho=5 Poission=$(poi) Young=$(Young) res=$(OUT_DIR)/$(model_name) ker_cof=8
 

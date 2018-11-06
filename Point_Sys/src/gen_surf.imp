@@ -37,9 +37,6 @@ Matrix<T, -1, -1> deform_surf_MLS<T>::update_surf(const Matrix<T, -1 ,-1>& moved
     T scal_fac = 0;
     ver_dis.setZero(3, 1);
     
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>friends_size<<<<<<<<<<<<<<<<<<" << endl;
-    cout << friends_[i].size() << endl;
-    assert(friends_[i].size() > 0);
     for(size_t j = 0; j < friends_[i].size(); ++j){
       size_t fri_id = friends_[i][j];
       

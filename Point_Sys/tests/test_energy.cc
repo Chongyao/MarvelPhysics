@@ -74,7 +74,7 @@ int main(int argc, char** argv){
   deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
   
   
-  double delt_t = 0.01;
+  double delt_t = 0.5;
   MatrixXd displace;
   MatrixXd velocity;
   MatrixXd acce;

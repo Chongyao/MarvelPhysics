@@ -77,7 +77,7 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand, con
     for(auto &grid : shell){
       auto range = points_hash.equal_range(grid);
       if( range.first != range.second){
-        for_each(range.first, range.second, [&](unordered_multimap<Vector3i,size_t>::value_type  &one_point){
+        for_each(range.first, range.second, [&](decltype(points_hash)::value_type  &one_point){
             double dis = (points.col(point_id) - points.col(one_point.second)).norm();
             NN_cand.push_back({point_id, one_point.second, dis});
           });
@@ -158,39 +158,24 @@ const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
 int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vector<size_t> &friends) const{
   
   friends.clear();
-  int grid_delt = 0;
-  bool has_outer_points = false;
-  int once_more = 0;
-  int touch_bd = 0;
+  int grid_delt = int(floor(sup_radi/cell_size));
+  const Vector3i center_grid = floor(query.array()/cell_size).cast<int>();
 
-  Vector3i center_grid = floor(query.array()/cell_size).cast<int>();
-  
-  do{
+  for(size_t i = 0; i < grid_delt; ++i){
     vector<Vector3i> shell;
-    touch_bd = get_shell(center_grid, grid_delt, shell);
-
-
+    get_shell(center_grid, i, shell);
     for(auto &one_grid : shell){
       auto range = points_hash.equal_range(one_grid);
       if( range.first != range.second){
-        for_each(range.first, range.second, [&](const unordered_multimap<Vector3i,size_t>::value_type  &one_point){
+        for_each(range.first, range.second, [&](const decltype(points_hash)::value_type  &one_point){
             double dis = (points.col(one_point.second) - query).norm();
             if(dis < sup_radi && dis != 0){
               friends.push_back(one_point.second);
             }
-            else if (dis != 0){
-              has_outer_points = true;
-            }
           });
       }
     }
-    ++grid_delt;
-    if(touch_bd == -1)
-      break;
-    if(has_outer_points)
-      ++once_more;
-    
-  }while(!has_outer_points || once_more < 2);
+  }
   assert(friends.size() > 0);
   return 0;
 }
