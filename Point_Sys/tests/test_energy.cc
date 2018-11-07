@@ -28,6 +28,13 @@ using namespace chrono;
 
 int main(int argc, char** argv){
 
+  Matrix3d test;
+  test << 1, 0, 3,
+      0, 1, 1,
+      0,0,2;
+  cout <<test << endl;
+  cout << test -MatrixXd::Identity(3, 3)<<endl;
+  
   boost::property_tree::ptree pt;
   zjucad::read_cmdline(argc, argv, pt);
 
@@ -61,6 +68,9 @@ int main(int argc, char** argv){
   point_sys PS(points, pt.get<double>("rho.value"), pt.get<double>("Young.value"), pt.get<double>("Poission.value"), volume, 1, friends_all, sup_radi);
 
   energy_dat dat_str (dim);
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>dat_str gra_ init<<<<<<<<<<<<<<<<<<" << endl;
+  cout << dat_str.gra_ << endl;
   PS.pre_compute(points_curr.data(), dat_str);
 
   //construct deform_surf_MLS
@@ -74,7 +84,7 @@ int main(int argc, char** argv){
   deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
   
   
-  double delt_t = 0.5;
+  double delt_t = 0.1;
   MatrixXd displace;
   MatrixXd velocity;
   MatrixXd acce;
@@ -87,20 +97,31 @@ int main(int argc, char** argv){
   gra.setZero(3, dim);
   new_acce.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
-  size_t max_iter = 5;
-  
+  size_t max_iter = 3;
+
+  //add simple constraints
+  vector<size_t> cons;
+  for(size_t i = 0; i < points.cols(); ++i){
+    if(points(2, i) > 2)
+      cons.push_back(i);
+  }
 
   for(size_t i = 0; i < max_iter; ++i){
     
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>disp<<<<<<<<<<<<<<<<<<" << endl;
     cout << "iter is "<<endl<< i << endl;
-    cout << "displace is "<<endl<< displace.block(0, 0, 3, 5) << endl;
+    // cout << "displace is "<<endl<< displace.block(0, 0, 3, 5) << endl;
+    cout << "displace is " << endl<< displace.transpose() << endl;
     cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 5) << endl;
     cout << "acce is " <<endl<< acce.block(0, 0, 3, 5) << endl;
 
     PS.calc_defo_gra(displace.data(), dat_str);
-    // cout << "def_gra " << dat_str.def_gra_.block(0, 0, 9, 5) << endl;
+    cout << "def_gra " << dat_str.def_gra_.block(0, 0, 9, 5) << endl;
+    auto comp_4debug = dat_str.gra_;
     PS.Gra(displace.data(), dat_str);
+    cout << "asdf" << dat_str.gra_.block(0, 0, 3, 5) << endl;
+    cout << "elasticity acce is " <<endl<< (dat_str.gra_ - comp_4debug).block(0, 0, 3, 5) << endl;
+
     // cout << "elasitic force " << dat_str.gra_.block(0, 0, 3, 5) << endl;    
     PS.gravity(displace.data(), dat_str, 9.8);
     for(size_t j = 0; j < dim; ++j){
@@ -109,14 +130,21 @@ int main(int argc, char** argv){
     }
     
     displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
+    for(auto c : cons){
+      displace.col(c) = MatrixXd::Zero(3, 1);
+    }      
+
     vet_displace = DS.update_surf(displace, dat_str.def_gra_);
     cout << "vet displace " <<endl<< vet_displace.block(0, 0, 3, 5) << endl;
     velocity += 0.5*(new_acce + acce)*delt_t;
+    for(auto c : cons){
+      velocity.col(c) = MatrixXd::Zero(3, 1);
+    }
     acce = new_acce;
 
     dat_str.set_zero();
-
-    writeOBJ(pt.get<string>("res.value").c_str() + to_string(i) + ".obj", (nods + vet_displace).transpose(), surf.transpose());    
+    auto filename = pt.get<string>("res.value") + "_" + to_string(i) + ".obj";
+    writeOBJ(filename, (nods + vet_displace).transpose(), surf.transpose());    
   }
 
   //done

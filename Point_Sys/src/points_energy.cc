@@ -30,11 +30,17 @@ Matrix3d safe_inv(const MatrixXd& sys_mat){
 
 void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra, const double &You, const double &Poi){
   //TODO:add more consititutive law
-  //St.Venant-Kirchhof model
+
   double G = You/(2 + 2*Poi);
   double lam = You*Poi/(1+Poi)/(1-2*Poi);
-  double trace = strain(0, 0) + strain(1, 1) + strain(2, 2);
-  stress = def_gra*(2*G*strain + lam*trace*MatrixXd::Identity(3, 3));
+  //St.Venant-Kirchhof model
+  // double trace = strain(0, 0) + strain(1, 1) + strain(2, 2);
+  // stress = def_gra*(2*G*strain + lam*trace*MatrixXd::Identity(3, 3));
+
+  //Linear model
+  double trace = def_gra(0, 0) + def_gra(1, 1) + def_gra(2, 2) - 3;
+  stress = G*(def_gra + def_gra.transpose() - 2*Matrix3d::Identity()) + lam*trace*Matrix3d::Identity();
+
 }
 
 
@@ -125,7 +131,8 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
       one_du.row(k) = (inv_A * b.segment(3*k, 3)).transpose();
     }
     
-    MatrixXd F = one_du.transpose()*one_du + MatrixXd::Identity(3, 3);
+    // MatrixXd F = one_du.transpose()*one_du + MatrixXd::Identity(3, 3);
+    MatrixXd F = one_du + MatrixXd::Identity(3, 3);
     dat_str.save_ele_def_gra(i, F);
 
   }
@@ -167,10 +174,13 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
   for(size_t i = 0; i < dim_; ++i){
     Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     //calculate strain and stress
-    Matrix3d strain = def_gra.transpose()*def_gra - MatrixXd::Identity(3, 3);
+    assert(def_gra(0, 0) == 1);
+    Matrix3d strain = def_gra.transpose()*def_gra - Matrix3d::Identity();
+    // Matrix3d strain = 0.5*(def_gra + def_gra.transpose()) - Matrix3d::Identity();
     dat_str.save_ele_strain(i, strain);
     Matrix3d stress;
     cons_law(strain, stress, def_gra, Young_, Poission_);
+    
     dat_str.save_ele_stress(i, stress);
     //calculate Fv
     Matrix3d gra_def_gra;
