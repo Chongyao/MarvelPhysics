@@ -23,7 +23,6 @@ struct hash<Eigen::Vector3i>{
 
 namespace marvel{
 struct pair_dis{
-  size_t m;
   size_t n;
   double dis;
 };
@@ -34,6 +33,8 @@ class spatial_hash{
 
   const Eigen::MatrixXi& get_NN(const size_t &nn_num_) ;
   const Eigen::MatrixXi& get_NN() ;
+  //find nn_num nearest neighbours of any point
+  const Eigen::VectorXi get_NN(const Eigen::Vector3d &query, const size_t &nn_num);
   const Eigen::VectorXd& get_sup_radi(const size_t &nn_num_);
   const Eigen::VectorXd& get_sup_radi();
 

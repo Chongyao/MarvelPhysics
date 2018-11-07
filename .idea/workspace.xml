@@ -2,7 +2,7 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true" buildAllGenerated="true">
     <generated>
-      <config projectName="MarvalPhysics" targetName="test_genpoints" />
+      <config projectName="MarvalPhysics" targetName="marvel-core" />
       <config projectName="MarvalPhysics" targetName="test_energy" />
       <config projectName="MarvalPhysics" targetName="PointSys" />
     </generated>
@@ -14,8 +14,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c593bbd6-e4d3-4ee1-a5c4-6fada7c8bec6" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/Point_Sys/scripts/run_test_energy.mk" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/scripts/run_test_energy.mk" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Point_Sys/src/get_nn.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/get_nn.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/get_nn.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/get_nn.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" afterDir="false" />
@@ -44,15 +44,15 @@
       <usages-collector id="statistics.file.extensions.open">
         <counts>
           <entry key="cc" value="4" />
-          <entry key="h" value="4" />
+          <entry key="h" value="5" />
           <entry key="imp" value="1" />
-          <entry key="test_energy (disassembly)" value="6" />
+          <entry key="test_energy (disassembly)" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Disassembly" value="6" />
-          <entry key="ObjectiveC" value="9" />
+          <entry key="Disassembly" value="7" />
+          <entry key="ObjectiveC" value="10" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -69,11 +69,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Point_Sys/src/points_energy.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="154" column="36" lean-forward="true" selection-start-line="154" selection-end-line="155" />
+            <state relative-caret-position="176">
+              <caret line="154" selection-start-line="154" selection-end-line="154" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
               </folding>
@@ -82,22 +82,19 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
+        <entry file="file:///usr/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="311">
-              <caret line="64" selection-start-line="64" selection-end-line="64" />
-              <folding>
-                <element signature="e#0#17#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="184">
+              <caret line="424" selection-start-line="424" selection-end-line="424" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/include/eigen3/Eigen/src/Core/Block.h">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="167">
-              <caret line="119" selection-start-line="119" selection-end-line="119" />
+            <state relative-caret-position="101">
+              <caret line="97" selection-start-line="97" selection-end-line="97" />
             </state>
           </provider>
         </entry>
@@ -115,16 +112,7 @@
         <entry file="file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="289">
-              <caret line="178" selection-start-line="178" selection-end-line="178" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="mock:///test_energy (disassembly)">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" selection-start-line="5" selection-end-line="5" />
+              <caret line="213" selection-start-line="213" selection-end-line="213" />
             </state>
           </provider>
         </entry>
@@ -260,12 +248,12 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="test_energy" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="surf=../../Point_Sys/data/53092_sf-G_G0_subdivide937772130937772130.obj points_out=../../Point_Sys/result/53092_sf-G_G0_subdivide937772130937772130.vtk num_in_axis=10 rho=5 Poission=0.45 Young=100 res=../../Point_Sys/result/53092_sf-G_G0_subdivide937772130937772130 ker_cof=8" PASS_PARENT_ENVS_2="true" PROJECT_NAME="MarvalPhysics" TARGET_NAME="test_energy" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="MarvalPhysics" RUN_TARGET_NAME="test_energy">
+    <configuration name="marvel-core" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="MarvalPhysics" TARGET_NAME="marvel-core" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="test_genpoints" type="CMakeRunConfiguration" factoryName="Application" PASS_PARENT_ENVS_2="true" PROJECT_NAME="MarvalPhysics" TARGET_NAME="test_genpoints" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="MarvalPhysics" RUN_TARGET_NAME="test_genpoints">
+    <configuration name="test_energy" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="../../Point_Sys/scripts/test_energy.json" PASS_PARENT_ENVS_2="true" PROJECT_NAME="MarvalPhysics" TARGET_NAME="test_energy" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="MarvalPhysics" RUN_TARGET_NAME="test_energy">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -274,7 +262,7 @@
       <item itemvalue="Application.Build All" />
       <item itemvalue="Application.PointSys" />
       <item itemvalue="Application.test_energy" />
-      <item itemvalue="Application.test_genpoints" />
+      <item itemvalue="Application.marvel-core" />
     </list>
   </component>
   <component name="SvnConfiguration">
@@ -288,15 +276,16 @@
       <option name="presentableId" value="Default" />
       <updated>1541146306711</updated>
       <workItem from="1541146308864" duration="463000" />
-      <workItem from="1541414790755" duration="6966000" />
+      <workItem from="1541414790755" duration="9372000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="7429000" />
+    <option name="totallyTimeSpent" value="9835000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1680" y="-1" width="1920" height="1080" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18210863" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -304,7 +293,7 @@
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Run" order="2" weight="0.30208334" />
-      <window_info active="true" anchor="bottom" id="Debug" order="3" visible="true" weight="0.4" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -325,6 +314,17 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc</url>
+          <line>108</line>
+          <option name="timeStamp" value="7" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
     <entry file="file:///usr/include/eigen3/Eigen/src/Core/Block.h">
@@ -367,30 +367,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="64" selection-start-line="64" selection-end-line="64" />
-          <folding>
-            <element signature="e#0#17#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="289">
-          <caret line="178" selection-start-line="178" selection-end-line="178" />
+          <caret line="213" selection-start-line="213" selection-end-line="213" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="424" selection-start-line="424" selection-end-line="424" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Point_Sys/src/points_energy.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="154" column="36" lean-forward="true" selection-start-line="154" selection-end-line="155" />
+        <state relative-caret-position="176">
+          <caret line="154" selection-start-line="154" selection-end-line="154" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="101">
+          <caret line="97" selection-start-line="97" selection-end-line="97" />
         </state>
       </provider>
     </entry>

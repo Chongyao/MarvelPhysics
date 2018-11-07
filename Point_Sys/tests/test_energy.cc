@@ -15,7 +15,7 @@
 #include "Point_Sys/src/data_stream.h"
 #include "Point_Sys/src/gen_surf.h"
 #include "io.h"
-
+#include <Eigen/Geometry>
 
 
 using namespace marvel;
@@ -91,6 +91,57 @@ int main(int argc, char** argv){
     vet_fris[j] = fris;
   }
   deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
+
+  //TODO: make below a function
+  //test spatial_hash::find_NN
+  #if 0
+  MatrixXi near_nei = MatrixXi::Zero(4, nods.cols());
+  for(size_t i = 0; i < nods.cols(); ++i){
+    
+    auto ver_nn_num = 4;
+    Vector2i two_index;
+    two_index << 2, 3;
+    bool is_co_line = true, is_co_plane = true;
+    do{
+      auto NN_index = SH.get_NN(nods.col(i), ver_nn_num);
+      Vector3d V1 = (points.col(NN_index(1)) - points.col(NN_index(0))).normalized();
+      Vector3d V2 = (points.col(NN_index(two_index(0))) - points.col(NN_index(0))).normalized();
+      Vector3d cross_ = V1.cross(V2);
+      if(fabs(cross_.norm()) < 1e-5){
+        two_index(0)++;
+        two_index(1)++;
+        ver_nn_num ++;
+        is_co_line = true;
+      }
+      else{
+        is_co_line = false;
+        do{
+          Vector3d V3 = (points.col(NN_index(two_index(1))) - points.col(NN_index(0))).normalized();
+
+          if(fabs(cross_.cross(V3).norm()) < 1e-5){
+            two_index(1)++;
+            ver_nn_num ++;
+            NN_index = SH.get_NN(nods.col(i), ver_nn_num);
+            // assert(ver_nn_num < 10);
+            is_co_plane = true;
+          }
+          else{
+            is_co_plane = false;
+            near_nei(0, i) = NN_index(0);
+            near_nei(1, i) = NN_index(1);
+            near_nei(2, i) = NN_index(two_index(0));
+            near_nei(3, i) = NN_index(two_index(1));
+            break;
+          }
+        }while(is_co_plane);
+      }
+    }while(is_co_line);
+
+  }
+  cout << near_nei.block(0, 0, 4, 10);
+#endif
+
+  
   
   double delt_t = 0.05;
   MatrixXd displace;
@@ -155,6 +206,7 @@ int main(int argc, char** argv){
     // auto filename = pt.get<string>("res") + "_" + to_string(i) + ".obj";
     auto filename = pt.get<string>("res") + "_" + to_string(i) + ".vtk";
     // writeOBJ(filename, (nods + vet_displace).transpose(), surf.transpose());
+    
     tri_mesh_write_to_vtk(filename.c_str(), nods + vet_displace, surf);
   }
 
@@ -176,7 +228,7 @@ int main(int argc, char** argv){
   // cout << "this is tmp" << tmp<<endl << endl;
   // tmp(2, 2) = 999;
   // cout << "this is tmp" << tmp<<endl << endl;
-  // cout <<"this is def_gra.col(0) : " << def_gra.col(0) << endl;
+  //c out <<"this is def_gra.col(0) : " << def_gra.col(0) << endl;
   
 }
 

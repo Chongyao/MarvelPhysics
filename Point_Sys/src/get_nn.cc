@@ -63,6 +63,7 @@ int spatial_hash::get_shell(const Eigen::Vector3i &query, const int &radi, std::
 int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand){
   return std::move(find_NN(point_id, NN_cand, nn_num));
 }
+
 int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand, const size_t &nn_num_){
   
   size_t cand_num = 0;
@@ -79,7 +80,7 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand, con
       if( range.first != range.second){
         for_each(range.first, range.second, [&](decltype(points_hash)::value_type  &one_point){
             double dis = (points.col(point_id) - points.col(one_point.second)).norm();
-            NN_cand.push_back({point_id, one_point.second, dis});
+            NN_cand.push_back({one_point.second, dis});
           });
       }
     }
@@ -129,6 +130,40 @@ const MatrixXi& spatial_hash::get_NN(const size_t &nn_num_) {
 }
 const MatrixXi& spatial_hash::get_NN(){
   return std::move(get_NN(nn_num));
+}
+const VectorXi spatial_hash::get_NN(const Vector3d &query, const size_t &nn_num_){
+  //init data
+  assert(nn_num_  < points_num);
+  VectorXi near_nei = VectorXi::Zero(nn_num_);
+  vector<pair_dis> NN_cand;
+  
+  size_t cand_num = 0;
+  int grid_delt = 0;
+  int once_more = 0;
+  const Vector3i center_grid = floor(query.array()/cell_size).cast<int>();
+  do{
+    vector<Vector3i> shell;
+    get_shell(center_grid, grid_delt, shell);
+    for(auto &grid : shell){
+      auto range = points_hash.equal_range(grid);
+      if( range.first != range.second){
+        for_each(range.first, range.second, [&](decltype(points_hash)::value_type  &one_point){
+            double dis = (query - points.col(one_point.second)).norm();
+            NN_cand.push_back({one_point.second, dis});
+          });
+      }
+    }
+    ++grid_delt;
+    if (NN_cand.size() > nn_num_ + 2)
+      once_more++;
+  }while(NN_cand.size() < nn_num_ + 2 || once_more<2);
+    
+    sort(NN_cand.begin(), NN_cand.end(), [](const pair_dis &a, const pair_dis &b){return a.dis < b.dis;});
+    
+    for(size_t j = 0; j < nn_num_; ++j){
+      near_nei(j) = NN_cand[j].n;
+    }
+    return near_nei;
 }
 const VectorXd& spatial_hash::get_sup_radi(){
   return std::move(get_sup_radi(nn_num));
