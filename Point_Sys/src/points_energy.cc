@@ -152,7 +152,7 @@ int point_sys::pre_compute(const double *disp, energy_dat &dat_str) const {
     Matrix3d sys_mat;
     sys_mat.setZero(3, 3);
     
-    assert(friends_[i].size() >= 3);
+    // assert(friends_[i].size() >= 3);
     for(size_t j = 0; j < friends_[i].size(); ++j){
       Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
       sys_mat += weig_[i][j]*xij*xij.transpose();
@@ -166,7 +166,7 @@ int point_sys::pre_compute(const double *disp, energy_dat &dat_str) const {
   return 0;
 }
 int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
-  dat_str.gra_.setZero(3, dim_);
+  // dat_str.gra_.setZero(3, dim_);
   //map the data
   // Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
   // calc strain

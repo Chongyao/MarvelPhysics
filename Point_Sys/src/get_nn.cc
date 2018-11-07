@@ -158,7 +158,7 @@ const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
 int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vector<size_t> &friends) const{
   
   friends.clear();
-  int grid_delt = int(floor(sup_radi/cell_size));
+  int grid_delt = int(floor(sup_radi/cell_size)) + 1;
   const Vector3i center_grid = floor(query.array()/cell_size).cast<int>();
 
   for(size_t i = 0; i < grid_delt; ++i){

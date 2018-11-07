@@ -1,9 +1,9 @@
-add_executable(test_genpoints test_genpoints.cc)
-target_link_libraries(test_genpoints
+# add_executable(test_genpoints test_genpoints.cc)
+# target_link_libraries(test_genpoints
 
-  PointSys
-  zjucad-ptree
-  )
+#   PointSys
+#   zjucad-ptree
+#   )
 
 # add_executable(test_wdnb test_wdnb.cc)
 # target_link_libraries(test_wdnb
@@ -17,5 +17,4 @@ target_link_libraries(test_genpoints
 add_executable(test_energy test_energy.cc)
 target_link_libraries(test_energy
   PointSys
-  zjucad-ptree
   )
