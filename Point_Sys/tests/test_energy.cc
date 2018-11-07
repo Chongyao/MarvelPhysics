@@ -14,6 +14,7 @@
 #include "Point_Sys/src/points_energy.h"
 #include "Point_Sys/src/data_stream.h"
 #include "Point_Sys/src/gen_surf.h"
+#include "io.h"
 
 
 
@@ -91,7 +92,6 @@ int main(int argc, char** argv){
   }
   deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
   
-  
   double delt_t = 0.05;
   MatrixXd displace;
   MatrixXd velocity;
@@ -152,8 +152,10 @@ int main(int argc, char** argv){
     acce = new_acce;
 
     dat_str.set_zero();
-    auto filename = pt.get<string>("res") + "_" + to_string(i) + ".obj";
-    writeOBJ(filename, (nods + vet_displace).transpose(), surf.transpose());    
+    // auto filename = pt.get<string>("res") + "_" + to_string(i) + ".obj";
+    auto filename = pt.get<string>("res") + "_" + to_string(i) + ".vtk";
+    // writeOBJ(filename, (nods + vet_displace).transpose(), surf.transpose());
+    tri_mesh_write_to_vtk(filename.c_str(), nods + vet_displace, surf);
   }
 
   //done

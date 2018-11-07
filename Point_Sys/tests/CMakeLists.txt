@@ -17,4 +17,5 @@
 add_executable(test_energy test_energy.cc)
 target_link_libraries(test_energy
   PointSys
+  marvel-core
   )
