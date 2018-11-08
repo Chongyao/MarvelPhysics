@@ -30,79 +30,79 @@ if(EIGEN3_FOUND)
   include_directories(${EIGEN3_INCLUDE_DIR})
 endif(EIGEN3_FOUND)
 
-# PETSC
-set(PETSC_DIR "/usr/lib/petscdir/3.7.7")
-set(PETSC_ARCH "x86_64-linux-gnu-real")
-find_package(PETSc)
-if(PETSC_FOUND)
-  include_directories(/usr/lib/openmpi/include)
-  include_directories(/usr/lib/openmpi/lib)
-  message("-- PETSc @ ${PETSC_INCLUDE_DIR}")
-  message("-- PETSc version: ${PETSC_VERSION}")
-  include_directories(${PETSC_INCLUDE_DIR})
-endif()
+# # PETSC
+# set(PETSC_DIR "/usr/lib/petscdir/3.7.7")
+# set(PETSC_ARCH "x86_64-linux-gnu-real")
+# find_package(PETSc)
+# if(PETSC_FOUND)
+#   include_directories(/usr/lib/openmpi/include)
+#   include_directories(/usr/lib/openmpi/lib)
+#   message("-- PETSc @ ${PETSC_INCLUDE_DIR}")
+#   message("-- PETSc version: ${PETSC_VERSION}")
+#   include_directories(${PETSC_INCLUDE_DIR})
+# endif()
 
 # UMFPACK
-find_package(UMFPACK REQUIRED)
-if(UMFPACK_FOUND)
-  message("-- Umfpack @ ${UMFPACK_INCLUDES}")
-  include_directories(${UMFPACK_INCLUDES})
-endif(UMFPACK_FOUND)
+# find_package(UMFPACK REQUIRED)
+# if(UMFPACK_FOUND)
+#   message("-- Umfpack @ ${UMFPACK_INCLUDES}")
+#   include_directories(${UMFPACK_INCLUDES})
+# endif(UMFPACK_FOUND)
 
 # SUITESPARSE
-find_package(SuiteSparse REQUIRED)
-if(SuiteSparse_FOUND)
-  message("-- SuiteSparse @ ${SuiteSparse_INCLUDE_DIRS}")
-  message("-- SuiteSparse libs @ ${SuiteSparse_LIBRARIES}")
-  include_directories(${SuiteSparse_INCLUDE_DIRS})
-endif(SuiteSparse_FOUND)
+# find_package(SuiteSparse REQUIRED)
+# if(SuiteSparse_FOUND)
+#   message("-- SuiteSparse @ ${SuiteSparse_INCLUDE_DIRS}")
+#   message("-- SuiteSparse libs @ ${SuiteSparse_LIBRARIES}")
+#   include_directories(${SuiteSparse_INCLUDE_DIRS})
+# endif(SuiteSparse_FOUND)
 
 # LBFGS
-find_package(LBFGS REQUIRED)
-if(LBFGS_FOUND)
-  message("-- LBFGS @ ${LBFGS_INCLUDE_DIRS}")
-  include_directories(${LBFGS_INCLUDE_DIRS})
-endif(LBFGS_FOUND)
+# find_package(LBFGS REQUIRED)
+# if(LBFGS_FOUND)
+#   message("-- LBFGS @ ${LBFGS_INCLUDE_DIRS}")
+#   include_directories(${LBFGS_INCLUDE_DIRS})
+# endif(LBFGS_FOUND)
 
 # IPOPT
-find_package(IPOPT REQUIRED)
-if(IPOPT_FOUND)
-  message("-- IPOPT @ ${IPOPT_INCLUDE_DIRS}")
-  message("-- IPOPT lib @ ${IPOPT_LIBRARIES}")
-  include_directories(${IPOPT_INCLUDE_DIRS})
-endif(IPOPT_FOUND)
+# find_package(IPOPT REQUIRED)
+# if(IPOPT_FOUND)
+#   message("-- IPOPT @ ${IPOPT_INCLUDE_DIRS}")
+#   message("-- IPOPT lib @ ${IPOPT_LIBRARIES}")
+#   include_directories(${IPOPT_INCLUDE_DIRS})
+# endif(IPOPT_FOUND)
 
 # ALGLIB
-find_package(ALGLIB REQUIRED)
-if(ALGLIB_FOUND)
-  message("-- Alglib @ ${ALGLIB_INCLUDES}")
-  message("-- Alglibs @ ${ALGLIB_LIBRARIES}")
-  include_directories(${ALGLIB_INCLUDES})
-endif(ALGLIB_FOUND)
+# find_package(ALGLIB REQUIRED)
+# if(ALGLIB_FOUND)
+#   message("-- Alglib @ ${ALGLIB_INCLUDES}")
+#   message("-- Alglibs @ ${ALGLIB_LIBRARIES}")
+#   include_directories(${ALGLIB_INCLUDES})
+# endif(ALGLIB_FOUND)
 
-# ARPACK
-find_package(Arpack REQUIRED)
+# # ARPACK
+# find_package(Arpack REQUIRED)
 
-# GLOG
-find_package(Glog REQUIRED)
-if(GLOG_FOUND)
-  message("-- GLOG @ ${GLOG_INCLUDE_DIRS}")
-  include_directories(${GLOG_INCLUDE_DIRS})
-endif(GLOG_FOUND)
+# # GLOG
+# find_package(Glog REQUIRED)
+# if(GLOG_FOUND)
+#   message("-- GLOG @ ${GLOG_INCLUDE_DIRS}")
+#   include_directories(${GLOG_INCLUDE_DIRS})
+# endif(GLOG_FOUND)
 
-# GTEST
-find_package(GTest REQUIRED)
-if(GTEST_FOUND)
-  message("-- GTEST @ ${GTEST_INCLUDE_DIRS}")
-  include_directories(${GTEST_INCLUDE_DIRS})
-endif(GTEST_FOUND)
+# # GTEST
+# find_package(GTest REQUIRED)
+# if(GTEST_FOUND)
+#   message("-- GTEST @ ${GTEST_INCLUDE_DIRS}")
+#   include_directories(${GTEST_INCLUDE_DIRS})
+# endif(GTEST_FOUND)
 
-# JSONCPP
-find_package(JsonCpp REQUIRED)
-if(JsonCpp_FOUND)
-  message("-- JsonCpp @ ${JsonCpp_INCLUDE_DIRS}")
-  include_directories(${JsonCpp_INCLUDE_DIRS})
-endif(JsonCpp_FOUND)
+# # JSONCPP
+# find_package(JsonCpp REQUIRED)
+# if(JsonCpp_FOUND)
+#   message("-- JsonCpp @ ${JsonCpp_INCLUDE_DIRS}")
+#   include_directories(${JsonCpp_INCLUDE_DIRS})
+# endif(JsonCpp_FOUND)
 
 #TBB
 find_package(TBB REQUIRED)
@@ -133,9 +133,6 @@ endif()
 
 
 add_subdirectory(external)
-# add_subdirectory(examples)
-# add_subdirectory(test)
-# add_subdirectory(coarsen)
 add_subdirectory(Point_Sys)
 add_subdirectory(src)
 
