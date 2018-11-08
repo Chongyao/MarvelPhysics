@@ -7,7 +7,7 @@
   "Poission":0.45,
   "Young":100000,
   "ker_cof":1,
-  "max_iter":500,
+  "max_iter":100000,
   "kv":1,
-  "time_step":0.01
+  "time_step":0.0001
 }
