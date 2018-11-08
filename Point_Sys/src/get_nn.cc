@@ -165,9 +165,59 @@ const VectorXi spatial_hash::get_NN(const Vector3d &query, const size_t &nn_num_
     }
     return near_nei;
 }
+
+const Eigen::MatrixXi spatial_hash::get_four_noncoplanar_NN(const Eigen::MatrixXd &nods){
+  MatrixXi near_nei = MatrixXi::Zero(4, nods.cols());
+#pragma omp parallel for 
+  for(size_t i = 0; i < nods.cols(); ++i){
+    
+    auto ver_nn_num = 4;
+    Vector2i two_index;
+    two_index << 2, 3;
+    bool is_co_line = true, is_co_plane = true;
+    do{
+      auto NN_index = get_NN(nods.col(i), ver_nn_num);
+      Vector3d V1 = (points.col(NN_index(1)) - points.col(NN_index(0))).normalized();
+      Vector3d V2 = (points.col(NN_index(two_index(0))) - points.col(NN_index(0))).normalized();
+      Vector3d cross_ = V1.cross(V2);
+      if(cross_.squaredNorm() < 1e-5){
+        two_index(0)++;
+        two_index(1)++;
+        ver_nn_num ++;
+        is_co_line = true;
+      }
+      else{
+        is_co_line = false;
+
+        do{
+          Vector3d V3 = (points.col(NN_index(two_index(1))) - points.col(NN_index(0))).normalized();
+          if(fabs(cross_.dot(V3)) < 1e-5){
+            two_index(1)++;
+            ver_nn_num ++;
+            NN_index = get_NN(nods.col(i), ver_nn_num);
+            // assert(ver_nn_num < 10);
+            is_co_plane = true;
+          }
+          else{
+            is_co_plane = false;
+            near_nei(0, i) = NN_index(0);
+            near_nei(1, i) = NN_index(1);
+            near_nei(2, i) = NN_index(two_index(0));
+            near_nei(3, i) = NN_index(two_index(1));
+            break;
+          }
+        }while(is_co_plane);
+      }
+    }while(is_co_line);
+
+  }
+  return near_nei;
+}
+
 const VectorXd& spatial_hash::get_sup_radi(){
   return std::move(get_sup_radi(nn_num));
 }
+
 const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
   assert(points.cols() > nn_num_);
 

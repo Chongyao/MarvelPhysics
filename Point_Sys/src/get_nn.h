@@ -35,6 +35,7 @@ class spatial_hash{
   const Eigen::MatrixXi& get_NN() ;
   //find nn_num nearest neighbours of any point
   const Eigen::VectorXi get_NN(const Eigen::Vector3d &query, const size_t &nn_num);
+  const Eigen::MatrixXi get_four_noncoplanar_NN(const Eigen::MatrixXd &nods);
   const Eigen::VectorXd& get_sup_radi(const size_t &nn_num_);
   const Eigen::VectorXd& get_sup_radi();
 

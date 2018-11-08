@@ -52,16 +52,10 @@ class deform_surf_LI : public deform_surf<T>{
  public:
   //TODO: do not use copy construct!!
   deform_surf_LI(const Eigen::MatrixXi &surf, const Eigen::Matrix<T,-1,-1> &nods, const Eigen::Matrix<T, -1, -1> &sam_points, const Eigen::MatrixXi &four_NN);
-  Eigen::Matrix<T, -1, -1>& update_surf(const Eigen::Matrix<T, -1, -1> &moved_points) const;
+  Eigen::Matrix<T, -1, -1> update_surf(const Eigen::Matrix<T, -1, -1> &moved_points) const;
  private:
-  const Eigen::MatrixXi surf_;
-  const Eigen::Matrix<T, -1, -1> nods_;
-  const Eigen::Matrix<T, -1, -1> sam_points_;
   const Eigen::MatrixXi four_NN_;
-
-  Eigen::Matrix<T, -1, -1> basis_weig;
-  
-  
+  Eigen::Matrix<T, -1, -1> basis_weig_;
   
 };
 //class deform_surf_LI
