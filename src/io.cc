@@ -264,7 +264,13 @@ int point_write_to_vtk(const char *path, const double *nods, const size_t num_po
   if ( ofs.fail() )
     return __LINE__;
   // const mati_t cell = colon(0, num_points-1);
-  auto cell = VectorXi(num_points - 1);
+  VectorXi cell = VectorXi::Zero(num_points);{
+    for(size_t i = 0; i < num_points; ++i){
+      cell(i) = i;
+    }
+
+ }
+  
   point2vtk(ofs, nods, num_points, cell.data(), cell.size());
   ofs.close();
   return 0;

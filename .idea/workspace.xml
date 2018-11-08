@@ -14,16 +14,213 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c593bbd6-e4d3-4ee1-a5c4-6fada7c8bec6" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/CMakeFiles/CMakeError.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CMakeFiles/CMakeOutput.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CMakeFiles/Makefile.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/CMakeFiles/TargetDirectories.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/PointSys.dir/link.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/test_energy.dir/depend.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/test_energy.dir/link.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/external/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/build.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/cmake_clean.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/depend.make" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/link.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/CMakeFiles/progress.marks" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/data/cube.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/data/cube.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/scripts/test_energy.json" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/scripts/test_energy.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/gen_points.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/gen_points.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Point_Sys/src/get_nn.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/get_nn.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Point_Sys/src/get_nn.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/get_nn.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/points_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/points_energy.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/points_energy.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/points_energy.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/tests/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeCache.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeCache.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CMakeCCompiler.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CMakeCCompiler.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CMakeCXXCompiler.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CMakeCXXCompiler.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CMakeDetermineCompilerABI_C.bin" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CMakeDetermineCompilerABI_C.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CMakeDetermineCompilerABI_CXX.bin" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CMakeDetermineCompilerABI_CXX.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CMakeSystem.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CMakeSystem.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CompilerIdC/CMakeCCompilerId.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CompilerIdC/a.out" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CompilerIdC/a.out" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CompilerIdCXX/CMakeCXXCompilerId.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/3.10.2/CompilerIdCXX/a.out" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/3.10.2/CompilerIdCXX/a.out" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/CMakeError.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/CMakeOutput.log" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/CMakeRuleHashes.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/Makefile.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/Makefile2" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/Makefile2" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/TargetDirectories.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/cmake.check_cache" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/cmake.check_cache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/feature_tests.bin" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/feature_tests.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/feature_tests.c" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/feature_tests.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/feature_tests.cxx" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/feature_tests.cxx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/progress.marks" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/src/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/CMakeFiles/progress.marks" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/cmake_install.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/CXX.includecache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/DependInfo.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/PointSys.dir/DependInfo.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/build.make" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/PointSys.dir/build.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/cmake_clean.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/PointSys.dir/cmake_clean.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/data_stream.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/depend.internal" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/depend.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/PointSys.dir/flags.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/gen_points.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/geometry.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/get_nn.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/link.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/points_energy.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/PointSys.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/PointSys.dir/progress.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/progress.marks" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/src/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/cmake_install.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeFiles/CMakeDirectoryInformation.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/progress.marks" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/CXX.includecache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/DependInfo.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/build.make" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/test_energy.dir/build.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/cmake_clean.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/test_energy.dir/cmake_clean.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/depend.internal" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/depend.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/test_energy.dir/flags.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/link.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/progress.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_energy.dir/test_energy.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/CXX.includecache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/DependInfo.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/test_energy.dir/DependInfo.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/build.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/cmake_clean.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/depend.internal" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/depend.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/flags.make" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/flags.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/link.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/progress.make" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/test_energy.dir/progress.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_genpoints.dir/test_genpoints.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_wdnb.dir/DependInfo.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/DependInfo.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_wdnb.dir/build.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_wdnb.dir/cmake_clean.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_wdnb.dir/depend.make" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/PointSys.dir/depend.make" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_wdnb.dir/flags.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_wdnb.dir/link.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/CMakeFiles/test_wdnb.dir/progress.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/Makefile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/Point_Sys/tests/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/cmake_install.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/bin/test_energy" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/bin/test_genpoints" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/cmake_install.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/cmake_uninstall.cmake.in" beforeDir="false" afterPath="$PROJECT_DIR$/cmake_uninstall.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/CMakeFiles/progress.marks" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeFiles/progress.marks" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/external/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/C.includecache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/CXX.includecache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/DependInfo.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/HLBFGS.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/HLBFGS_BLAS.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/ICFS.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/LineSearch.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/Lite_Sparse_Matrix.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/basis_opt_energy.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/build.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/catenary.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/cholmod_qr_solver.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/cmake_clean.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/collision.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/constraint.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/constraint_graph.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/coro_basis_def_oper.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/cosserat.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/cosserat_rod.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/depend.internal" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/depend.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/energy.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/example_elastic.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/fast_proj.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/fem_basis.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/flags.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/fortran.internal" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/geom_util.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/grad_check.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/green_strain.c.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/green_strain_jac_curr.c.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/green_strain_jac_rest.c.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/hex_cons_law.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/io.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/ipopt_solver.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/link.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/mass_matrix.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/mesh_partition.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/modal_analysis.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/mtr_sampler.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/multigrid_base.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/nnet.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/nnls.c.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/nodal_basis_optimizer.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/optimizer.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/pbd_cloth.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/pbd_cons.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/phx_util.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/poly_elasticity.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/progress.make" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/proj_dynamics.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/quad_to_lin.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/rotation_strain.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/sdf.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/sigma_elastic.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/stencil.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/stencil_extractor.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/stencil_patch.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/util.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/vox_dfdPF.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/vox_elastic_mtr.f90.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/vox_shape_func.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/bigbang.dir/vox_subdivision.cc.o" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/CMakeFiles/progress.marks" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/Makefile" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/cmake_install.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/coro_basis_def_oper.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/cosserat_rod.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/elasticity.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/fem_basis.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/hex_cons_law.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/nnet.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/pbd_cons.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/poly_elasticity.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/quad_to_lin.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/sdf.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/vox_dfdPF.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/vox_elastic.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/bigbang/vox_elastic_mtr.f90" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/external/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/external/cmake_install.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/lib/libPointSys.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/src/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/src/CMakeFiles/progress.marks" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/src/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake/src/cmake_install.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/src/cmake_install.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_SolidAngle.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_SolidAngle.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/hnsw" beforeDir="false" afterPath="$PROJECT_DIR$/external/hnsw" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/hnsw/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/hnsw/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/io.cc" beforeDir="false" afterPath="$PROJECT_DIR$/src/io.cc" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
+    <ignored path="$PROJECT_DIR$/CMakeFiles/" />
+    <ignored path="$PROJECT_DIR$/src/CMakeFiles/" />
+    <ignored path="$PROJECT_DIR$/Point_Sys/tests/CMakeFiles/" />
+    <ignored path="$PROJECT_DIR$/Point_Sys/src/CMakeFiles/" />
+    <ignored path="$PROJECT_DIR$/external/CMakeFiles/" />
+    <ignored path="$PROJECT_DIR$/Point_Sys/CMakeFiles/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +232,7 @@
     <session id="1301105899">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.17" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.opened" value="2" />
@@ -45,24 +242,26 @@
         <counts>
           <entry key="cc" value="4" />
           <entry key="h" value="5" />
+          <entry key="hpp" value="2" />
           <entry key="imp" value="1" />
-          <entry key="test_energy (disassembly)" value="7" />
+          <entry key="test_energy (disassembly)" value="9" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Disassembly" value="7" />
-          <entry key="ObjectiveC" value="10" />
+          <entry key="Disassembly" value="9" />
+          <entry key="ObjectiveC" value="12" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
+          <entry key="cc" value="6" />
           <entry key="imp" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="ObjectiveC" value="1" />
+          <entry key="ObjectiveC" value="7" />
         </counts>
       </usages-collector>
     </session>
@@ -72,8 +271,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Point_Sys/src/points_energy.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="176">
-              <caret line="154" selection-start-line="154" selection-end-line="154" />
+            <state relative-caret-position="199">
+              <caret line="75" selection-start-line="75" selection-end-line="75" />
               <folding>
                 <element signature="e#0#26#0" expanded="true" />
               </folding>
@@ -93,8 +292,31 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="101">
-              <caret line="97" selection-start-line="97" selection-end-line="97" />
+            <state relative-caret-position="41">
+              <caret line="78" column="28" lean-forward="true" selection-start-line="78" selection-start-column="28" selection-end-line="78" selection-end-column="28" />
+              <folding>
+                <element signature="e#2798#3006#0" expanded="true" />
+                <element signature="e#3055#3271#0" expanded="true" />
+                <element signature="e#3709#5138#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/include/boost/throw_exception.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="167">
+              <caret line="85" selection-start-line="85" selection-end-line="85" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/include/boost/property_tree/json_parser.hpp">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="167">
+              <caret line="71" selection-start-line="71" selection-end-line="71" />
             </state>
           </provider>
         </entry>
@@ -102,7 +324,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_surf.imp">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-205">
+            <state relative-caret-position="570">
               <caret line="41" column="6" selection-start-line="41" selection-start-column="6" selection-end-line="41" selection-end-column="6" />
             </state>
           </provider>
@@ -111,8 +333,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="213" selection-start-line="213" selection-end-line="213" />
+            <state relative-caret-position="478">
+              <caret line="215" selection-start-line="215" selection-end-line="215" />
             </state>
           </provider>
         </entry>
@@ -133,24 +355,6 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/include/eigen3/Eigen/src/plugins/CommonCwiseBinaryOps.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
-              <caret line="68" selection-start-line="68" selection-end-line="68" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/include/eigen3/Eigen/src/plugins/BlockMethods.h">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="168">
-              <caret line="846" selection-start-line="846" selection-end-line="846" />
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="Git.Settings">
@@ -160,6 +364,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/Point_Sys/src/gen_surf.imp" />
+        <option value="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" />
       </list>
     </option>
   </component>
@@ -253,7 +458,7 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="test_energy" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="../../Point_Sys/scripts/test_energy.json" PASS_PARENT_ENVS_2="true" PROJECT_NAME="MarvalPhysics" TARGET_NAME="test_energy" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="MarvalPhysics" RUN_TARGET_NAME="test_energy">
+    <configuration name="test_energy" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="../../Point_Sys/scripts/test_energy.json" WORKING_DIR="file://$PROJECT_DIR$/build/bin" PASS_PARENT_ENVS_2="true" PROJECT_NAME="MarvalPhysics" TARGET_NAME="test_energy" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="MarvalPhysics" RUN_TARGET_NAME="test_energy">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -276,16 +481,15 @@
       <option name="presentableId" value="Default" />
       <updated>1541146306711</updated>
       <workItem from="1541146308864" duration="463000" />
-      <workItem from="1541414790755" duration="9372000" />
+      <workItem from="1541414790755" duration="12218000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="9835000" />
+    <option name="totallyTimeSpent" value="12681000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1680" y="-1" width="1920" height="1080" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18210863" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -320,8 +524,18 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc</url>
-          <line>108</line>
+          <line>142</line>
           <option name="timeStamp" value="7" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc</url>
+          <line>197</line>
+          <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc</url>
+          <line>213</line>
+          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -360,20 +574,6 @@
     <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_surf.h">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_surf.imp">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-205">
-          <caret line="41" column="6" selection-start-line="41" selection-start-column="6" selection-end-line="41" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="213" selection-start-line="213" selection-end-line="213" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/eigen3/Eigen/src/Core/DenseCoeffsBase.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="184">
@@ -381,20 +581,53 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_surf.imp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="570">
+          <caret line="41" column="6" selection-start-line="41" selection-start-column="6" selection-end-line="41" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/boost/property_tree/json_parser.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="167">
+          <caret line="71" selection-start-line="71" selection-end-line="71" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/boost/throw_exception.hpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="167">
+          <caret line="85" selection-start-line="85" selection-end-line="85" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Point_Sys/src/points_energy.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="176">
-          <caret line="154" selection-start-line="154" selection-end-line="154" />
+        <state relative-caret-position="199">
+          <caret line="75" selection-start-line="75" selection-end-line="75" />
           <folding>
             <element signature="e#0#26#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="478">
+          <caret line="215" selection-start-line="215" selection-end-line="215" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="101">
-          <caret line="97" selection-start-line="97" selection-end-line="97" />
+        <state relative-caret-position="41">
+          <caret line="78" column="28" lean-forward="true" selection-start-line="78" selection-start-column="28" selection-end-line="78" selection-end-column="28" />
+          <folding>
+            <element signature="e#2798#3006#0" expanded="true" />
+            <element signature="e#3055#3271#0" expanded="true" />
+            <element signature="e#3709#5138#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
