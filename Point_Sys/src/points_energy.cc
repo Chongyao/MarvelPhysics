@@ -114,15 +114,12 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d one_du;
-    VectorXd b(9);
-    b.setZero(9);
+    Matrix3d b = Matrix3d::Zero();
     for(size_t j = 0; j < friends_[i].size(); ++j){
       Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
       for(size_t k = 0; k < 3; ++k){
-        b.segment(3*k, 3) += (_disp(k, friends_[i][j]) - _disp(k, i))*weig_[i][j]*xij;
+        b.col(k) += (_disp(k, friends_[i][j]) - _disp(k, i))*weig_[i][j]*xij;
         
-        // cout << "[INFO]>>>>>>>>>>>>>>>>>>>debuggggggg fuck <<<<<<<<<<<<<<<<<<" << endl;
-        // cout << _disp(k, friends_[i][j]) - _disp(k, i) << endl << "xij" <<endl<< xij << endl;
       }
     }
     
@@ -131,13 +128,8 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
     Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     
     for(size_t k = 0; k < 3; ++k){
-      one_du.row(k) = (inv_A * b.segment(3*k, 3)).transpose();
+      one_du.row(k) = (inv_A * b.col(k)).transpose();
     }
-    
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>b<<<<<<<<<<<<<<<<<<" << endl;
-    // cout << b << endl;
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>one du<<<<<<<<<<<<<<<<<<" << endl;
-    // cout << one_du << endl;
     MatrixXd F = one_du + MatrixXd::Identity(3, 3);
     dat_str.save_ele_def_gra(i, F);
 
@@ -178,20 +170,13 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     
     Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>def_gra<<<<<<<<<<<<<<<<<<" << endl;
-    // cout << def_gra << endl;
     //calculate strain and stress
     Matrix3d strain = def_gra.transpose()*def_gra - Matrix3d::Identity();
     // Matrix3d strain = 0.5*(def_gra + def_gra.transpose()) - Matrix3d::Identity();
     
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>strain is <<<<<<<<<<<<<<<<<<" << endl;
-    // cout << strain << endl;
     dat_str.save_ele_strain(i, strain);
     Matrix3d stress;
     cons_law(strain, stress, def_gra, Young_, Poission_);
-    
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>stress is <<<<<<<<<<<<<<<<<<" << endl;
-    // cout << stress << endl;
     
     dat_str.save_ele_stress(i, stress);
     //calculate Fv
@@ -216,25 +201,13 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
       Vector3d xij = (points_.col(friends_[i][j]) - points_.col(i));
       di += -w*xij;
       
-      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>see elasticity<<<<<<<<<<<<<<<<<<" << endl;
-      // cout << "pre_F " << endl;
-      // cout <<pre_F<<endl<<"xij :" <<endl<< xij <<endl;
       dat_str.save_ele_gra(friends_[i][j], w*pre_F*xij);
     }
     
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>elasticitu i <<<<<<<<<<<<<<<<<<" << endl;
-    // cout << pre_F*di << endl;
+
     dat_str.save_ele_gra(i, pre_F*di);
   }
 
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>dubug inv_A<<<<<<<<<<<<<<<<<<" << endl;
-  // MatrixXd dubug_def= dat_str.pre_F_.array().abs();
-  // cout << dubug_def <<endl;
-  // for(size_t i = 0; i < dim_; ++i){
-  //   dubug_def.col(i) -= dubug_def.col(dim_ - 1);
-  // }
-  // cout <<" <<<<<<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>>>>." <<endl;
-  // cout << dubug_def  << endl;
   return 0;
 }
 

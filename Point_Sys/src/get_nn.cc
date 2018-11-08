@@ -190,7 +190,7 @@ const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
   sup_radi*= 3.0/nn_num_;
   return sup_radi;
 }
-int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vector<size_t> &friends) const{
+int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vector<size_t> &friends,bool is_sample) const{
   
   friends.clear();
   int grid_delt = int(floor(sup_radi/cell_size)) + 1;
@@ -204,9 +204,10 @@ int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vec
       if( range.first != range.second){
         for_each(range.first, range.second, [&](const decltype(points_hash)::value_type  &one_point){
             double dis = (points.col(one_point.second) - query).norm();
-            if(dis < sup_radi && dis != 0){
+            if(is_sample && dis < sup_radi && dis != 0)
               friends.push_back(one_point.second);
-            }
+            else if(!is_sample && dis < sup_radi)
+              friends.push_back(one_point.second);              
           });
       }
     }

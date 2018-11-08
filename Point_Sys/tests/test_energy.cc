@@ -65,13 +65,16 @@ int main(int argc, char** argv){
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
-  MatrixXd points;
+  MatrixXd points(3,3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
+  // #if 1
+  points = nods;
+  // #endif
   size_t dim = points.cols();
-
+  cout <<"generate points done." << endl;
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
-  spatial_hash SH(points);
+  spatial_hash SH(points, 7);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
@@ -95,7 +98,7 @@ int main(int argc, char** argv){
   vector<vector<size_t>> vet_fris(nods.cols());
   for(size_t j = 0; j < nods.cols(); ++j){
     vector<size_t> fris;
-    SH.get_friends(nods.col(j), kernel_cof, fris);
+    SH.get_friends(nods.col(j), kernel_cof, fris, false);
     vet_fris[j] = fris;
   }
   
@@ -109,7 +112,7 @@ int main(int argc, char** argv){
   //Constraints vary from different models and situations.
   vector<size_t> cons;
   for(size_t i = 0; i < points.cols(); ++i){
-    if(points(2, i) > 2){
+    if(points(2, i) == 1){
       cons.push_back(i);
       cout << i << " ";
     }
@@ -136,12 +139,12 @@ int main(int argc, char** argv){
   new_acce.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
-
+  PS.pre_compute(dat_str);
 
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
     cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
-    cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
+    // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
 
     PS.calc_defo_gra(displace.data(), dat_str);
     PS.Gra(displace.data(), dat_str);
