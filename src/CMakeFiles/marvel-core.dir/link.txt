@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -fopenmp -std=c++11 -o3 -fpermissive -fopenmp -g  -shared -Wl,-soname,libmarvel-cored.so -o ../lib/libmarvel-cored.so CMakeFiles/marvel-core.dir/io.cc.o  -L/home/zcy/usr/Linux/lib  -L/home/zcy/usr/Linux/64/lib  -L/home/zcy/usr/Linux/64/gcc3/lib 

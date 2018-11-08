@@ -19,7 +19,7 @@ class point_sys{
   point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const std::vector<std::vector<size_t>> &friends, const Eigen::VectorXd &sup_radi );
   size_t Nx() const ;
 
-  int pre_compute(const double *disp,energy_dat &dat_str) const ;//calc once
+  int pre_compute(energy_dat &dat_str) const ;//calc once
   int calc_defo_gra(const double *disp, energy_dat &dat_str) const;
   int Gra(const double *disp, energy_dat &dat_str) const;
   int gravity(const double *disp, energy_dat &dat_str, const double &gravity) const;

@@ -169,7 +169,7 @@ const VectorXd& spatial_hash::get_sup_radi(){
   return std::move(get_sup_radi(nn_num));
 }
 const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
-  assert(points.cols() > nn_num_);
+  assert(points.cols() >= nn_num_);
 
   //init data
 

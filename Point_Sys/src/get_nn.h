@@ -29,7 +29,7 @@ struct pair_dis{
 
 class spatial_hash{
  public:
-  spatial_hash(const Eigen::MatrixXd &points_, const size_t &nn_num_);
+  spatial_hash(const Eigen::MatrixXd &points_, const size_t &nn_num_ = 10);
 
   const Eigen::MatrixXi& get_NN(const size_t &nn_num_) ;
   const Eigen::MatrixXi& get_NN() ;

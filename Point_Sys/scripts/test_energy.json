@@ -1,10 +1,13 @@
 {
-  "surf":"../../Point_Sys/data/53092_sf-G_G0_subdivide937772130937772130.obj",
-  "points_out":"../../Point_Sys/result/53092_sf-G_G0_subdivide937772130937772130.vtk",
-  "num_in_axis":10,
+  "indir":"../../Point_Sys/data/",
+  "outdir":"../../Point_Sys/result/",
+  "surf":"cube",  
+  "num_in_axis":3,
   "rho":5,
   "Poission":0.45,
-  "Young":100,
-  "res":"../../Point_Sys/result/53092_sf-G_G0_subdivide937772130937772130",
-  "ker_cof":8
+  "Young":100000,
+  "ker_cof":8,
+  "max_iter":500,
+  "kv":1,
+  "time_step":0.01
 }
