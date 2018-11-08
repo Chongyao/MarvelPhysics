@@ -1,5 +1,6 @@
 #include "gen_surf.h"
 #include <Eigen/Core>
+#include <Eigen/LU>
 #include <cmath>
 #include <iostream>
 
@@ -62,19 +63,36 @@ Matrix<T, -1, -1> deform_surf_MLS<T>::update_surf(const Matrix<T, -1 ,-1>& moved
 
 /********************************CLASS deform_surf_LI******************************/
 template<typename T>  
-deform_surf_LI<T>::deform_surf_LI(const MatrixXi &surf, const Matrix<T, -1, -1> &nods, const Matrix<T, -1, -1> &sam_points, const MatrixXi &four_NN):surf_(surf), nods_(nods), sam_points_(sam_points), four_NN_(four_NN){
+deform_surf_LI<T>::deform_surf_LI(const MatrixXi &surf, const Matrix<T, -1, -1> &nods, const Matrix<T, -1, -1> &sam_points, const MatrixXi &four_NN):deform_surf<T>(surf, nods, sam_points), four_NN_(four_NN){
+  basis_weig_ = Matrix<T, -1, -1>(3, nods.cols());
   for(size_t i = 0; i < nods.cols(); ++i){
     Matrix3d basis;
     for(size_t j = 0; j < 3; ++j){
-      basis.col(i) = sam_points_.col(four_NN(j, i)) - sam_points.col(four_NN_(3, i));
+      cout << "four_NN_: " << endl;
+      cout << four_NN_.col(i) << endl;
+      basis.col(j) = this->sam_points_.col(four_NN_(j, i)) - this->sam_points_.col(four_NN_(3, i));
+      cout << "basis.col " << j << " = [" << this->sam_points_.col(four_NN_(j, i)).transpose() << "] - [" << this->sam_points_.col(four_NN_(3, i)).transpose() << "]" << endl;
     }
+    // Calculate weight of each basis of a single node
+    PartialPivLU<Matrix<T, -1, -1>> lu_solver(basis);
+    // basis.col(i) * basis_weig_ = nods.col(i);
+    basis_weig_.col(i) = basis.lu().solve(nods.col(i));
+    cout << basis_weig_.col(i) << endl;
   }
 }//function:deform_surf_LI()
 
 // deform
 template<typename T>
-Matrix<T, -1, -1>& deform_surf_LI<T>::update_surf(const Matrix<T, -1, -1> &moved_points) const{
-  
+Matrix<T, -1, -1> deform_surf_LI<T>::update_surf(const Matrix<T, -1, -1> &moved_points) const{
+  Matrix<T, -1, -1> moved_nods(3, this->nods_.cols());
+  for(size_t i = 0; i < this->nods_.cols(); ++i){
+    Matrix3d basis;
+    for(size_t j = 0; j < 3; ++j){
+      basis.col(j) = moved_points.col(this->four_NN_(j, i)) - moved_points.col(this->four_NN_(3, i));
+    }
+    moved_nods.col(i) = basis * this->basis_weig_.col(i);
+  }
+  return moved_nods;
 }
 
 
