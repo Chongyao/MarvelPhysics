@@ -68,7 +68,7 @@ int main(int argc, char** argv){
   MatrixXd points(3,3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
   // #if 1
-  points = nods;
+  //points = nods;
   // #endif
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
@@ -112,7 +112,7 @@ int main(int argc, char** argv){
   //Constraints vary from different models and situations.
   vector<size_t> cons;
   for(size_t i = 0; i < points.cols(); ++i){
-    if(points(2, i) == 1){
+    if(points(2, i) > 0.7 ){
       cons.push_back(i);
       cout << i << " ";
     }
@@ -140,7 +140,7 @@ int main(int argc, char** argv){
   vet_displace.setZero(3, nods.cols());
 
   PS.pre_compute(dat_str);
-
+  size_t iters_perframe = floor(1/delt_t/20);
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
     cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
@@ -170,11 +170,13 @@ int main(int argc, char** argv){
     acce = new_acce;
 
     dat_str.set_zero();
-    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
-    auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
-    MatrixXd points_now = points + displace;
-    point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-    tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
+    if(i%iters_perframe == 0){ 
+      auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
+      auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
+      MatrixXd points_now = points + displace;
+      point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
+      tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
+    }
   }
 
   //done
