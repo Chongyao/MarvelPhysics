@@ -63,10 +63,12 @@ int main(int argc, char** argv){
   surf.transposeInPlace();
   nods.transposeInPlace();
 
-  
+
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points(3,3);
+  MatrixXd test(3, 3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
+
   // #if 1
   //points = nods;
   // #endif
@@ -105,14 +107,14 @@ int main(int argc, char** argv){
   deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
 
 
-  
+
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
   //add simple constraints
   //This should read from file. We loop for some points to restrain here.
   //Constraints vary from different models and situations.
   vector<size_t> cons;
   for(size_t i = 0; i < points.cols(); ++i){
-    if(points(2, i) > 2 ){
+    if(points(2, i) > 0.7 ){
       cons.push_back(i);
       cout << i << " ";
     }
@@ -148,7 +150,7 @@ int main(int argc, char** argv){
 
     PS.calc_defo_gra(displace.data(), dat_str);
     PS.Gra(displace.data(), dat_str);
-    PS.gravity(displace.data(), dat_str, 9.8);
+    PS.gravity(displace.data(), dat_str, pt.get<double>("gravity"));
     
 #pragma parallel omp for
     for(size_t j = 0; j < dim; ++j){
@@ -170,15 +172,14 @@ int main(int argc, char** argv){
     acce = new_acce;
 
     dat_str.set_zero();
-    if(i%iters_perframe == 0){ 
+    // if(i%iters_perframe == 0){ 
       auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
       auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
       MatrixXd points_now = points + displace;
       point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
       tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
-    }
+    // }
   }
-
   //done
   
 }

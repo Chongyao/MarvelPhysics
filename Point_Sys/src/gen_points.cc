@@ -8,7 +8,7 @@
 #include <WindingNumber/UT_Array.cpp>
 #include <WindingNumber/UT_SolidAngle.h>
 #include <WindingNumber/UT_SolidAngle.cpp>
-
+#include <Eigen/Core>
 // typedef zjucad::matrix::matrix<size_t> mati_t;
 // typedef zjucad::matrix::matrix<double> matd_t;
 using namespace Eigen;
@@ -19,7 +19,6 @@ using namespace HDK_Sample;
 
 #define PI 3.14159265359
 namespace marvel{
-
 
 int build_bdbox(const MatrixXd &nods, MatrixXd & bdbox){
   //simple bounding box
@@ -32,10 +31,10 @@ int build_bdbox(const MatrixXd &nods, MatrixXd & bdbox){
         bdbox(j, 1) = nods(j ,i);      
     }
   }
-
   return 0;
 }
-int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nods){
+
+int get_inner_points(Eigen::MatrixXd &points, const Eigen::MatrixXi &surf, const Eigen::MatrixXd &nods){
   using UT_Vector3T = UT_FixedVector<float,3>;
   UT_Vector3T UT_nods[nods.cols()];
 
@@ -71,17 +70,18 @@ int get_inner_points(MatrixXd &points, const MatrixXi &surf, const MatrixXd &nod
     points_tmp.col(i) = points.col(inside_id[i]);
   }
   
-  points = points_tmp;  
-
+  points = points_tmp;
   return 0;
 }
 
 int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_axis, MatrixXd &points){
   assert(num_in_axis > 1);
   MatrixXd bdbox;
+
   int res = build_bdbox(nods, bdbox);
   cout << "bdbox: " << bdbox << endl;
   vector<double> intervals(3);
+
 #pragma omp parallel for 
   for(size_t i = 0; i < 3; ++i){
     intervals[i] = (bdbox(i, 1) - bdbox(i, 0))/(num_in_axis - 1);
@@ -103,8 +103,8 @@ int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_
   cout << "[INFO]genarate raw points done. size is " <<points.cols() << endl;
   res = get_inner_points(points, surf, nods);
   cout << "after select: "  << points.cols() << endl;
-
   return 0;
 }
 
+  
 }

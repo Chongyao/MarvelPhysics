@@ -14,34 +14,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c593bbd6-e4d3-4ee1-a5c4-6fada7c8bec6" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Point_Sys/data/53092_sf-G_G0_subdivide937772130937772130.obj" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Point_Sys/scripts/test_energy.json" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/scripts/test_energy.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Point_Sys/src/gen_points.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/gen_points.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Point_Sys/src/gen_points.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/gen_points.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Point_Sys/src/get_nn.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/get_nn.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Point_Sys/src/get_nn.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/get_nn.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Point_Sys/src/points_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/points_energy.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/gen_surf.imp" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/gen_surf.imp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_SolidAngle.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_SolidAngle.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/hnsw" beforeDir="false" afterPath="$PROJECT_DIR$/external/hnsw" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/hnsw/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/hnsw/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/CMakeDirectoryInformation.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/CXX.includecache" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/DependInfo.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/build.make" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/cmake_clean.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/depend.internal" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/depend.make" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/flags.make" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/io.cc.o" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/link.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/marvel-core.dir/progress.make" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeFiles/progress.marks" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Makefile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cmake_install.cmake" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <ignored path="$PROJECT_DIR$/CMakeFiles/" />
@@ -61,12 +39,13 @@
     <session id="1301105899">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="4" />
+          <entry key="project.closed" value="5" />
           <entry key="project.open.time.17" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.31" value="1" />
           <entry key="project.open.time.4" value="2" />
-          <entry key="project.opened" value="5" />
+          <entry key="project.open.time.5" value="1" />
+          <entry key="project.opened" value="6" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -111,7 +90,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
+            <state relative-caret-position="1020">
               <caret line="68" selection-start-line="68" selection-end-line="68" />
             </state>
           </provider>
@@ -120,7 +99,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file:///usr/include/eigen3/Eigen/src/Core/util/Memory.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="167">
+            <state relative-caret-position="1035">
               <caret line="69" selection-start-line="69" selection-end-line="69" />
             </state>
           </provider>
@@ -129,7 +108,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file:///usr/include/eigen3/Eigen/src/Core/DenseStorage.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
+            <state relative-caret-position="6105">
               <caret line="407" selection-start-line="407" selection-end-line="407" />
             </state>
           </provider>
@@ -138,7 +117,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file:///usr/include/eigen3/Eigen/src/Core/AssignEvaluator.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="161">
+            <state relative-caret-position="12345">
               <caret line="823" column="59" selection-start-line="823" selection-start-column="59" selection-end-line="823" selection-end-column="59" />
             </state>
           </provider>
@@ -147,7 +126,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file:///usr/include/eigen3/Eigen/src/Core/PlainObjectBase.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
+            <state relative-caret-position="4380">
               <caret line="292" selection-start-line="292" selection-end-line="292" />
             </state>
           </provider>
@@ -156,8 +135,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_points.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="328">
-              <caret line="78" column="65" selection-start-line="78" selection-start-column="65" selection-end-line="78" selection-end-column="68" />
+            <state relative-caret-position="344">
+              <caret line="78" column="65" selection-start-line="78" selection-start-column="65" selection-end-line="78" selection-end-column="65" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -166,18 +145,9 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="mock:///test_energy (disassembly)">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" selection-start-line="5" selection-end-line="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file:///usr/include/eigen3/Eigen/src/Core/CwiseNullaryOp.h">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="184">
+            <state relative-caret-position="1050">
               <caret line="70" selection-start-line="70" selection-end-line="70" />
             </state>
           </provider>
@@ -297,15 +267,15 @@
       <workItem from="1541659074465" duration="2109000" />
       <workItem from="1541679060966" duration="603000" />
       <workItem from="1541680363354" duration="758000" />
+      <workItem from="1541746117001" duration="87000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16151000" />
+    <option name="totallyTimeSpent" value="16238000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1680" y="-1" width="1920" height="1080" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.18530351" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -390,9 +360,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2205">
           <caret line="147" column="25" selection-start-line="147" selection-start-column="25" selection-end-line="147" selection-end-column="25" />
-          <folding>
-            <element signature="e#0#26#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -427,13 +394,6 @@
     <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_surf.h">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file:///usr/include/c++/7/bits/stl_vector.h">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="11955">
-          <caret line="797" selection-start-line="797" selection-end-line="797" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/boost/property_tree/json_parser.hpp">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -441,52 +401,59 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/include/eigen3/Eigen/src/Core/PlainObjectBase.h">
+    <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="292" selection-start-line="292" selection-end-line="292" />
+        <state relative-caret-position="1020">
+          <caret line="68" selection-start-line="68" selection-end-line="68" />
         </state>
       </provider>
     </entry>
     <entry file="file:///usr/include/eigen3/Eigen/src/Core/util/Memory.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="167">
+        <state relative-caret-position="1035">
           <caret line="69" selection-start-line="69" selection-end-line="69" />
         </state>
       </provider>
     </entry>
     <entry file="file:///usr/include/eigen3/Eigen/src/Core/DenseStorage.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
+        <state relative-caret-position="6105">
           <caret line="407" selection-start-line="407" selection-end-line="407" />
         </state>
       </provider>
     </entry>
     <entry file="file:///usr/include/eigen3/Eigen/src/Core/AssignEvaluator.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="161">
+        <state relative-caret-position="12345">
           <caret line="823" column="59" selection-start-line="823" selection-start-column="59" selection-end-line="823" selection-end-column="59" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
+    <entry file="file:///usr/include/eigen3/Eigen/src/Core/PlainObjectBase.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
-          <caret line="68" selection-start-line="68" selection-end-line="68" />
+        <state relative-caret-position="4380">
+          <caret line="292" selection-start-line="292" selection-end-line="292" />
         </state>
       </provider>
     </entry>
     <entry file="file:///usr/include/eigen3/Eigen/src/Core/CwiseNullaryOp.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="184">
+        <state relative-caret-position="1050">
           <caret line="70" selection-start-line="70" selection-end-line="70" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/c++/7/bits/stl_vector.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="11955">
+          <caret line="797" selection-start-line="797" selection-end-line="797" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_points.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="328">
-          <caret line="78" column="65" selection-start-line="78" selection-start-column="65" selection-end-line="78" selection-end-column="68" />
+        <state relative-caret-position="344">
+          <caret line="78" column="65" selection-start-line="78" selection-start-column="65" selection-end-line="78" selection-end-column="65" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>

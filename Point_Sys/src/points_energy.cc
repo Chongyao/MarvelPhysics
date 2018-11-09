@@ -1,6 +1,6 @@
 #include "points_energy.h"
 #include "get_nn.h"
-#include <cmath>
+#include <math.h>
 #include <Eigen/SVD>
 #include <Eigen/LU>
 #include <Eigen/Geometry>
@@ -57,7 +57,23 @@ point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Y
   double mass_total = rho*vol_all;
   double mass_sigma = (sup_radi_/3).array().cube().sum();
   scal_fac_ = mass_total/mass_sigma;
-  mass_i_ = (scal_fac_*rho_*sup_radi_).array().cube();
+  scal_fac_ /= 19.2649;
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>scal face<<<<<<<<<<<<<<<<<<" << endl;
+  cout << scal_fac_ <<endl;
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup radi<<<<<<<<<<<<<<<<<<" << endl;
+  cout << sup_radi_ <<endl;
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>cube <<<<<<<<<<<<<<<<<<" << endl;
+  for(size_t i = 0; i < dim_; ++i){
+    double tmp = sup_radi_(i);
+    cout << pow(tmp/3,3) << endl;
+    mass_i_(i) = scal_fac_ * rho_ * pow(tmp/3,3);
+  }
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>mass <<<<<<<<<<<<<<<<<<" << endl;
+  cout << mass_i_ <<endl;
+  // mass_i_ = scal_fac_*rho_*sup_radi_.array().cube();
 }
 
 double point_sys::get_mass(const size_t &i) const{
@@ -86,6 +102,16 @@ int point_sys::calc_rhoi_vi() const{
   vol_i_.setZero(dim_);
 
   calc_weig();
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>weig<<<<<<<<<<<<<<<<<<" << endl;
+  for(size_t i = 0; i < dim_; ++i){
+    cout << "i is " << i << endl;
+    for(auto w : weig_[i]){
+      cout << w <<" " ;
+    }
+    cout << endl;
+  }
+
   assert(friends_.size() > 0 && weig_.size() > 0);
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
@@ -93,13 +119,28 @@ int point_sys::calc_rhoi_vi() const{
       rho_i_(i) += mass_i_(i)*weig_[i][j];
     }
   }
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>rho is <<<<<<<<<<<<<<<<<<" << endl;
+  cout << rho_i_ << endl;
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>average<<<<<<<<<<<<<<<<<<" << endl;
+  cout << rho_i_.sum()/dim_;
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup_radi<<<<<<<<<<<<<<<<<<" << endl;
+  cout << sup_radi_ << endl;
 
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>mass<<<<<<<<<<<<<<<<<<" << endl;
+  cout << mass_i_ << endl;
   vol_i_ = mass_i_.array() / rho_i_.array();
   return 0;
 }
 double point_sys::kernel(const double &r, const double &h) const {
-  if(r < h)
-    return 315*pow((h*h - r*r), 3)/(64*PI*pow(h, 9));
+  if(r < h){
+    double old_res =  315*pow((h*h - r*r), 3)/(64*PI*pow(h, 9));
+    return old_res;
+  }
+
   else
     return 0;
 }
@@ -182,10 +223,10 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     //calculate Fv
     Matrix3d gra_def_gra;
     auto trans_def_gra = def_gra.transpose();
-    for(int j = 0; j < 3; ++j){
-      Vector3d cross1 = trans_def_gra.col((j+1)%3), cross2 = trans_def_gra.col((j+2)%3);
-      gra_def_gra.col(j) = cross1.cross(cross2);
-    }
+    // for(int j = 0; j < 3; ++j){
+    //   Vector3d cross1 = trans_def_gra.col((j+1)%3), cross2 = trans_def_gra.col((j+2)%3);
+    //   gra_def_gra.col(j) = cross1.cross(cross2);
+    // }
     gra_def_gra.transposeInPlace();
 
     //assemble Fe and Fv
