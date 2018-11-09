@@ -68,13 +68,13 @@ int main(int argc, char** argv){
   MatrixXd points(3,3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
   // #if 1
-  points = nods;
+  //points = nods;
   // #endif
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
-  spatial_hash SH(points, 7);
+  spatial_hash SH(points, 10);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
@@ -112,7 +112,7 @@ int main(int argc, char** argv){
   //Constraints vary from different models and situations.
   vector<size_t> cons;
   for(size_t i = 0; i < points.cols(); ++i){
-    if(points(2, i) == 1){
+    if(points(2, i) > 2 ){
       cons.push_back(i);
       cout << i << " ";
     }
