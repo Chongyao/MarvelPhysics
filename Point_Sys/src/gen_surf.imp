@@ -16,7 +16,7 @@ deform_surf<T>::deform_surf(const MatrixXi &surf, const Matrix<T,-1,-1> &nods, c
 /********************************CLASS deform_surf_MLS******************************/
 template<typename T>
 deform_surf_MLS<T>::deform_surf_MLS(const MatrixXi &surf, const Matrix<T,-1,-1> &nods, const Matrix<T, -1, -1> &sam_points, const std::vector<std::vector<size_t>> &friends, const T &kernel_cof):deform_surf<T>(surf, nods, sam_points), friends_(friends), kernel_cof_(kernel_cof){
-  
+
 }
 
 template<typename T>
@@ -37,13 +37,13 @@ Matrix<T, -1, -1> deform_surf_MLS<T>::update_surf(const Matrix<T, -1 ,-1>& moved
     Matrix<T, 3, 1> ver_dis;
     T scal_fac = 0;
     ver_dis.setZero(3, 1);
-    
+
     for(size_t j = 0; j < friends_[i].size(); ++j){
       size_t fri_id = friends_[i][j];
-      
+
       Matrix<T, 3, 1> rij = this->sam_points_.col(fri_id) - this->nods_.col(i);
       T gas_weig = kernel(rij.norm(), kernel_cof_);
-      
+
       scal_fac += gas_weig;
       Map<const Matrix<T, -1, -1>> def_gra(def_gra_all.col(fri_id).data(), 3, 3);
       auto dis_gra = def_gra - Matrix<T, -1, -1>::Identity(3, 3);
@@ -62,16 +62,13 @@ Matrix<T, -1, -1> deform_surf_MLS<T>::update_surf(const Matrix<T, -1 ,-1>& moved
 
 
 /********************************CLASS deform_surf_LI******************************/
-template<typename T>  
+template<typename T>
 deform_surf_LI<T>::deform_surf_LI(const MatrixXi &surf, const Matrix<T, -1, -1> &nods, const Matrix<T, -1, -1> &sam_points, const MatrixXi &four_NN):deform_surf<T>(surf, nods, sam_points), four_NN_(four_NN){
   basis_weig_ = Matrix<T, -1, -1>(3, nods.cols());
   for(size_t i = 0; i < nods.cols(); ++i){
     Matrix3d basis;
     for(size_t j = 0; j < 3; ++j){
-      cout << "four_NN_: " << endl;
-      cout << four_NN_.col(i) << endl;
       basis.col(j) = this->sam_points_.col(four_NN_(j, i)) - this->sam_points_.col(four_NN_(3, i));
-      cout << "basis.col " << j << " = [" << this->sam_points_.col(four_NN_(j, i)).transpose() << "] - [" << this->sam_points_.col(four_NN_(3, i)).transpose() << "]" << endl;
     }
     // Calculate weight of each basis of a single node
     PartialPivLU<Matrix<T, -1, -1>> lu_solver(basis);

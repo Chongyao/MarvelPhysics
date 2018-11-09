@@ -23,7 +23,6 @@ int energy_dat::save_ele_def_gra(const size_t &ele_id, const MatrixXd &ele_mat){
 }
 int energy_dat::save_ele_inv_all(const size_t &ele_id, const MatrixXd &ele_mat){
   return save_ele_mat(ele_id, 9, ele_mat, inv_A_all_, false);
-  return 0;
 }
 int energy_dat::save_ele_gra(const size_t &ele_id, const MatrixXd &ele_mat){
   return save_ele_mat(ele_id, 3, ele_mat, gra_, true);    
