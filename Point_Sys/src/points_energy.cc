@@ -57,22 +57,16 @@ point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Y
   double mass_total = rho*vol_all;
   double mass_sigma = (sup_radi_/3).array().cube().sum();
   scal_fac_ = mass_total/mass_sigma;
-  scal_fac_ /= 19.2649;
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>scal face<<<<<<<<<<<<<<<<<<" << endl;
-  cout << scal_fac_ <<endl;
+  // scal_fac_ /= 19.2649;
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>scal face<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << scal_fac_ <<endl;
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup radi<<<<<<<<<<<<<<<<<<" << endl;
-  cout << sup_radi_ <<endl;
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup radi<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << sup_radi_ <<endl;
+
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>mass <<<<<<<<<<<<<<<<<<" << endl;
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>cube <<<<<<<<<<<<<<<<<<" << endl;
-  for(size_t i = 0; i < dim_; ++i){
-    double tmp = sup_radi_(i);
-    cout << pow(tmp/3,3) << endl;
-    mass_i_(i) = scal_fac_ * rho_ * pow(tmp/3,3);
-  }
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>mass <<<<<<<<<<<<<<<<<<" << endl;
-  cout << mass_i_ <<endl;
+  VectorXd mass_i_tmp = scal_fac_ * rho_ * (sup_radi_/3).array().cube()- mass_i_.array();
   // mass_i_ = scal_fac_*rho_*sup_radi_.array().cube();
 }
 
@@ -103,14 +97,14 @@ int point_sys::calc_rhoi_vi() const{
 
   calc_weig();
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>weig<<<<<<<<<<<<<<<<<<" << endl;
-  for(size_t i = 0; i < dim_; ++i){
-    cout << "i is " << i << endl;
-    for(auto w : weig_[i]){
-      cout << w <<" " ;
-    }
-    cout << endl;
-  }
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>weig<<<<<<<<<<<<<<<<<<" << endl;
+  // for(size_t i = 0; i < dim_; ++i){
+  //   cout << "i is " << i << endl;
+  //   for(auto w : weig_[i]){
+  //     cout << w <<" " ;
+  //   }
+  //   cout << endl;
+  // }
 
   assert(friends_.size() > 0 && weig_.size() > 0);
 #pragma parallel omp for

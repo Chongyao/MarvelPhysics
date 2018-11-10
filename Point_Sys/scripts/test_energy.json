@@ -10,5 +10,5 @@
   "max_iter":100000,
   "kv":1,
   "time_step":0.001,
-  "gravity":1
+  "gravity":9.8
 }

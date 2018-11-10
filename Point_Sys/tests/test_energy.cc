@@ -70,13 +70,13 @@ int main(int argc, char** argv){
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
 
   // #if 1
-  //points = nods;
+  points = nods;
   // #endif
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
-  spatial_hash SH(points, 10);
+  spatial_hash SH(points, 4);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
@@ -172,13 +172,13 @@ int main(int argc, char** argv){
     acce = new_acce;
 
     dat_str.set_zero();
-    // if(i%iters_perframe == 0){ 
+    if(i%iters_perframe == 0){ 
       auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
       auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
       MatrixXd points_now = points + displace;
       point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
       tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
-    // }
+    }
   }
   //done
   
