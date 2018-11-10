@@ -20,3 +20,10 @@ target_link_libraries(test_energy
   marvel-core
   ${Boost_LIBRARIES}
   )
+
+add_executable(test_linearInterp test_linearInterp.cc)
+target_link_libraries(test_linearInterp
+  PointSys
+  marvel-core
+  ${Boost_LIBRARIES}
+  )
