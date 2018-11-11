@@ -55,10 +55,10 @@ int get_inner_points(Eigen::MatrixXd &points, const Eigen::MatrixXi &surf, const
     float sol_angle = Comp_WN.computeSolidAngle(query_point);
 
 // #pragma omp critical
-    {
-      if (fabs(sol_angle - 4*PI) < 1){
+    {        cout << sol_angle  <<endl;   
+      if (fabs(sol_angle) > 1){
 
-        // cout << sol_angle  <<endl;   
+
         inside_id.push_back(i);
       }
     }

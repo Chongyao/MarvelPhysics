@@ -70,7 +70,7 @@ int main(int argc, char** argv){
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
 
   // #if 1
-  points = nods;
+ // points = nods;
   // #endif
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
@@ -177,11 +177,14 @@ int main(int argc, char** argv){
       auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
       MatrixXd points_now = points + displace;
       point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
+      vector_append_to_vtk(false, point_filename.c_str(), velocity, dim, "velocity");
+      vector_append_to_vtk(true, point_filename.c_str(), acce, dim, "accelarate");
       tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
     }
   }
   //done
   
 }
+
 
 

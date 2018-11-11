@@ -36,7 +36,6 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
   //St.Venant-Kirchhof model
   // double trace = strain(0, 0) + strain(1, 1) + strain(2, 2);
   // stress = def_gra*(2*G*strain + lam*trace*MatrixXd::Identity(3, 3));
-
   //Linear model
   double trace = def_gra(0, 0) + def_gra(1, 1) + def_gra(2, 2) - 3;
   stress = G*(def_gra + def_gra.transpose() - 2*Matrix3d::Identity()) + lam*trace*Matrix3d::Identity();
@@ -192,10 +191,10 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     //calculate Fv
     Matrix3d gra_def_gra;
     auto trans_def_gra = def_gra.transpose();
-    // for(int j = 0; j < 3; ++j){
-    //   Vector3d cross1 = trans_def_gra.col((j+1)%3), cross2 = trans_def_gra.col((j+2)%3);
-    //   gra_def_gra.col(j) = cross1.cross(cross2);
-    // }
+    for(int j = 0; j < 3; ++j){
+      Vector3d cross1 = trans_def_gra.col((j+1)%3), cross2 = trans_def_gra.col((j+2)%3);
+      gra_def_gra.col(j) = cross1.cross(cross2);
+    }
     gra_def_gra.transposeInPlace();
 
     //assemble Fe and Fv
@@ -231,6 +230,17 @@ int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &grav
   Gra += g;
   return 0;
 }
+
+// int point_sys::Hessian(const double*disp, energy_dat &dat_str){
+// #pragma parallel omp for
+//   for(size_t i = 0; i < dim_; ++i){
+//     for(size_t i = 0; i < 2; ++i){
+      
+//     }
+
+//   }
+// }
+
 
 
 }//namespace : marvel
