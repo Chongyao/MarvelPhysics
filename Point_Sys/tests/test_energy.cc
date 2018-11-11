@@ -76,7 +76,7 @@ int main(int argc, char** argv){
   cout <<"generate points done." << endl;
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
-  spatial_hash SH(points, 4);
+  spatial_hash SH(points, pt.get<size_t>("nn_num"));
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;

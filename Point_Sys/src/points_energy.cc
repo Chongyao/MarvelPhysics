@@ -49,25 +49,23 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
 
 point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const vector<vector<size_t>> &friends, const VectorXd &sup_radi):
     points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), kv_(kv), friends_(friends), sup_radi_(sup_radi){
-
-  // sup_radi_ = SH_.get_sup_radi();
   
   mass_i_.setZero(dim_);
   //init
   double mass_total = rho*vol_all;
   double mass_sigma = (sup_radi_/3).array().cube().sum();
-  scal_fac_ = mass_total/mass_sigma;
+  // scal_fac_ = mass_total/mass_sigma;
   // scal_fac_ /= 19.2649;
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>scal face<<<<<<<<<<<<<<<<<<" << endl;
-  // cout << scal_fac_ <<endl;
+  mass_i_ =  (sup_radi_/3).array().cube();
   
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup radi<<<<<<<<<<<<<<<<<<" << endl;
-  // cout << sup_radi_ <<endl;
+  calc_weig();
+  calc_rhoi_vi();
+  scal_fac_ = dim_/rho_i_.sum();
 
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>mass <<<<<<<<<<<<<<<<<<" << endl;
+  mass_i_ *= scal_fac_*rho_;
+  rho_i_ *= scal_fac_*rho_;
   
-  VectorXd mass_i_tmp = scal_fac_ * rho_ * (sup_radi_/3).array().cube()- mass_i_.array();
-  // mass_i_ = scal_fac_*rho_*sup_radi_.array().cube();
+   
 }
 
 double point_sys::get_mass(const size_t &i) const{
@@ -95,37 +93,14 @@ int point_sys::calc_rhoi_vi() const{
   rho_i_.setZero(dim_);
   vol_i_.setZero(dim_);
 
-  calc_weig();
   
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>weig<<<<<<<<<<<<<<<<<<" << endl;
-  // for(size_t i = 0; i < dim_; ++i){
-  //   cout << "i is " << i << endl;
-  //   for(auto w : weig_[i]){
-  //     cout << w <<" " ;
-  //   }
-  //   cout << endl;
-  // }
-
   assert(friends_.size() > 0 && weig_.size() > 0);
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
-      rho_i_(i) += mass_i_(i)*weig_[i][j];
+      rho_i_(i) += mass_i_(friends_[i][j])*weig_[i][j];
     }
-  }
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>rho is <<<<<<<<<<<<<<<<<<" << endl;
-  cout << rho_i_ << endl;
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>average<<<<<<<<<<<<<<<<<<" << endl;
-  cout << rho_i_.sum()/dim_;
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup_radi<<<<<<<<<<<<<<<<<<" << endl;
-  cout << sup_radi_ << endl;
-
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>mass<<<<<<<<<<<<<<<<<<" << endl;
-  cout << mass_i_ << endl;
+  }  
   vol_i_ = mass_i_.array() / rho_i_.array();
   return 0;
 }
@@ -179,7 +154,7 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
   //elasiticity do not updata
   // SH_.update_points(points_curr);
   //
-  calc_rhoi_vi();
+  // calc_rhoi_vi();
  #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
