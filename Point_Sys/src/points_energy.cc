@@ -57,7 +57,7 @@ point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Y
   double mass_total = rho*vol_all;
   double mass_sigma = (sup_radi_/3).array().cube().sum();
   scal_fac_ = mass_total/mass_sigma;
-  mass_i_ = (scal_fac_*rho_*sup_radi_).array().cube();
+  mass_i_ = scal_fac_*rho_*(sup_radi_/3).array().cube();
 }
 
 double point_sys::get_mass(const size_t &i) const{
@@ -78,6 +78,7 @@ int point_sys::calc_weig() const{
     }
     weig_[i] = weig_of_one_p;
   }
+  return 0;
 }
 
 int point_sys::calc_rhoi_vi() const{

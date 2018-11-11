@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <unordered_map>
+#include <Eigen/Geometry>
 using namespace std;
 using namespace Eigen;
 
