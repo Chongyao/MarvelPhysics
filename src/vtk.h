@@ -133,6 +133,17 @@ void vtk_data(OS &os, Iterator first, INT size, const char *value_name, const ch
 }
 
 template <typename OS, typename Iterator, typename INT>
+void vtk_vector(OS &os, Iterator first, INT size, const char *vector_name){
+  os << "VECTORS " << vector_name << " double\n";
+  for(size_t i = 0; i < size; ++i){
+    for(size_t j = 0; j < 3; ++j, ++first)
+      os << *first << " ";
+    os << "\n";
+  }
+}
+    
+
+template <typename OS, typename Iterator, typename INT>
 void vtk_data_rgba(OS &os, Iterator first, INT size, const char *value_name,
                    const char *table_name = "my_table")
 {
@@ -186,6 +197,13 @@ void cell_data_rgba_and_scalar(OS &os, Iterator rgba_first, Iterator scalar_firs
   vtk_data_rgba(os, rgba_first, size, rgba_value_name, table_name);
   vtk_data(os, scalar_first, size, scalar_value_name, table_name);
 
+}
+
+template <typename OS, typename Iterator, typename INT>
+void point_data_vector(bool is_append, OS &os, Iterator first, INT size, const char *vector_name){
+  if(!is_append)
+    os << "POINT_DATA " << size << "\n";
+  vtk_vector(os, first, size, vector_name);
 }
 
 #endif

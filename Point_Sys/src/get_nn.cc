@@ -255,9 +255,10 @@ int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vec
       if( range.first != range.second){
         for_each(range.first, range.second, [&](const decltype(points_hash)::value_type  &one_point){
             double dis = (points.col(one_point.second) - query).norm();
-            if(is_sample && dis < sup_radi && dis != 0)
-              friends.push_back(one_point.second);
-            else if(!is_sample && dis < sup_radi)
+            // if(is_sample && dis < sup_radi && dis != 0)
+            //   friends.push_back(one_point.second);
+                        // else
+            if(dis < sup_radi)
               friends.push_back(one_point.second);              
           });
       }

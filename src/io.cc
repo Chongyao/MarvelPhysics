@@ -177,7 +177,6 @@ int hex_mesh_write_to_vtk(const char *path, const matd_t &nods,
 int tri_mesh_write_to_vtk(const char *path, const MatrixXd &nods,
                           const MatrixXi &tris, const MatrixXd *mtr) {
   assert(tris.rows() == 3);
-
   ofstream ofs(path);
   if ( ofs.fail() )
     return __LINE__;
@@ -204,6 +203,15 @@ int tri_mesh_write_to_vtk(const char *path, const MatrixXd &nods,
   }
   ofs.close();
   return 0;
+}
+
+
+int vector_append_to_vtk(const bool is_append, const char* path, const MatrixXd &vectors, const size_t num_vecs, const char* vector_name){
+  assert(vectors.rows() == 3);
+  ofstream ofs(path,ios_base::app);
+  if ( ofs.fail() )
+    return __LINE__;
+  point_data_vector(is_append, ofs, vectors.data(), vectors.cols(), vector_name);
 }
 /*
 int quad_mesh_write_to_vtk(const char *path, const matd_t &nods,

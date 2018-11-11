@@ -1,6 +1,6 @@
 #include "points_energy.h"
 #include "get_nn.h"
-#include <cmath>
+#include <math.h>
 #include <Eigen/SVD>
 #include <Eigen/LU>
 #include <Eigen/Geometry>
@@ -36,7 +36,6 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
   //St.Venant-Kirchhof model
   // double trace = strain(0, 0) + strain(1, 1) + strain(2, 2);
   // stress = def_gra*(2*G*strain + lam*trace*MatrixXd::Identity(3, 3));
-
   //Linear model
   double trace = def_gra(0, 0) + def_gra(1, 1) + def_gra(2, 2) - 3;
   stress = G*(def_gra + def_gra.transpose() - 2*Matrix3d::Identity()) + lam*trace*Matrix3d::Identity();
@@ -49,15 +48,24 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
 
 point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const vector<vector<size_t>> &friends, const VectorXd &sup_radi):
     points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), kv_(kv), friends_(friends), sup_radi_(sup_radi){
-
-  // sup_radi_ = SH_.get_sup_radi();
   
   mass_i_.setZero(dim_);
   //init
   double mass_total = rho*vol_all;
   double mass_sigma = (sup_radi_/3).array().cube().sum();
-  scal_fac_ = mass_total/mass_sigma;
-  mass_i_ = scal_fac_*rho_*(sup_radi_/3).array().cube();
+
+  // scal_fac_ = mass_total/mass_sigma;
+  // scal_fac_ /= 19.2649;
+  mass_i_ =  (sup_radi_/3).array().cube();
+  
+  calc_weig();
+  calc_rhoi_vi();
+  scal_fac_ = dim_/rho_i_.sum();
+
+  mass_i_ *= scal_fac_*rho_;
+  rho_i_ *= scal_fac_*rho_;
+  
+   
 }
 
 double point_sys::get_mass(const size_t &i) const{
@@ -86,21 +94,23 @@ int point_sys::calc_rhoi_vi() const{
   rho_i_.setZero(dim_);
   vol_i_.setZero(dim_);
 
-  calc_weig();
+  
   assert(friends_.size() > 0 && weig_.size() > 0);
 #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
-      rho_i_(i) += mass_i_(i)*weig_[i][j];
+      rho_i_(i) += mass_i_(friends_[i][j])*weig_[i][j];
     }
-  }
-
+  }  
   vol_i_ = mass_i_.array() / rho_i_.array();
   return 0;
 }
 double point_sys::kernel(const double &r, const double &h) const {
-  if(r < h)
-    return 315*pow((h*h - r*r), 3)/(64*PI*pow(h, 9));
+  if(r < h){
+    double old_res =  315*pow((h*h - r*r), 3)/(64*PI*pow(h, 9));
+    return old_res;
+  }
+
   else
     return 0;
 }
@@ -145,7 +155,7 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
   //elasiticity do not updata
   // SH_.update_points(points_curr);
   //
-  calc_rhoi_vi();
+  // calc_rhoi_vi();
  #pragma parallel omp for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
@@ -222,6 +232,17 @@ int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &grav
   Gra += g;
   return 0;
 }
+
+// int point_sys::Hessian(const double*disp, energy_dat &dat_str){
+// #pragma parallel omp for
+//   for(size_t i = 0; i < dim_; ++i){
+//     for(size_t i = 0; i < 2; ++i){
+      
+//     }
+
+//   }
+// }
+
 
 
 }//namespace : marvel
