@@ -80,12 +80,20 @@ int point_sys::calc_weig() const{
   weig_ = vector<vector<double>>(dim_);
 #pragma omp parallel for  
   for(size_t i = 0; i < dim_; ++i){
-    vector<double> weig_of_one_p;
-    for(auto one_fri : friends_[i]){
-      weig_of_one_p.push_back(kernel(i, one_fri));
+    vector<double> weig_of_one_p(friends_[i].size());
+    for(size_t j = 0; j < friends_[i].size(); ++j){
+      weig_of_one_p[j] = kernel(i, friends_[i][j]);
     }
     weig_[i] = weig_of_one_p;
   }
+  for(size_t i = 0; i < dim_; ++i){
+    cout << "i = " << i << endl;
+    for(size_t j = 0; j < weig_[i].size(); ++j){
+      cout << weig_[i][j] << " ";
+    }
+    cout <<endl;
+  }
+
   return 0;
 }
 
@@ -149,13 +157,9 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
 }
 
 
-
+//calculate inv_A
 int point_sys::pre_compute(energy_dat &dat_str) const {
-  // Map<const Matrix<double, Dynamic, Dynamic> > points_curr(x, 3, dim_);
-  //elasiticity do not updata
-  // SH_.update_points(points_curr);
-  //
-  // calc_rhoi_vi();
+ 
  #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
@@ -164,10 +168,9 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
     // assert(friends_[i].size() >= 3);
     for(size_t j = 0; j < friends_[i].size(); ++j){
       Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
-      sys_mat += weig_[i][j]*xij*xij.transpose();
+      sys_mat += weig_[i][j]*xij*(xij.transpose());
       
     }
-    
     auto inv_A = safe_inv(sys_mat);
     
     dat_str.save_ele_inv_all(i, inv_A);
@@ -240,12 +243,17 @@ int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &grav
 
 #if 0
 int point_sys::Hessian(const double*disp, energy_dat &dat_str){
+  Matrix3d Kpq = Matrix3d::Zero();n
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
       size_t p = friends_[i][j];
       for(size_t k = j; k < friends_[i].size(); ++k){
         size_t q = friends_[i][k];
+        for(size_t l = 0; l < 3; ++l){
+          Kpq.col(l) = -2*vol_i_(i)*()
+        }
+
         
         
       }

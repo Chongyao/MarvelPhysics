@@ -158,6 +158,13 @@ int main(int argc, char** argv){
       new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j);
     }
     cout << "new acce is "<<endl << new_acce.block(0, 0, 3, 8) << endl;
+
+    displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
+#pragma omp parallel for
+    for(size_t i = 0; i < cons.size(); ++i){
+      displace.col(cons[i]) = MatrixXd::Zero(3, 1);    
+    }
+    
     velocity += 0.5*(new_acce + acce)*delt_t;
 #pragma omp parallel for
     for(size_t i = 0; i < cons.size(); ++i){
@@ -165,11 +172,7 @@ int main(int argc, char** argv){
     }
 
 
-    displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
-#pragma omp parallel for
-    for(size_t i = 0; i < cons.size(); ++i){
-      displace.col(cons[i]) = MatrixXd::Zero(3, 1);    
-    }
+
 
     
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
