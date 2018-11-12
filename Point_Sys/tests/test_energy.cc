@@ -86,7 +86,7 @@ int main(int argc, char** argv){
   VectorXd sup_radi = SH.get_sup_radi();
   //get friends of every point
   vector<vector<size_t>> friends_all(dim);
-#pragma parallel omp for
+#pragma omp parallel for
   for(size_t i = 0; i < dim; ++i){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
@@ -152,39 +152,52 @@ int main(int argc, char** argv){
     PS.Gra(displace.data(), dat_str);
     PS.gravity(displace.data(), dat_str, pt.get<double>("gravity"));
     
-#pragma parallel omp for
+#pragma omp parallel for
     for(size_t j = 0; j < dim; ++j){
       assert(PS.get_mass(j) > 0);
       new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j);
     }
     cout << "new acce is "<<endl << new_acce.block(0, 0, 3, 8) << endl;
     velocity += 0.5*(new_acce + acce)*delt_t;
-#pragma parallel omp for
-    for(auto c : cons){
-      velocity.col(c) = MatrixXd::Zero(3, 1);
+#pragma omp parallel for
+    for(size_t i = 0; i < cons.size(); ++i){
+      velocity.col(cons[i]) = MatrixXd::Zero(3, 1);    
     }
-#pragma parallel omp for
+
+
     displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
-    for(auto c : cons){
-      displace.col(c) = MatrixXd::Zero(3, 1);
+#pragma omp parallel for
+    for(size_t i = 0; i < cons.size(); ++i){
+      displace.col(cons[i]) = MatrixXd::Zero(3, 1);    
     }
+
+    
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
+    cout << dat_str.ela_val_.transpose();
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
+    cout << dat_str.vol_val_.transpose();
+        
     vet_displace = DS.update_surf(displace, dat_str.def_gra_);
     acce = new_acce;
 
-    dat_str.set_zero();
     if(i%iters_perframe == 0){ 
       auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
       auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
       MatrixXd points_now = points + displace;
       point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-      vector_append_to_vtk(false, point_filename.c_str(), velocity, dim, "velocity");
-      vector_append_to_vtk(true, point_filename.c_str(), acce, dim, "accelarate");
+      point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
+      point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
+      point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
+      point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
+      
       tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
     }
+
+    dat_str.set_zero();
   }
   //done
-  
 }
+
 
 
 

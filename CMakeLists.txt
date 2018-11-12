@@ -1,8 +1,8 @@
 project(MarvalPhysics)
 cmake_minimum_required(VERSION 2.8)
 
-# list(APPEND CMAKE_CXX_FLAGS "-fopenmp -std=c++11 -o3 -fpermissive")
-list(APPEND CMAKE_CXX_FLAGS " -std=c++11 -o3 -fpermissive")
+list(APPEND CMAKE_CXX_FLAGS "-fopenmp -std=c++11 -o3 -fpermissive")
+# list(APPEND CMAKE_CXX_FLAGS " -std=c++11 -o3 -fpermissive")
 # set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/;${CMAKE_MODULE_PATH}")
 
@@ -125,12 +125,12 @@ endif(TBB_FOUND)
 # option(LIBIGL_WITH_VIEWER            "Use OpenGL viewer"  ON)
 # find_package(LIBIGL REQUIRED QUIET)
 
-# find_package(OpenMP)
-# if (OPENMP_FOUND)
-#   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-#   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-#   set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-# endif()
+find_package(OpenMP)
+if (OPENMP_FOUND)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
 
 
 add_subdirectory(external)

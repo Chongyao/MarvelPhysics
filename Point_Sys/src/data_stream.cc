@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 namespace marvel{
-energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(9, dim_), strain_(9, dim_), stress_(9, dim_), pre_F_(9, dim_){
+energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(9, dim_), strain_(9, dim_), stress_(9, dim_), pre_F_(9, dim_), ela_val_(dim_), vol_val_(dim_){
   gra_.setZero(3, dim_);
   hes_.setZero(3, dim_);
 }
@@ -45,7 +45,8 @@ int energy_dat::set_zero(){
   strain_.setZero(9, dim_);
   stress_.setZero(9, dim_);
   pre_F_.setZero(9, dim_);
-
+  ela_val_.setZero(dim_, 1);
+  vol_val_.setZero(dim_, 1);
   return 0;
 }
 

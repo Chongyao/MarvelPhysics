@@ -25,7 +25,8 @@ int tri_mesh_write_to_vtk(const char *path, const Eigen::MatrixXd &nods, const E
 // int quad_mesh_write_to_vtk(const char *path, const matd_t &nods, const mati_t &quad,
 //                            const matd_t *mtr=nullptr, const char *type="CELL");
 int point_write_to_vtk(const char *path, const double *nods, const size_t num_points);
-int vector_append_to_vtk(const bool is_append, const char* path, const Eigen::MatrixXd &vectors, const size_t num_vecs, const char* vector_name);
+int point_vector_append2vtk(const bool is_append, const char* path, const Eigen::MatrixXd &vectors, const size_t num_vecs, const char* vector_name);
+int point_scalar_append2vtk(const bool is_append, const char* path, const Eigen::VectorXd &scalars, const size_t num_sca, const char* scalar_name);
 /*
 int point_write_to_vtk(const char *path, const matd_t &nods);
 
