@@ -212,6 +212,7 @@ int vector_append_to_vtk(const bool is_append, const char* path, const MatrixXd 
   if ( ofs.fail() )
     return __LINE__;
   point_data_vector(is_append, ofs, vectors.data(), vectors.cols(), vector_name);
+  return 0;
 }
 /*
 int quad_mesh_write_to_vtk(const char *path, const matd_t &nods,
