@@ -114,7 +114,7 @@ int spatial_hash::hash_NNN(){
 
 
   //insert elements
-#pragma parallel omp for
+#pragma omp parallel for
   for(size_t i = 0; i < points_num; ++i){
     points_hash.insert({points_dis.col(i), i});
   }
@@ -226,7 +226,7 @@ const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
 
   sup_radi.setZero(points_num);
   
-  #pragma parallel omp for
+  #pragma omp parallel for
   for(size_t i = 0; i < points_num; ++i){
     vector<pair_dis> NN_cand;
     find_NN(i, NN_cand, nn_num_);

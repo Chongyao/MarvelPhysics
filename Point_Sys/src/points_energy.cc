@@ -78,7 +78,7 @@ size_t point_sys::Nx() const{
 int point_sys::calc_weig() const{
   // friends_ = vector<vector<size_t>>(dim_);
   weig_ = vector<vector<double>>(dim_);
-#pragma parallel omp for  
+#pragma omp parallel for  
   for(size_t i = 0; i < dim_; ++i){
     vector<double> weig_of_one_p;
     for(auto one_fri : friends_[i]){
@@ -96,7 +96,7 @@ int point_sys::calc_rhoi_vi() const{
 
   
   assert(friends_.size() > 0 && weig_.size() > 0);
-#pragma parallel omp for
+#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
       rho_i_(i) += mass_i_(friends_[i][j])*weig_[i][j];
@@ -122,7 +122,7 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
 
 int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
   Map<const Matrix<double, Dynamic, Dynamic> > _disp(disp, 3, dim_);
-#pragma parallel omp for
+#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d one_du;
     Matrix3d b = Matrix3d::Zero();
@@ -156,7 +156,7 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
   // SH_.update_points(points_curr);
   //
   // calc_rhoi_vi();
- #pragma parallel omp for
+ #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
     sys_mat.setZero(3, 3);
@@ -175,7 +175,7 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
   return 0;
 }
 int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
-#pragma parallel omp for
+#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     
     
@@ -188,8 +188,13 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     dat_str.save_ele_strain(i, strain);
     Matrix3d stress;
     cons_law(strain, stress, def_gra, Young_, Poission_);
-    
     dat_str.save_ele_stress(i, stress);
+
+    //save energy
+    double energy = 0;
+
+    dat_str.ela_val_(i) = 0.5*vol_i_(i)*(stress.array()*strain.array()).sum();
+    dat_str.vol_val_(i) = 0.5*kv_*pow((def_gra.determinant() - 1), 2);
     //calculate Fv
     Matrix3d gra_def_gra;
     auto trans_def_gra = def_gra.transpose();
@@ -233,16 +238,23 @@ int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &grav
   return 0;
 }
 
-// int point_sys::Hessian(const double*disp, energy_dat &dat_str){
-// #pragma parallel omp for
-//   for(size_t i = 0; i < dim_; ++i){
-//     for(size_t i = 0; i < 2; ++i){
-      
-//     }
+#if 0
+int point_sys::Hessian(const double*disp, energy_dat &dat_str){
+#pragma omp parallel for
+  for(size_t i = 0; i < dim_; ++i){
+    for(size_t j = 0; j < friends_[i].size(); ++j){
+      size_t p = friends_[i][j];
+      for(size_t k = j; k < friends_[i].size(); ++k){
+        size_t q = friends_[i][k];
+        
+        
+      }
 
-//   }
-// }
+    }
+  }
+}
 
+#endif
 
 
 }//namespace : marvel

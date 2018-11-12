@@ -205,5 +205,11 @@ void point_data_vector(bool is_append, OS &os, Iterator first, INT size, const c
     os << "POINT_DATA " << size << "\n";
   vtk_vector(os, first, size, vector_name);
 }
+template <typename OS, typename Iterator, typename INT>
+void point_data_scalar(bool is_append, OS &os, Iterator first, INT size, const char *scalar_name){
+  if(!is_append)
+    os << "POINT_DATA " << size << "\n";
+  vtk_data(os, first, size, scalar_name);
+}
 
 #endif

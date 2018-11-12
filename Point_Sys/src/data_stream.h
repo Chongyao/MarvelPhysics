@@ -24,6 +24,7 @@ struct energy_dat{
 
   int set_zero();
   //get data by element
+
   // Eigen::MatrixXd& ele_def_gra(const size_t &ele_id);
   // Eigen::MatrixXd& ele_inv_all(const size_t &ele_id);
   // Eigen::MatrixXd& ele_gra(const size_t &ele_id);
@@ -36,6 +37,8 @@ struct energy_dat{
   Eigen::MatrixXd strain_;
   Eigen::MatrixXd stress_;
   Eigen::MatrixXd pre_F_;
+  Eigen::VectorXd ela_val_;
+  Eigen::VectorXd vol_val_;
   // const Eigen::MatrixXd& ele_mat(const size_t &ele_id, const size_t &rows, const size_t &cols, Eigen::MatrixXd &mat);
   int save_ele_mat(const size_t &ele_id, const size_t &rows, const Eigen::MatrixXd &ele_mat, Eigen::MatrixXd &whole_mat, bool if_plus);
 };
