@@ -1,0 +1,15 @@
+{
+  "indir":"../../Point_Sys/data/",
+  "outdir":"../../Point_Sys/result/",
+  "surf":"Tetrahedron",  
+  "num_in_axis":4,
+  "rho":5,
+  "Poission":0.45,
+  "Young":900,
+  "ker_cof":10,
+  "max_iter":100000,
+  "kv":0,
+  "time_step":0.0001,
+  "gravity":98,
+  "nn_num":3
+}

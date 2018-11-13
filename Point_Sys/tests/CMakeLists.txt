@@ -27,3 +27,13 @@ target_link_libraries(test_linearInterp
   marvel-core
   ${Boost_LIBRARIES}
   )
+
+
+add_executable(test_tet test_tet.cc)
+target_link_libraries(test_tet
+  PointSys
+  marvel-core
+  ${Boost_LIBRARIES}
+  )
+
+add_executable(test_autodiff test_autodiff.cc)
