@@ -48,7 +48,7 @@ int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, 
     while ( getline(linestream, cell, ',') ) {
       coords.push_back(std::stod(cell));
     }    
-  }
+v  }
   ASSERT(coords.size() == 3*fixed.size());
 
   if ( pos != nullptr ) {
