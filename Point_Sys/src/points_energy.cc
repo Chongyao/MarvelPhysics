@@ -5,12 +5,29 @@
 #include <Eigen/LU>
 #include <Eigen/Geometry>
 #include <iostream>
-#define PI 3.14159265359
-
 using namespace std;
 using namespace Eigen;
-namespace marvel{
 
+#define AUTODIFF_ENABLE_EIGEN_SUPPORT
+#include <autodiff/autodiff/autodiff.hpp>
+using namespace autodiff;
+
+#define PI 3.14159265359
+
+
+namespace marvel{
+#if 0
+var STRAIN_ENERGY(const VectorXv& u_all, const Matrix3d &inv_A, const MatrixXd &x){
+  size_t num_friends = u_all.size()/3;
+  
+  Matrix3v def_u;
+  for(size_t i = 0; i < num_friends; ++i){
+    Vector3d xij = x.col(i) - x.col(0);
+    def_u.col(i) = 
+  }
+
+}
+#endif
 
 
 Matrix3d safe_inv(const MatrixXd& sys_mat){
@@ -65,7 +82,9 @@ point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Y
   mass_i_ *= scal_fac_*rho_;
   rho_i_ *= scal_fac_*rho_;
   
-   
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>vol<<<<<<<<<<<<<<<<<<" << endl;
+  cout << vol_i_ << endl;
 }
 
 double point_sys::get_mass(const size_t &i) const{
@@ -78,7 +97,7 @@ size_t point_sys::Nx() const{
 int point_sys::calc_weig() const{
   // friends_ = vector<vector<size_t>>(dim_);
   weig_ = vector<vector<double>>(dim_);
-#pragma omp parallel for  
+// #pragma omp parallel for  
   for(size_t i = 0; i < dim_; ++i){
     vector<double> weig_of_one_p(friends_[i].size());
     for(size_t j = 0; j < friends_[i].size(); ++j){
@@ -243,15 +262,26 @@ int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &grav
 
 #if 0
 int point_sys::Hessian(const double*disp, energy_dat &dat_str){
-  Matrix3d Kpq = Matrix3d::Zero();n
+  MatrixXd Consti
+  
+  Matrix3d Kpq = Matrix3d::Zero();
+  Matrix3d one_line;
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
+    Map<MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
+    Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
+    
     for(size_t j = 0; j < friends_[i].size(); ++j){
-      size_t p = friends_[i][j];
+      // size_t p = friends_[i][j];
+      Vector3d dq = poitns.col(friends_[i][j]) - points.col(i);
       for(size_t k = j; k < friends_[i].size(); ++k){
-        size_t q = friends_[i][k];
+        Vector3d dq = poitns.col(friends_[i][k]) - points.col(i);
+        
         for(size_t l = 0; l < 3; ++l){
-          Kpq.col(l) = -2*vol_i_(i)*()
+          one_line.setZero(3, 3);
+          one_line.row(l) = dq.transpose();
+          Kpq.col(l) = -2*vol_i_(i)*(one_line*stress)
+              
         }
 
         

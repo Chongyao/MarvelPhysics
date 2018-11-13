@@ -231,16 +231,6 @@ const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
     vector<pair_dis> NN_cand;
     find_NN(i, NN_cand, nn_num_ + 2);
     sort(NN_cand.begin(), NN_cand.end(), [](const pair_dis &a, const pair_dis &b){return a.dis < b.dis;});
-#pragma omp critical
-    {
-    cout << "i is " << i << endl;
-    for(auto NN: NN_cand){
-      cout << NN.n << " "<< NN.dis <<endl;
-    }
-    cout << endl;      
-    }
-
-
     for(size_t j = 0; j < nn_num_ ; ++j){
       NN(j, i) = NN_cand[j + 1].n;
       sup_radi[i] += NN_cand[j + 1].dis;

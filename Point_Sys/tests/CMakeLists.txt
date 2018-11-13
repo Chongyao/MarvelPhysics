@@ -35,3 +35,5 @@ target_link_libraries(test_tet
   marvel-core
   ${Boost_LIBRARIES}
   )
+
+add_executable(test_autodiff test_autodiff.cc)

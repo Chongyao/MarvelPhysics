@@ -1,0 +1,3 @@
+[submodule "external/autodiffgit"]
+	path = external/autodiffgit
+	url = https://github.com/autodiff/autodiff.git

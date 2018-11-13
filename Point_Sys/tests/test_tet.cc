@@ -94,6 +94,15 @@ int main(int argc, char** argv){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
   
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>friends<<<<<<<<<<<<<<<<<<" << endl;
+  for(size_t i = 0; i < dim; ++i){
+    cout << "i = " << i <<endl;
+    for(size_t j = 0; j < friends_all[i].size(); ++j){
+      cout << friends_all[i][j] << " ";
+    }
+    cout << endl;
+  }
+
   point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
 
