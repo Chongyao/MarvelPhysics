@@ -3,9 +3,9 @@
 
 #include <src/def.h>
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 #include "get_nn.h"
 #include "data_stream.h"
-
 namespace marvel{
 
 
@@ -24,6 +24,8 @@ class point_sys{
   int Gra(const double *disp, energy_dat &dat_str) const;
   int gravity(const double *disp, energy_dat &dat_str, const double &gravity) const;
   double get_mass(const size_t &i) const;
+  int Hessian(const double*disp, energy_dat &dat_str);
+  const Eigen::SparseMatrix<double>& get_Mass_Matrix();
   // int Gra(const double *x, double *gra) const;
   // int Val(const double *x, double *val) const;
   // int Gra(const double *x, double *gra) const;
@@ -31,7 +33,7 @@ class point_sys{
  private:
   const Eigen::MatrixXd points_;
   Eigen::MatrixXi NN_;
-  
+  Eigen::SparseMatrix<double> M_;
   const size_t dim_;
   const double rho_;
   const double Poission_;
@@ -46,7 +48,7 @@ class point_sys{
 
   int calc_rhoi_vi() const;
   int calc_weig() const;
-  
+  int calc_Mass_matrix();  
   double kernel(const double &r, const double &h) const;
   double kernel(const size_t &i, const size_t &j) const;
 

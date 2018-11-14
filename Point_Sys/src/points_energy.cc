@@ -1,10 +1,13 @@
+#include <math.h>
+#include <iostream>
+
 #include "points_energy.h"
 #include "get_nn.h"
-#include <math.h>
+
 #include <Eigen/SVD>
 #include <Eigen/LU>
 #include <Eigen/Geometry>
-#include <iostream>
+
 using namespace std;
 using namespace Eigen;
 
@@ -45,6 +48,21 @@ Matrix3d safe_inv(const MatrixXd& sys_mat){
   return std::move(svd.matrixV() * inv_sin_val * svd.matrixU().transpose());
 }
 
+Matrix3d cons_law(const Matrix3d &strain, const double &You, const double &Poi){
+  assert(Poi > 0 && Poi < 0.5);
+  Matrix3d stress = Matrix3d::Zero();
+  
+  for(size_t i = 0; i < 3; ++i){
+    for(size_t j = 0; j < 3; ++j){
+      stress(i, i) += j==i ? (1-Poi) * strain(j, j) : Poi*strain(j, j);
+    }
+    stress((i + 1)%3, i) += (1 - 2*Poi)*strain((i + 1)%3, i);
+    stress((i + 2)%3, i) += (1 - 2*Poi)*strain((i + 2)%3, i);
+  }
+  stress *= You/(1+Poi)/(1-2*Poi);
+  return stress;
+}
+
 void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra, const double &You, const double &Poi){
   //TODO:add more consititutive law
 
@@ -54,8 +72,9 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
   // double trace = strain(0, 0) + strain(1, 1) + strain(2, 2);
   // stress = def_gra*(2*G*strain + lam*trace*MatrixXd::Identity(3, 3));
   //Linear model
-  double trace = def_gra(0, 0) + def_gra(1, 1) + def_gra(2, 2) - 3;
-  stress = G*(def_gra + def_gra.transpose() - 2*Matrix3d::Identity()) + lam*trace*Matrix3d::Identity();
+  double trace = def_gra(0, 0) + def_gra(1, 1) + def_gra(2, 2) - 3; 
+  // stress = G*(def_gra + def_gra.transpose() - 2*Matrix3d::Identity()) + lam*trace*Matrix3d::Identity();
+  stress = def_gra*(2*G*strain + lam*trace*Matrix3d::Identity());
 
 }
 
@@ -81,10 +100,7 @@ point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Y
 
   mass_i_ *= scal_fac_*rho_;
   rho_i_ *= scal_fac_*rho_;
-  
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>vol<<<<<<<<<<<<<<<<<<" << endl;
-  cout << vol_i_ << endl;
+
 }
 
 double point_sys::get_mass(const size_t &i) const{
@@ -104,13 +120,6 @@ int point_sys::calc_weig() const{
       weig_of_one_p[j] = kernel(i, friends_[i][j]);
     }
     weig_[i] = weig_of_one_p;
-  }
-  for(size_t i = 0; i < dim_; ++i){
-    cout << "i = " << i << endl;
-    for(size_t j = 0; j < weig_[i].size(); ++j){
-      cout << weig_[i][j] << " ";
-    }
-    cout <<endl;
   }
 
   return 0;
@@ -178,17 +187,17 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
 
 //calculate inv_A
 int point_sys::pre_compute(energy_dat &dat_str) const {
- 
  #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
     sys_mat.setZero(3, 3);
     
+    
     // assert(friends_[i].size() >= 3);
-    for(size_t j = 0; j < friends_[i].size(); ++j){
-      Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
-      sys_mat += weig_[i][j]*xij*(xij.transpose());
-      
+    for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
+      Vector3d xij = points_.col(friends_[i][iter_j]) - points_.col(i);
+      dat_str.sigma_w_points_.col(i) += -weig_[i][iter_j] * xij;
+      sys_mat += weig_[i][iter_j]*xij*(xij.transpose());
     }
     auto inv_A = safe_inv(sys_mat);
     
@@ -210,6 +219,14 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     dat_str.save_ele_strain(i, strain);
     Matrix3d stress;
     cons_law(strain, stress, def_gra, Young_, Poission_);
+
+    Matrix3d stress_test = cons_law(strain, Young_, Poission_);
+    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>test stress<<<<<<<<<<<<<<<<<<" << endl;
+    // cout << stress << endl <<endl<< stress_test << endl << endl;
+    // assert(stress_test == stress);
+    
+
+    
     dat_str.save_ele_stress(i, stress);
 
     //save energy
@@ -260,39 +277,78 @@ int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &grav
   return 0;
 }
 
-#if 0
+// #if 0
 int point_sys::Hessian(const double*disp, energy_dat &dat_str){
-  MatrixXd Consti
+  
+  vector<Triplet<double>> TripletList;
+  //TODO: estimate entries
+  // TripletList.reserve()
+
+  //TODO:consider sysmetric
   
   Matrix3d Kpq = Matrix3d::Zero();
   Matrix3d one_line;
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
+    // cout << "i = " << i << endl;
     Map<MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
     Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
-    
-    for(size_t j = 0; j < friends_[i].size(); ++j){
-      // size_t p = friends_[i][j];
-      Vector3d dq = poitns.col(friends_[i][j]) - points.col(i);
-      for(size_t k = j; k < friends_[i].size(); ++k){
-        Vector3d dq = poitns.col(friends_[i][k]) - points.col(i);
+    Map<MatrixXd> inv_A(dat_str.inv_A_all_.col(i).data(), 3, 3);
+    for(auto iter_j = friends_[i].begin(); iter_j != friends_[i].end(); ++iter_j){
+      Vector3d xij = points_.col(*iter_j) - points_.col(i);
+      Vector3d dp = (*iter_j) == i ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij;
+      
+      for(auto iter_k = friends_[i].begin(); iter_k != friends_[i].end(); ++iter_k){
+        Vector3d xik = points_.col(*iter_k) - points_.col(i);
+        Vector3d dq = *iter_k == i ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik;
         
         for(size_t l = 0; l < 3; ++l){
           one_line.setZero(3, 3);
           one_line.row(l) = dq.transpose();
-          Kpq.col(l) = -2*vol_i_(i)*(one_line*stress)
-              
+          Matrix3d dsigma_duk =
+              cons_law(def_gra.row(l).transpose()*dq.transpose() + dq*def_gra.row(l), Young_, Poission_);
+          Kpq.col(l) = -2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
+        }
+        
+        // cout << "[INFO]>>>>>>>>>>>>>>>>>>>local Hessian<<<<<<<<<<<<<<<<<<" << endl;
+        // cout << "p == " << *iter_j << " q == " << *iter_k << endl;
+        // cout << Kpq <<endl;
+#pragma omp critical
+        {
+        for(size_t m = 0; m < 3; ++m){
+          for(size_t n = 0; n < 3; ++n){
+            if (Kpq(m, n) != 0){
+              dat_str.hes_trips.push_back(Triplet<double>(*iter_j + m, *iter_k + n, Kpq(m,n)));
+            }
+          }
+        }          
         }
 
-        
-        
       }
-
     }
   }
 }
 
-#endif
+int point_sys::calc_Mass_matrix(){
+  vector<Triplet<double>> mass_triplets(3 * dim_);
+#pragma omp parallel for
+  for(size_t i = 0; i < dim_; ++i){
+    for(size_t j = 0; j < 3; ++j){
+      mass_triplets[i*3 + j] = Triplet<double>(i * 3 + j, i * 3 + j, mass_i_(i));
+    }
+  }
+  M_ = SparseMatrix<double>(3*dim_, 3*dim_);
+  M_.setFromTriplets(mass_triplets.begin(), mass_triplets.end());
+  return 0;
+}
+
+const SparseMatrix<double>& point_sys::get_Mass_Matrix(){
+  calc_Mass_matrix();
+  return M_;
+}
+
+
+// #endif
 
 
 }//namespace : marvel

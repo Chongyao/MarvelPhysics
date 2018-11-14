@@ -6,6 +6,7 @@
 #include <libigl/include/igl/writeOBJ.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
@@ -28,10 +29,11 @@ using namespace chrono;
 using namespace boost;
 
 int main(int argc, char** argv){
-  
+
   Eigen::initParallel();
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Eigen parallel<<<<<<<<<<<<<<<<<<" << endl;
   cout << "enable parallel in Eigen in " << nbThreads() << " threads" << endl;
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>READ JSON FILE<<<<<<<<<<<<<<<<<<" << endl;
   boost::property_tree::ptree pt;{
     const string jsonfile_path = argv[1];
@@ -111,6 +113,7 @@ int main(int argc, char** argv){
 
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
+
   //add simple constraints
   //This should read from file. We loop for some points to restrain here.
   //Constraints vary from different models and situations.
@@ -122,6 +125,8 @@ int main(int argc, char** argv){
     }
   }
   cout << endl;
+  position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
+
 
   
   
@@ -130,13 +135,12 @@ int main(int argc, char** argv){
   energy_dat dat_str (dim);
 
   double delt_t = pt.get<double>("time_step");
-  MatrixXd displace;
-  MatrixXd velocity;
+  SparseVector displace(3 * dim);
+  SparseVector velocity(3 * dim);
   MatrixXd acce;
   MatrixXd new_acce;
   MatrixXd gra;
   MatrixXd vet_displace;
-  displace.setZero(3, dim);
   velocity.setZero(3, dim);
   acce.setZero(3, dim);
   gra.setZero(3, dim);
@@ -145,6 +149,11 @@ int main(int argc, char** argv){
 
   PS.pre_compute(dat_str);
   size_t iters_perframe = floor(1/delt_t/20);
+
+  SparseMatrix A_CG(dim * 3, dim * 3);
+  SparseVector b_CG(dim * 3);
+  SparseMatrix M = PS.get_Mass_Matrix();
+  
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
     cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
@@ -153,29 +162,18 @@ int main(int argc, char** argv){
     PS.calc_defo_gra(displace.data(), dat_str);
     PS.Gra(displace.data(), dat_str);
     PS.gravity(displace.data(), dat_str, pt.get<double>("gravity"));
+    pos_cons.Gra(displace.data(), dat_str);
+    PS.Hessian(displace.data(), dat_str);
+    pos_cons.Hes(displace.data(), dat_str);
     
-#pragma omp parallel for
-    for(size_t j = 0; j < dim; ++j){
-      assert(PS.get_mass(j) > 0);
-      new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j);
+    //implicit time integral
+    { SparseVector<double> velocity(3 * dim)
+      A.setZero();
+      dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
+      A = M - delt_t*delt_t*dat_str.hes_;
+      b = M * 
+     
     }
-    cout << "new acce is "<<endl << new_acce.block(0, 0, 3, 8) << endl;
-
-    displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
-#pragma omp parallel for
-    for(size_t i = 0; i < cons.size(); ++i){
-      displace.col(cons[i]) = MatrixXd::Zero(3, 1);    
-    }
-    
-    velocity += 0.5*(new_acce + acce)*delt_t;
-#pragma omp parallel for
-    for(size_t i = 0; i < cons.size(); ++i){
-      velocity.col(cons[i]) = MatrixXd::Zero(3, 1);    
-    }
-
-
-
-
     
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
     cout << dat_str.ela_val_.transpose();

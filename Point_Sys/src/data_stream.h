@@ -1,6 +1,7 @@
 #ifndef DATA_STREAM_H
 #define DATA_STREAM_H
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 namespace marvel{
 
 
@@ -31,14 +32,16 @@ struct energy_dat{
   // Eigen::MatrixXd& ele_hes(const size_t &ele_id);
  // private:
   Eigen::MatrixXd def_gra_;
+  Eigen::MatrixXd sigma_w_points_;
   Eigen::MatrixXd inv_A_all_;
   Eigen::MatrixXd gra_;
-  Eigen::MatrixXd hes_;
   Eigen::MatrixXd strain_;
   Eigen::MatrixXd stress_;
   Eigen::MatrixXd pre_F_;
   Eigen::VectorXd ela_val_;
   Eigen::VectorXd vol_val_;
+  std::vector<Eigen::Triplet<double>> hes_trips;
+  Eigen::SparseMatrix<double> hes_;
   // const Eigen::MatrixXd& ele_mat(const size_t &ele_id, const size_t &rows, const size_t &cols, Eigen::MatrixXd &mat);
   int save_ele_mat(const size_t &ele_id, const size_t &rows, const Eigen::MatrixXd &ele_mat, Eigen::MatrixXd &whole_mat, bool if_plus);
 };
