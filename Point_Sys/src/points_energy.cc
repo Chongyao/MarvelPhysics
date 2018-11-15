@@ -81,9 +81,9 @@ void cons_law(const Matrix3d &strain, Matrix3d &stress, const Matrix3d &def_gra,
 
 
 
-
+//set dim_ to 1 to debug
 point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const vector<vector<size_t>> &friends, const VectorXd &sup_radi):
-    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points_.cols()), kv_(kv), friends_(friends), sup_radi_(sup_radi){
+    points_(points), rho_(rho), Young_(Young), Poission_(Poission), vol_all_(vol_all), dim_(points.cols()), kv_(kv), friends_(friends), sup_radi_(sup_radi){
   
   mass_i_.setZero(dim_);
   //init
@@ -113,7 +113,7 @@ size_t point_sys::Nx() const{
 int point_sys::calc_weig() const{
   // friends_ = vector<vector<size_t>>(dim_);
   weig_ = vector<vector<double>>(dim_);
-// #pragma omp parallel for  
+//#pragma omp parallel for  
   for(size_t i = 0; i < dim_; ++i){
     vector<double> weig_of_one_p(friends_[i].size());
     for(size_t j = 0; j < friends_[i].size(); ++j){
@@ -132,7 +132,7 @@ int point_sys::calc_rhoi_vi() const{
 
   
   assert(friends_.size() > 0 && weig_.size() > 0);
-#pragma omp parallel for
+//#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
       rho_i_(i) += mass_i_(friends_[i][j])*weig_[i][j];
@@ -158,14 +158,14 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
 
 int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
   Map<const Matrix<double, Dynamic, Dynamic> > _disp(disp, 3, dim_);
-#pragma omp parallel for
+//#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d one_du;
     Matrix3d b = Matrix3d::Zero();
-    for(size_t j = 0; j < friends_[i].size(); ++j){
-      Vector3d xij = points_.col(friends_[i][j]) - points_.col(i);
+    for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
+      Vector3d xij = points_.col(friends_[i][iter_j]) - points_.col(i);
       for(size_t k = 0; k < 3; ++k){
-        b.col(k) += (_disp(k, friends_[i][j]) - _disp(k, i))*weig_[i][j]*xij;
+        b.col(k) += (_disp(k, friends_[i][iter_j]) - _disp(k, i))*weig_[i][iter_j]*xij;
         
       }
     }
@@ -173,6 +173,7 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
     //clac inverse of sys_mat by SVD
     
     Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
+    
     
     for(size_t k = 0; k < 3; ++k){
       one_du.row(k) = (inv_A * b.col(k)).transpose();
@@ -205,11 +206,11 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
   }
   return 0;
 }
-int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
-#pragma omp parallel for
+int point_sys::Val(const double *disp, energy_dat &dat_str)const {
+  calc_defo_gra(disp, dat_str);
+  // dat_str.Val_ = 0;
+//#pragma omp parallel for 
   for(size_t i = 0; i < dim_; ++i){
-    
-    
     Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     
     //calculate strain and stress
@@ -217,23 +218,35 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     // Matrix3d strain = 0.5*(def_gra + def_gra.transpose()) - Matrix3d::Identity();
     
     dat_str.save_ele_strain(i, strain);
-    Matrix3d stress;
-    cons_law(strain, stress, def_gra, Young_, Poission_);
+    // Matrix3d stress;
+    // cons_law(strain, stress, def_gra, Young_, Poission_);
 
-    Matrix3d stress_test = cons_law(strain, Young_, Poission_);
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>test stress<<<<<<<<<<<<<<<<<<" << endl;
-    // cout << stress << endl <<endl<< stress_test << endl << endl;
+    Matrix3d stress = cons_law(strain, Young_, Poission_);
     // assert(stress_test == stress);
-    
-
-    
     dat_str.save_ele_stress(i, stress);
 
     //save energy
-    double energy = 0;
+    double energy = 0.5*vol_i_(i)*(stress.array()*strain.array()).sum();
+//#pragma omp critical
+    {
+      dat_str.save_val(energy);      
+    }
 
-    dat_str.ela_val_(i) = 0.5*vol_i_(i)*(stress.array()*strain.array()).sum();
-    dat_str.vol_val_(i) = 0.5*kv_*pow((def_gra.determinant() - 1), 2);
+
+    // dat_str.Val_ += 0.5*kv_*pow((def_gra.determinant() - 1), 2);
+    // dat_str.ela_val_(i) += 0.5*vol_i_(i)*(stress.array()*strain.array());
+    // dat_str.vol_val_(i) += 0.5*kv_*pow((def_gra.determinant() - 1), 2);
+  }
+
+
+}
+int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
+//#pragma omp parallel for
+  for(size_t i = 0; i < dim_; ++i){
+    Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
+    Map<const MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
+    Map<const MatrixXd> strain(dat_str.strain_.col(i).data(), 3, 3);
+    
     //calculate Fv
     Matrix3d gra_def_gra;
     auto trans_def_gra = def_gra.transpose();
@@ -251,22 +264,21 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     //add to gra_
     Vector3d di;
     di.setZero(3);
-    for(size_t j = 0; j < friends_[i].size(); ++j){
-      double w = weig_[i][j];
-      Vector3d xij = (points_.col(friends_[i][j]) - points_.col(i));
+    Vector3d xij, force_j,force_i;
+    for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
+      double w = weig_[i][iter_j];
+      xij = (points_.col(friends_[i][iter_j]) - points_.col(i));
       di += -w*xij;
-      
-      dat_str.save_ele_gra(friends_[i][j], w*pre_F*xij);
+      force_j = w*pre_F*xij;
+      dat_str.save_ele_gra(friends_[i][iter_j], force_j);
     }
     
-
-    dat_str.save_ele_gra(i, pre_F*di);
+    force_i = pre_F*di;
+    dat_str.save_ele_gra(i, force_i);
   }
 
   return 0;
 }
-
-
 int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &gravity) const{
 
   MatrixXd g(3, dim_);
@@ -277,7 +289,7 @@ int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &grav
   return 0;
 }
 
-// #if 0
+// #ipf 0
 int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
   vector<Triplet<double>> TripletList;
@@ -288,37 +300,49 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
   Matrix3d Kpq = Matrix3d::Zero();
   Matrix3d one_line;
-#pragma omp parallel for
+//#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
-    // cout << "i = " << i << endl;
     Map<MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
     Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     Map<MatrixXd> inv_A(dat_str.inv_A_all_.col(i).data(), 3, 3);
-    for(auto iter_j = friends_[i].begin(); iter_j != friends_[i].end(); ++iter_j){
-      Vector3d xij = points_.col(*iter_j) - points_.col(i);
-      Vector3d dp = (*iter_j) == i ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij;
+    
+    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>def_gra<<<<<<<<<<<<<<<<<<" << endl;
+    // cout << def_gra << endl;
+    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>stress is <<<<<<<<<<<<<<<<<<" << endl;
+    // cout << stress << endl;
+    
+    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>inv_A<<<<<<<<<<<<<<<<<<" << endl;
+    // cout << inv_A << endl;
+    for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
+      auto xij = points_.col(friends_[i][iter_j]) - points_.col(i);
+      auto dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
       
-      for(auto iter_k = friends_[i].begin(); iter_k != friends_[i].end(); ++iter_k){
-        Vector3d xik = points_.col(*iter_k) - points_.col(i);
-        Vector3d dq = *iter_k == i ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik;
+      for(size_t iter_k = 0; iter_k < friends_[i].size(); ++iter_k){
+        auto xik = points_.col(friends_[i][iter_k]) - points_.col(i);
+        auto dq = ( friends_[i][iter_k]== i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik * weig_[i][iter_k];
         
         for(size_t l = 0; l < 3; ++l){
           one_line.setZero(3, 3);
           one_line.row(l) = dq.transpose();
           Matrix3d dsigma_duk =
               cons_law(def_gra.row(l).transpose()*dq.transpose() + dq*def_gra.row(l), Young_, Poission_);
-          Kpq.col(l) = -2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
+          
+          // cout << "[INFO]>>>>>>>>>>>>>>>>>>>dsigma duk<<<<<<<<<<<<<<<<<<" << endl;
+          // cout <<def_gra.row(l).transpose()*dq.transpose() + dq*def_gra.row(l)  << endl << endl << endl;
+          // cout << dsigma_duk << endl;
+          Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
         }
         
         // cout << "[INFO]>>>>>>>>>>>>>>>>>>>local Hessian<<<<<<<<<<<<<<<<<<" << endl;
-        // cout << "p == " << *iter_j << " q == " << *iter_k << endl;
+        // cout << "p == " << friends_[i][iter_j] << " q == " << friends_[i][iter_k] << endl;
         // cout << Kpq <<endl;
-#pragma omp critical
+//#pragma omp critical
         {
         for(size_t m = 0; m < 3; ++m){
           for(size_t n = 0; n < 3; ++n){
             if (Kpq(m, n) != 0){
-              dat_str.hes_trips.push_back(Triplet<double>(*iter_j + m, *iter_k + n, Kpq(m,n)));
+              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
+               
             }
           }
         }          
@@ -331,7 +355,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
 int point_sys::calc_Mass_matrix(){
   vector<Triplet<double>> mass_triplets(3 * dim_);
-#pragma omp parallel for
+//#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < 3; ++j){
       mass_triplets[i*3 + j] = Triplet<double>(i * 3 + j, i * 3 + j, mass_i_(i));
@@ -346,6 +370,7 @@ const SparseMatrix<double>& point_sys::get_Mass_Matrix(){
   calc_Mass_matrix();
   return M_;
 }
+
 
 
 // #endif

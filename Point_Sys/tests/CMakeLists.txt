@@ -13,7 +13,12 @@
 #   zjucad-ptree
 #   jtf-mesh)
 
-
+add_executable(test_energy_implicit test_energy_implicit.cc)
+target_link_libraries(test_energy_implicit
+  PointSys
+  marvel-core
+  ${Boost_LIBRARIES}
+  )
 add_executable(test_energy test_energy.cc)
 target_link_libraries(test_energy
   PointSys

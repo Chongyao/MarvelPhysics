@@ -54,7 +54,6 @@ int main(int argc, char** argv){
   boost::filesystem::path outpath(outdir);
   if ( !boost::filesystem::exists(outdir) )
     boost::filesystem::create_directories(outdir);
-
   MatrixXi surf;
   MatrixXd nods;
   readOBJ((indir+mesh_name+".obj").c_str(), nods, surf);
@@ -69,7 +68,7 @@ int main(int argc, char** argv){
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
 
   // #if 1
-  points = nods;
+  // points = nods;
   // #endif
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
@@ -124,29 +123,73 @@ int main(int argc, char** argv){
   energy_dat dat_str (dim);
 
   PS.pre_compute(dat_str);
-  PS.calc_defo_gra(displace.data(), dat_str);
+
+  
+  PS.Val(displace.data(), dat_str);
+  cout << dat_str.def_gra_ << endl << endl;
+  cout << dat_str.stress_ << endl << endl;
+  cout << dat_str.strain_ << endl;
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>energy<<<<<<<<<<<<<<<<<<" << endl;
+
+
   PS.Gra(displace.data(), dat_str);
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>inv_A_all<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.inv_A_all_ << endl;
+  cout << dat_str.ela_val_ << endl;
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra<<<<<<<<<<<<<<<<<<" << endl;
+  cout << dat_str.gra_ << endl;
+
+  //check gra by difference
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>det_gra<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.def_gra_ << endl;;
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
+  { auto init_val = dat_str.Val_;
+    cout << init_val << endl << endl << endl << endl;
+    MatrixXd new_gra(3, dim);
+    double delt_x = 1e-9;
+    
+    for(size_t i = 0; i < points.size(); ++i){
+      dat_str.set_zero();
+      displace(i) += delt_x;
+      PS.Val(displace.data(), dat_str);
+      PS.Gra(displace.data(), dat_str);
+      new_gra(i) = dat_str.Val_ - init_val;
+      displace(i) -= delt_x;
+    }
+    new_gra /= delt_x;
+    cout << new_gra << endl;
+
+  }
+  // displace += dat_str.gra_;
+  
+
+  // dat_str.set_zero();
+  // PS.calc_defo_gra(displace.data(), dat_str);
+  // PS.Gra(displace.data(), dat_str);
+  // cout << dat_str.ela_val_ << endl;
+  //numeric difference
+  // assert(0);
+  
+  
+  
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>inv_A_all<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << dat_str.inv_A_all_ << endl;
+  
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>det_gra<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << dat_str.def_gra_ << endl;;
 
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>strain<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.strain_ << endl;
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>strain<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << dat_str.strain_ << endl;
 
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>stress<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.stress_ << endl;
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>stress<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << dat_str.stress_ << endl;
 
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>pre_F<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.pre_F_ << endl;
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>pre_F<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << dat_str.pre_F_ << endl;
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra_<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.gra_;
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra_<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << dat_str.gra_;
   
       
       

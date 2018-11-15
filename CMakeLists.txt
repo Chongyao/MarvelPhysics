@@ -1,8 +1,8 @@
 project(MarvalPhysics)
 cmake_minimum_required(VERSION 2.8)
 
-list(APPEND CMAKE_CXX_FLAGS "-fopenmp -std=c++11 -o3 -fpermissive")
-# list(APPEND CMAKE_CXX_FLAGS " -std=c++11 -o3 -fpermissive")
+# list(APPEND CMAKE_CXX_FLAGS "-fopenmp -std=c++11 -o3 -fpermissive")
+list(APPEND CMAKE_CXX_FLAGS " -std=c++11 -o3 ")
 # set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/;${CMAKE_MODULE_PATH}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)

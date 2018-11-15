@@ -150,8 +150,10 @@ int main(int argc, char** argv){
     cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
 
-    PS.calc_defo_gra(displace.data(), dat_str);
+    PS.Val(displace.data(), dat_str);
     PS.Gra(displace.data(), dat_str);
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gra norm<<<<<<<<<<<<<<<<<<" << endl;
+    cout << dat_str.gra_.array().square().sum();
     PS.gravity(displace.data(), dat_str, pt.get<double>("gravity"));
     
 #pragma omp parallel for
@@ -177,10 +179,11 @@ int main(int argc, char** argv){
 
 
     
+
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << dat_str.ela_val_.transpose();
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << dat_str.vol_val_.transpose();
+    cout << dat_str.Val_ << endl;
+    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
+    // cout << dat_str.vol_val_.transpose();
         
     vet_displace = DS.update_surf(displace, dat_str.def_gra_);
     acce = new_acce;

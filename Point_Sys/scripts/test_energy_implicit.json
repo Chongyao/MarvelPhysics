@@ -2,14 +2,15 @@
   "indir":"../../Point_Sys/data/",
   "outdir":"../../Point_Sys/result/",
   "surf":"cube",  
-  "num_in_axis":4,
+  "num_in_axis":3,
   "rho":5,
   "Poission":0.45,
-  "Young":900,
+  "Young":90000,
   "ker_cof":10,
-  "max_iter":1000000,
+  "max_iter":1000,
   "kv":0,
-  "time_step":0.0001,
-  "gravity":98,
-  "nn_num":10
+  "time_step":0.001,
+  "gravity":9.8,
+  "nn_num":10,
+  "position_weig":9999999999
 }
