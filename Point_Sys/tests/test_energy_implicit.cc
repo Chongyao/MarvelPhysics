@@ -129,7 +129,9 @@ int main(int argc, char** argv){
   cout << endl;
   position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
 
-
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
+  double gravity = pt.get<double>("gravity");
+  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'z');
   
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
@@ -163,7 +165,7 @@ int main(int argc, char** argv){
 
     PS.Val(displace.data(), dat_str);
     PS.Gra(displace.data(), dat_str);
-    PS.gravity(displace.data(), dat_str, pt.get<double>("gravity"));
+    GE.Gra(displace.data(), dat_str);
     pos_cons.Gra(displace.data(), dat_str);
     PS.Hessian(displace.data(), dat_str);
     pos_cons.Hes(displace.data(),dat_str);
@@ -171,7 +173,6 @@ int main(int argc, char** argv){
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra<<<<<<<<<<<<<<<<<<" << endl;
     cout << dat_str.gra_.block(0, 0, 3, 8) << endl;
     cout << dat_str.gra_.array().square().sum() << endl;
-
      
     //implicit time integral
     { 
@@ -179,14 +180,14 @@ int main(int argc, char** argv){
       Map<VectorXd> _velo(velocity.data(), 3*dim);
       Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
       dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-      A_CG = M - delt_t*delt_t*dat_str.hes_;
+      A_CG = M + delt_t*delt_t*dat_str.hes_;
       
       cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
-      // cout << MatrixXd(dat_str.hes_) << endl;
+      cout << MatrixXd(dat_str.hes_) << endl;
       b_CG = M * _velo + delt_t * _F;
       ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
       // cg.setMaxIterations(50);
-      // cg.setTolerance(1e-10);
+      cg.setTolerance(1e-15);
       cg.compute(A_CG);
       _velo = cg.solve(b_CG);
       cout << "#iterations:     " << cg.iterations() << endl;
@@ -205,7 +206,7 @@ int main(int argc, char** argv){
     // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
     acce = new_acce;
 
-    // if(i%iters_perframe == 0){ 
+    if(i%iters_perframe == 0){ 
       auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
       auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
       MatrixXd points_now = points + displace;
@@ -216,7 +217,7 @@ int main(int argc, char** argv){
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
       
       tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
-    // }
+    }
 
     dat_str.set_zero();
   }
