@@ -6,6 +6,7 @@
 #include <libigl/include/igl/writeOBJ.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <Eigen/SparseCore>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
@@ -54,7 +55,6 @@ int main(int argc, char** argv){
   boost::filesystem::path outpath(outdir);
   if ( !boost::filesystem::exists(outdir) )
     boost::filesystem::create_directories(outdir);
-
   MatrixXi surf;
   MatrixXd nods;
   readOBJ((indir+mesh_name+".obj").c_str(), nods, surf);
@@ -124,29 +124,59 @@ int main(int argc, char** argv){
   energy_dat dat_str (dim);
 
   PS.pre_compute(dat_str);
-  PS.calc_defo_gra(displace.data(), dat_str);
+
+  
+  PS.Val(displace.data(), dat_str);
+  cout << dat_str.def_gra_ << endl << endl;
+  cout << dat_str.stress_ << endl << endl;
+  cout << dat_str.strain_ << endl;
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>energy<<<<<<<<<<<<<<<<<<" << endl;
+
+
   PS.Gra(displace.data(), dat_str);
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>inv_A_all<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.inv_A_all_ << endl;
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>det_gra<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.def_gra_ << endl;;
+  cout << dat_str.ela_val_ << endl;
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra<<<<<<<<<<<<<<<<<<" << endl;
+  cout << dat_str.gra_ << endl;
+
+  //check gra by difference
 
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>strain<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.strain_ << endl;
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
+  // { auto init_val = dat_str.Val_;
+  //   auto init_gra = dat_str.gra_;
+  //   cout << init_val << endl << endl << endl << endl;
+  //   MatrixXd new_gra(3, dim);
+  //   double delt_x = 1e-10;
+  //   for(size_t i = 0; i < points.size(); ++i){
+  //     dat_str.set_zero();
+  //     displace(i) += delt_x;
+  //     PS.Val(displace.data(), dat_str);
+  //     new_gra(i) = dat_str.Val_ - init_val;
+  //     displace(i) -= delt_x;
+  //   }
+  //   new_gra /= delt_x;
+  //   cout << -new_gra << endl <<endl << endl;
+  //   cout<< init_gra - (- new_gra);
+    
+  // }
 
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>stress<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.stress_ << endl;
+  PS.Hessian(displace.data(), dat_str);
+  dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
 
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>Hessian<<<<<<<<<<<<<<<<<<" << endl;
+  cout << MatrixXd(dat_str.hes_);
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>pre_F<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.pre_F_ << endl;
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra_<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.gra_;
+  // displace += dat_str.gra_;
+  
+
+  // dat_str.set_zero();
+  // PS.calc_defo_gra(displace.data(), dat_str);
+  // PS.Gra(displace.data(), dat_str);
+  // cout << dat_str.ela_val_ << endl;
+  //numeric difference
+  // assert(0);
   
       
       

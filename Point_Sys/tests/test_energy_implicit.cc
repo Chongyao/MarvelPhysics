@@ -6,6 +6,8 @@
 #include <libigl/include/igl/writeOBJ.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <Eigen/SparseCore>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
@@ -17,8 +19,7 @@
 #include "Point_Sys/src/data_stream.h"
 #include "Point_Sys/src/gen_surf.h"
 #include "io.h"
-#include "Point_Sys/src/basic_energy.cc"
-
+#include "Point_Sys/src/basic_energy.h"
 
 
 
@@ -30,10 +31,11 @@ using namespace chrono;
 using namespace boost;
 
 int main(int argc, char** argv){
-  
+
   Eigen::initParallel();
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Eigen parallel<<<<<<<<<<<<<<<<<<" << endl;
   cout << "enable parallel in Eigen in " << nbThreads() << " threads" << endl;
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>READ JSON FILE<<<<<<<<<<<<<<<<<<" << endl;
   boost::property_tree::ptree pt;{
     const string jsonfile_path = argv[1];
@@ -73,9 +75,9 @@ int main(int argc, char** argv){
   MatrixXd test(3, 3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
 
-  // #if 1
- // points = nods;
-  // #endif
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>points<<<<<<<<<<<<<<<<<<" << endl;
+  cout << points << endl;
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
   
@@ -94,7 +96,7 @@ int main(int argc, char** argv){
   for(size_t i = 0; i < dim; ++i){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
-  
+
   point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
   
@@ -113,27 +115,28 @@ int main(int argc, char** argv){
 
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
+
   //add simple constraints
   //This should read from file. We loop for some points to restrain here.
   //Constraints vary from different models and situations.
   vector<size_t> cons;
   for(size_t i = 0; i < points.cols(); ++i){
-    if( 1 == points(2, i)){
+    if(points(2, i) > 0.7 ){
       cons.push_back(i);
       cout << i << " ";
     }
   }
   cout << endl;
+  position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
 
-  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
   gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'z');
   
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
   energy_dat dat_str (dim);
-
 
   double delt_t = pt.get<double>("time_step");
   MatrixXd displace;
@@ -150,86 +153,57 @@ int main(int argc, char** argv){
   vet_displace.setZero(3, nods.cols());
 
   PS.pre_compute(dat_str);
-  size_t iters_perframe = floor(1/delt_t/pt.get<size_t>("rate"));
+  size_t iters_perframe = floor(1/delt_t/20);
 
-  double dump = pt.get<double>("dump");
-  double previous_step_Val = 0;
-  
+  SparseMatrix<double> A_CG(dim * 3, dim * 3);
+  VectorXd b_CG(dim * 3);
+  SparseMatrix<double> M = PS.get_Mass_Matrix();
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
-    cerr << "iter is "<<endl<< i << endl;
-    // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
+    cout << "iter is "<<endl<< i << endl;
+    cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
 
     PS.Val(displace.data(), dat_str);
     PS.Gra(displace.data(), dat_str);
-    #if 0
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
-    
-    { 
-      cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra by formula<<<<<<<<<<<<<<<<<<" << endl;
-      cout << dat_str.gra_ << endl;
-      auto init_val = dat_str.Val_;
-      cout << init_val << endl << endl << endl << endl;
-      MatrixXd new_gra(3, dim);
-      double delt_x = 1e-14;
-    
-      for(size_t i = 0; i < points.size(); ++i){
-        dat_str.set_zero();
-        displace(i) += delt_x;
-        PS.Val(displace.data(), dat_str);
-        new_gra(i) = dat_str.Val_ - init_val;
-        displace(i) -= delt_x;
-      }
-      new_gra /= delt_x;
-      cout << -new_gra << endl;
-      // PS.Val(displace.data(), dat_str);
-      // PS.Gra(displace.data(), dat_str);
-      dat_str.gra_ = -new_gra;
-    }
-    #endif
-    GE.Val(displace.data(), dat_str);
     GE.Gra(displace.data(), dat_str);
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gra norm<<<<<<<<<<<<<<<<<<" << endl;
+    pos_cons.Gra(displace.data(), dat_str);
+    PS.Hessian(displace.data(), dat_str);
+    pos_cons.Hes(displace.data(),dat_str);
     
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra<<<<<<<<<<<<<<<<<<" << endl;
+    cout << dat_str.gra_.block(0, 0, 3, 8) << endl;
     cout << dat_str.gra_.array().square().sum() << endl;
-
-
-#pragma omp parallel for
-    for(size_t j = 0; j < dim; ++j){
-      assert(PS.get_mass(j) > 0);
-      new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
+     
+    //implicit time integral
+    { 
+      A_CG.setZero();
+      Map<VectorXd> _velo(velocity.data(), 3*dim);
+      Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
+      dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
+      A_CG = M + delt_t*delt_t*dat_str.hes_;
+      
+      cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
+      cout << MatrixXd(dat_str.hes_) << endl;
+      b_CG = M * _velo + delt_t * _F;
+      ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
+      // cg.setMaxIterations(50);
+      cg.setTolerance(1e-15);
+      cg.compute(A_CG);
+      _velo = cg.solve(b_CG);
+      cout << "#iterations:     " << cg.iterations() << endl;
+      cout << "estimated error: " << cg.error()      << endl;
     }
-    // cout << "new acce is "<<endl << new_acce.block(0, 0, 3, 8) << endl;
-
+    displace += delt_t * velocity;
+    
 
     
-    // velocity += 0.5*(new_acce + acce)*delt_t;
-    velocity += delt_t * new_acce;
-#pragma omp parallel for
-    for(size_t j = 0; j < cons.size(); ++j){
-      velocity.col(cons[j]) = MatrixXd::Zero(3, 1);    
-    }
-
-    // displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
-    displace += delt_t *velocity;
-#pragma omp parallel for
-    for(size_t j = 0; j < cons.size(); ++j){
-      displace.col(cons[j]) = MatrixXd::Zero(3, 1);    
-    }
-
-
-
-    cout << "delt energy :"<< dat_str.Val_ - previous_step_Val << endl;
-    if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
-      break;
     
-    previous_step_Val = dat_str.Val_;
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << "totao energy: " << dat_str.Val_ << endl;
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
+    cout << dat_str.Val_;
     // cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
     // cout << dat_str.vol_val_.transpose();
         
-    vet_displace = DS.update_surf(displace, dat_str.def_gra_);
+    // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
     acce = new_acce;
 
     if(i%iters_perframe == 0){ 
@@ -242,7 +216,7 @@ int main(int argc, char** argv){
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
       
-      // tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
+      tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
     }
 
     dat_str.set_zero();

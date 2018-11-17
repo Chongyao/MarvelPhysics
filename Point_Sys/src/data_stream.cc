@@ -2,15 +2,19 @@
 
 using namespace Eigen;
 namespace marvel{
-energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(9, dim_), strain_(9, dim_), stress_(9, dim_), pre_F_(9, dim_), ela_val_(dim_), vol_val_(dim_){
+energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(3*dim_, 3*dim_), strain_(9, dim_), stress_(9, dim_), pre_F_(9, dim_), ela_val_(dim_), vol_val_(dim_), sigma_w_points_(3, dim_), Val_(0){
   gra_.setZero(3, dim_);
-  hes_.setZero(3, dim_);
+  sigma_w_points_.setZero(3, dim_);
+
 }
 
 // energy_dat::energy_dat(const energy_dat &other){
   
 // }
-
+int energy_dat::save_val(const double val){
+  Val_ += val;
+  return 0;
+}
 int energy_dat::save_ele_mat(const size_t &ele_id, const size_t &rows, const MatrixXd &ele_mat, MatrixXd &whole_mat, bool if_plus){
   if(if_plus)
     whole_mat.col(ele_id) += Map<const VectorXd>(ele_mat.data(), rows);
@@ -27,9 +31,7 @@ int energy_dat::save_ele_inv_all(const size_t &ele_id, const MatrixXd &ele_mat){
 int energy_dat::save_ele_gra(const size_t &ele_id, const MatrixXd &ele_mat){
   return save_ele_mat(ele_id, 3, ele_mat, gra_, true);    
 }
-int energy_dat::save_ele_hes(const size_t &ele_id, const MatrixXd &ele_mat){
-  return save_ele_mat(ele_id, 3, ele_mat, hes_, true);    
-}
+
 int energy_dat::save_ele_strain(const size_t &ele_id, const MatrixXd &ele_mat){
   return save_ele_mat(ele_id, 9, ele_mat, strain_, false);    
 }
@@ -41,12 +43,16 @@ int energy_dat::save_ele_pre_F(const size_t &ele_id, const MatrixXd &ele_mat){
 int energy_dat::set_zero(){
   def_gra_.setZero(9, dim_);
   gra_.setZero(3, dim_);
-  hes_.setZero(9, dim_);
+  // hes_.setZero(9, dim_);
   strain_.setZero(9, dim_);
   stress_.setZero(9, dim_);
   pre_F_.setZero(9, dim_);
   ela_val_.setZero(dim_, 1);
   vol_val_.setZero(dim_, 1);
+  std::vector<Triplet<double>> to_swap(0);
+  hes_trips.swap(to_swap);
+  hes_.setZero();
+  Val_ = 0;
   return 0;
 }
 
