@@ -52,8 +52,9 @@ gravity_energy::gravity_energy(const double &w_g, const double &gravity, const s
 
 int gravity_energy::Val(const double *disp, energy_dat &dat_str){
   Map<const MatrixXd> _disp(disp, 3, dim_);
-  size_t which_axis = size_t(axis_ - 'x');  
-  dat_str.Val_ += (_disp.row(which_axis).array() * mass_.array()).sum() * w_g_ * gravity_;
+  size_t which_axis = size_t(axis_ - 'x');
+  cout << "gravity energy " << (_disp.row(which_axis).transpose().array() * mass_.array()).sum() * w_g_ * gravity_ << endl;
+  dat_str.Val_ += (_disp.row(which_axis).transpose().array() * mass_.array()).sum() * w_g_ * gravity_;
   return 0;
 }
 int gravity_energy::Gra(const double *disp, energy_dat &dat_str){

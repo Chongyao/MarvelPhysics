@@ -237,8 +237,8 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
     // dat_str.ela_val_(i) += 0.5*vol_i_(i)*(stress.array()*strain.array());
     // dat_str.vol_val_(i) += 0.5*kv_*pow((def_gra.determinant() - 1), 2);
   }
-
-
+  cout << "elasiticy energy" << dat_str.Val_ << endl;
+ 
 }
 int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
 #pragma omp parallel for
@@ -316,7 +316,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   Matrix3d Kpq = Matrix3d::Zero();
   Matrix3d one_line;
 #pragma omp parallel for
-  for(size_t i = 0; i < dim; ++i){
+  for(size_t i = 0; i < dim_; ++i){
     Map<const MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
     Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     Map<const MatrixXd> inv_A(dat_str.inv_A_all_.col(i).data(), 3, 3);

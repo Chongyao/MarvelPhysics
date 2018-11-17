@@ -151,6 +151,10 @@ int main(int argc, char** argv){
 
   PS.pre_compute(dat_str);
   size_t iters_perframe = floor(1/delt_t/pt.get<size_t>("rate"));
+
+  double dump = pt.get<double>("dump");
+  double previous_step_Val = 0;
+  
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cerr << "iter is "<<endl<< i << endl;
     // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
@@ -183,6 +187,7 @@ int main(int argc, char** argv){
       dat_str.gra_ = -new_gra;
     }
     #endif
+    GE.Val(displace.data(), dat_str);
     GE.Gra(displace.data(), dat_str);
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gra norm<<<<<<<<<<<<<<<<<<" << endl;
     
@@ -192,7 +197,7 @@ int main(int argc, char** argv){
 #pragma omp parallel for
     for(size_t j = 0; j < dim; ++j){
       assert(PS.get_mass(j) > 0);
-      new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j);
+      new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
     }
     // cout << "new acce is "<<endl << new_acce.block(0, 0, 3, 8) << endl;
 
@@ -201,24 +206,26 @@ int main(int argc, char** argv){
     // velocity += 0.5*(new_acce + acce)*delt_t;
     velocity += delt_t * new_acce;
 #pragma omp parallel for
-    for(size_t i = 0; i < cons.size(); ++i){
-      velocity.col(cons[i]) = MatrixXd::Zero(3, 1);    
+    for(size_t j = 0; j < cons.size(); ++j){
+      velocity.col(cons[j]) = MatrixXd::Zero(3, 1);    
     }
 
     // displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
     displace += delt_t *velocity;
 #pragma omp parallel for
-    for(size_t i = 0; i < cons.size(); ++i){
-      displace.col(cons[i]) = MatrixXd::Zero(3, 1);    
+    for(size_t j = 0; j < cons.size(); ++j){
+      displace.col(cons[j]) = MatrixXd::Zero(3, 1);    
     }
 
 
 
-
+    cout << "delt energy :"<< dat_str.Val_ - previous_step_Val << endl;
+    if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
+      break;
     
-
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cerr << dat_str.Val_ << endl;
+    previous_step_Val = dat_str.Val_;
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Energy Val<<<<<<<<<<<<<<<<<<" << endl;
+    cout << "totao energy: " << dat_str.Val_ << endl;
     // cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
     // cout << dat_str.vol_val_.transpose();
         
