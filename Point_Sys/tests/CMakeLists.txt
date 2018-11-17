@@ -14,19 +14,19 @@
 #   jtf-mesh)
 
 
-add_executable(test_energy test_energy.cc)
-target_link_libraries(test_energy
-  PointSys
-  marvel-core
-  ${Boost_LIBRARIES}
-  )
+# add_executable(test_energy test_energy.cc)
+# target_link_libraries(test_energy
+#   PointSys
+#   marvel-core
+#   ${Boost_LIBRARIES}
+#   )
 
-add_executable(test_linearInterp test_linearInterp.cc)
-target_link_libraries(test_linearInterp
-  PointSys
-  marvel-core
-  ${Boost_LIBRARIES}
-  )
+# add_executable(test_linearInterp test_linearInterp.cc)
+# target_link_libraries(test_linearInterp
+#   PointSys
+#   marvel-core
+#   ${Boost_LIBRARIES}
+#   )
 
 
 add_executable(test_tet test_tet.cc)
