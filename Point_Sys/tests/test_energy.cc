@@ -19,6 +19,7 @@
 #include "io.h"
 #include "Point_Sys/src/basic_energy.cc"
 
+#include "vtk2surf.h"
 
 
 
@@ -66,13 +67,13 @@ int main(int argc, char** argv){
   
   surf.transposeInPlace();
   nods.transposeInPlace();
-
+  
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
-  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
-
+  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
+  cout << points.rows() << " " << points.cols() << endl;
   // #if 1
  // points = nods;
   // #endif
@@ -90,25 +91,27 @@ int main(int argc, char** argv){
   VectorXd sup_radi = SH.get_sup_radi();
   //get friends of every point
   vector<vector<size_t>> friends_all(dim);
-#pragma omp parallel for
+// #pragma omp parallel for
   for(size_t i = 0; i < dim; ++i){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
+
+
   
   point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Construct Deform_Surf<<<<<<<<<<<<<<<<<<" << endl;
-  //get friends of every vertex in mesh
-  double kernel_cof = pt.get<double>("ker_cof");
-  vector<vector<size_t>> vet_fris(nods.cols());
-  for(size_t j = 0; j < nods.cols(); ++j){
-    vector<size_t> fris;
-    SH.get_friends(nods.col(j), kernel_cof, fris, false);
-    vet_fris[j] = fris;
-  }
+  // //get friends of every vertex in mesh
+  // double kernel_cof = pt.get<double>("ker_cof");
+  // vector<vector<size_t>> vet_fris(nods.cols());
+  // for(size_t j = 0; j < nods.cols(); ++j){
+  //   vector<size_t> fris;
+  //   SH.get_friends(nods.col(j), kernel_cof, fris, false);
+  //   vet_fris[j] = fris;
+  // }
   
-  deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
+  // deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
 
 
 
@@ -116,19 +119,28 @@ int main(int argc, char** argv){
   //add simple constraints
   //This should read from file. We loop for some points to restrain here.
   //Constraints vary from different models and situations.
-  vector<size_t> cons;
-  for(size_t i = 0; i < points.cols(); ++i){
-    if( 1 == points(2, i)){
-      cons.push_back(i);
-      cout << i << " ";
-    }
-  }
+  vector<size_t> cons(0);
+  // for(size_t i = 0; i < points.cols(); ++i){
+  //   if( 2 == points(1, i)){
+  //     cons.push_back(i);
+  //     cout << i << " ";
+  //   }
+  // }
+  // cons.push_back(3737);
+  // cons.push_back(3773);
+  // cons.push_back(4157);
+  // cons.push_back(4179);
   cout << endl;
-
+  position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
-  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'z');
+  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
+
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
+  collision COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim);
+
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
@@ -154,14 +166,16 @@ int main(int argc, char** argv){
 
   double dump = pt.get<double>("dump");
   double previous_step_Val = 0;
-  
+
+  auto start = system_clock::now();
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cerr << "iter is "<<endl<< i << endl;
-    // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
+    cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
 
     PS.Val(displace.data(), dat_str);
     PS.Gra(displace.data(), dat_str);
+
     #if 0
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
     
@@ -182,18 +196,22 @@ int main(int argc, char** argv){
       }
       new_gra /= delt_x;
       cout << -new_gra << endl;
-      // PS.Val(displace.data(), dat_str);
-      // PS.Gra(displace.data(), dat_str);
+      PS.Val(displace.data(), dat_str);
+      PS.Gra(displace.data(), dat_str);
       dat_str.gra_ = -new_gra;
     }
     #endif
     GE.Val(displace.data(), dat_str);
     GE.Gra(displace.data(), dat_str);
+    cout << dat_str.gra_.array().square().sum() << endl;
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gra norm<<<<<<<<<<<<<<<<<<" << endl;
     
-    cout << dat_str.gra_.array().square().sum() << endl;
 
 
+    COLL.Val(nods.data(), displace.data(), dat_str);
+    COLL.Gra(nods.data(), displace.data(), dat_str);
+    // cout << new_acce - new_acce.col(0) * MatrixXd::Ones(1, dim);    
+    // pos_cons.Gra(displace.data(), dat_str);
 #pragma omp parallel for
     for(size_t j = 0; j < dim; ++j){
       assert(PS.get_mass(j) > 0);
@@ -204,18 +222,20 @@ int main(int argc, char** argv){
 
     
     // velocity += 0.5*(new_acce + acce)*delt_t;
+
     velocity += delt_t * new_acce;
-#pragma omp parallel for
-    for(size_t j = 0; j < cons.size(); ++j){
-      velocity.col(cons[j]) = MatrixXd::Zero(3, 1);    
-    }
+// #pragma omp parallel for
+//     for(size_t j = 0; j < cons.size(); ++j){
+//       velocity.col(cons[j]) = MatrixXd::Zero(3, 1);    
+//     }
 
     // displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
     displace += delt_t *velocity;
-#pragma omp parallel for
-    for(size_t j = 0; j < cons.size(); ++j){
-      displace.col(cons[j]) = MatrixXd::Zero(3, 1);    
-    }
+// #pragma omp parallel for
+//     for(size_t j = 0; j < cons.size(); ++j){
+//       displace.col(cons[j]) = MatrixXd::Zero(3, 1);    
+//     }
+
 
 
 
@@ -229,7 +249,7 @@ int main(int argc, char** argv){
     // cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
     // cout << dat_str.vol_val_.transpose();
         
-    vet_displace = DS.update_surf(displace, dat_str.def_gra_);
+
     acce = new_acce;
 
     if(i%iters_perframe == 0){ 
@@ -241,14 +261,23 @@ int main(int argc, char** argv){
       point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
-      
-      // tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
+      // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
+      vet_displace = displace.block(0, 0, 3, nods.cols());
+      tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
+
     }
 
     dat_str.set_zero();
   }
+  auto end = system_clock::now();
+  auto duration = duration_cast<microseconds>(end - start);
+  cout <<  "花费了" 
+       << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+       << "秒" << endl;
+
   //done
 }
+
 
 
 

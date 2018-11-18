@@ -81,6 +81,11 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand, con
       if( range.first != range.second){
         for_each(range.first, range.second, [&](decltype(points_hash)::value_type  &one_point){
             double dis = (points.col(point_id) - points.col(one_point.second)).norm();
+            
+            // cout << "[INFO]>>>>>>>>>>>>>>>>>>>check dis<<<<<<<<<<<<<<<<<<" << endl;
+            // cout << points.col(point_id) << endl << points.col(one_point.second) << endl;
+            // cout << (points.col(point_id) - points.col(one_point.second)) << endl;
+            // cout << dis << endl;
             NN_cand.push_back({one_point.second, dis});
           });
       }
@@ -102,10 +107,13 @@ int spatial_hash::hash_NNN(){
   NN.setZero(nn_num, points_num);
   points_hash.clear();
   //set parameter
-  cell_size = pow(points.cols()/nn_num, 1/3);
+  
+  cell_size = pow(points.cols()/float(nn_num), 1.0/3);
+  cout << cell_size << endl;
 
   //generate discretized 3D position
   points_dis = floor(points.array()/cell_size).cast<int>();
+  cout << points_dis.block(0, 0, 3, 10);
   max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(2).maxCoeff()};
   min_id = {points_dis.row(0).minCoeff(), points_dis.row(1).minCoeff(), points_dis.row(2).minCoeff()};
   
@@ -193,7 +201,7 @@ const Eigen::MatrixXi spatial_hash::get_four_noncoplanar_NN(const Eigen::MatrixX
         do{
           Vector3d V3 = (points.col(NN_index(two_index(1))) - points.col(NN_index(0))).normalized();
           if(fabs(cross_.dot(V3)) < 1e-5){
-            two_index(1)++;
+             two_index(1)++;
             ver_nn_num ++;
             NN_index = get_NN(nods.col(i), ver_nn_num);
             // assert(ver_nn_num < 10);
@@ -226,30 +234,34 @@ const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
 
   sup_radi.setZero(points_num);
   
-  #pragma omp parallel for
+  // #pragma omp parallel for
   for(size_t i = 0; i < points_num; ++i){
     vector<pair_dis> NN_cand;
     find_NN(i, NN_cand, nn_num_ + 2);
     sort(NN_cand.begin(), NN_cand.end(), [](const pair_dis &a, const pair_dis &b){return a.dis < b.dis;});
     for(size_t j = 0; j < nn_num_ ; ++j){
-      NN(j, i) = NN_cand[j + 1].n;
-      sup_radi[i] += NN_cand[j + 1].dis;
+      NN(j, i) = NN_cand[j].n;
+      // cout << NN_cand[j].dis << endl;
+      sup_radi[i] += NN_cand[j].dis;
     }
   }
-  
   sup_radi*= 3.0/nn_num_;
   return sup_radi;
 }
 int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vector<size_t> &friends,bool is_sample) const{
   
   friends.clear();
-  int grid_delt = int(floor(sup_radi/cell_size)) + 1;
+  // cout << "cell size is "  << cell_size << endl;
+  //TODO: fix this bug
+  int grid_delt = int(floor(sup_radi/cell_size)) + 40;
+    // cout << grid_delt << endl;
   const Vector3i center_grid = floor(query.array()/cell_size).cast<int>();
-
+  // cout <<"center grid "<< center_grid << endl;
   for(size_t i = 0; i < grid_delt; ++i){
     vector<Vector3i> shell;
     get_shell(center_grid, i, shell);
     for(auto &one_grid : shell){
+      // cout << "once " << endl;
       auto range = points_hash.equal_range(one_grid);
       if( range.first != range.second){
         for_each(range.first, range.second, [&](const decltype(points_hash)::value_type  &one_point){
@@ -257,13 +269,15 @@ int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vec
             // if(is_sample && dis < sup_radi && dis != 0)
             //   friends.push_back(one_point.second);
                         // else
+            // cout << dis << " " << sup_radi << endl;
             if(dis < sup_radi)
               friends.push_back(one_point.second);              
           });
       }
     }
   }
-  assert(friends.size() > 0);
+  // cout << friends.size() << endl;
+  assert(friends.size() > nn_num);
   return 0;
 }
 int spatial_hash::update_points(const Eigen::MatrixXd &points_){

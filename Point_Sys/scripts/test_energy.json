@@ -1,18 +1,22 @@
 {
   "indir":"../../Point_Sys/data/",
   "outdir":"../../Point_Sys/result/",
-  "surf":"cube",  
-  "num_in_axis":3,
+  "surf":"bunny",  
+  "num_in_axis":14,
   "rho":5,
   "Poission":0.45,
-  "Young":1000,
+  "Young":7000,
   "ker_cof":10,
-  "max_iter":1000000,
-  "kv":0,
+  "max_iter":50000,
+  "kv" : 500,
   "time_step":0.0001,
   "gravity":9.8,
-  "nn_num":3,
-  "rate":50,
+  "nn_num":10,
+  "rate":100,
   "w_g": 10,
-  "dump":50
+  "dump":1,
+  "w_coll":200,
+  "g_pos":-3,
+  "position_weig":99999
 }
+

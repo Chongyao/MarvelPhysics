@@ -34,13 +34,13 @@ int build_bdbox(const MatrixXd &nods, MatrixXd & bdbox){
   return 0;
 }
 
-int get_inner_points(Eigen::MatrixXd &points, const Eigen::MatrixXi &surf, const Eigen::MatrixXd &nods){
+int get_inner_points(Eigen::MatrixXd &points, const Eigen::MatrixXi &surf, const Eigen::MatrixXd &nods, const bool save_surf_points){
   using UT_Vector3T = UT_FixedVector<float,3>;
   UT_Vector3T UT_nods[nods.cols()];
 
   MatrixXf nods_flo = nods.cast<float>();
 
-// #pragma omp parallel for
+#pragma omp parallel for
   for(size_t i = 0; i < nods.cols(); ++i){
     UT_Vector3T vec_tmp;
     copy(nods_flo.col(i).data(), nods_flo.col(i).data() +  nods_flo.rows(), vec_tmp.vec);
@@ -49,18 +49,18 @@ int get_inner_points(Eigen::MatrixXd &points, const Eigen::MatrixXi &surf, const
 
   UT_SolidAngle<float, float>  Comp_WN(int(surf.cols()), surf.data(), int(nods.cols()), UT_nods);
   vector<int> inside_id;
-// #pragma omp parallel for
+#pragma omp parallel for
   for(size_t i = 0; i < points.cols(); ++i){
     UT_Vector3T query_point(&points(0, i));
     float sol_angle = Comp_WN.computeSolidAngle(query_point);
 
-// #pragma omp critical
-    {        
-      if (fabs(sol_angle) > 1){
-
-
+#pragma omp critical
+    {
+      if(!save_surf_points && fabs(sol_angle) > 1)
         inside_id.push_back(i);
-      }
+      else if (save_surf_points && fabs(sol_angle - 4*PI) < 0.3)
+        inside_id.push_back(i);
+
     }
   }
   
@@ -74,7 +74,7 @@ int get_inner_points(Eigen::MatrixXd &points, const Eigen::MatrixXi &surf, const
   return 0;
 }
 
-int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_axis, MatrixXd &points){
+int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_axis, MatrixXd &points, const bool save_surf_points){
   assert(num_in_axis > 1);
   MatrixXd bdbox;
 
@@ -101,8 +101,15 @@ int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_
   }
 
   cout << "[INFO]genarate raw points done. size is " <<points.cols() << endl;
-  res = get_inner_points(points, surf, nods);
+  res = get_inner_points(points, surf, nods, save_surf_points);
   cout << "after select: "  << points.cols() << endl;
+  if (save_surf_points){
+    MatrixXd points_inc_nods(3, nods.cols() + points.cols());
+    points_inc_nods.block(0, 0, 3, nods.cols()) = nods;
+    points_inc_nods.block(0, nods.cols(), 3, points.cols()) = points;
+    points = points_inc_nods;
+  }
+    
   return 0;
 }
 

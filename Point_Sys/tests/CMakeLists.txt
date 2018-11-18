@@ -1,9 +1,9 @@
-# add_executable(test_genpoints test_genpoints.cc)
-# target_link_libraries(test_genpoints
-
-#   PointSys
-#   zjucad-ptree
-#   )
+add_executable(test_genpoints test_genpoints.cc)
+target_link_libraries(test_genpoints
+  marvel-core
+  PointSys
+  ${Boost_LIBRARIES}
+  )
 
 # add_executable(test_wdnb test_wdnb.cc)
 # target_link_libraries(test_wdnb

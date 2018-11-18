@@ -41,9 +41,8 @@ Matrix3d safe_inv(const MatrixXd& sys_mat){
   Matrix3d inv_sin_val;
   inv_sin_val.setZero(3, 3);
   
-  for(size_t p = 0; p < 3; ++p){
+  for(size_t p = 0; p < 3; ++p)
     inv_sin_val(p, p) = sin_val(p)>0?1/sin_val(p):0;
-  }
   
   return std::move(svd.matrixV() * inv_sin_val * svd.matrixU().transpose());
 }
@@ -174,7 +173,6 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
     
     Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     
-    
     for(size_t k = 0; k < 3; ++k){
       one_du.row(k) = (inv_A * b.col(k)).transpose();
     }
@@ -188,7 +186,7 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
 
 //calculate inv_A
 int point_sys::pre_compute(energy_dat &dat_str) const {
- #pragma omp parallel for
+ // #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
     sys_mat.setZero(3, 3);
@@ -204,6 +202,7 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
     
     dat_str.save_ele_inv_all(i, inv_A);
   }
+
   return 0;
 }
 int point_sys::Val(const double *disp, energy_dat &dat_str)const {
@@ -212,23 +211,25 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
 #pragma omp parallel for 
   for(size_t i = 0; i < dim_; ++i){
     Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
-    
+
     //calculate strain and stress
     Matrix3d strain = def_gra.transpose()*def_gra - Matrix3d::Identity();
     // Matrix3d strain = 0.5*(def_gra + def_gra.transpose()) - Matrix3d::Identity();
-    
-    dat_str.save_ele_strain(i, strain);
+
     // Matrix3d stress;
     // cons_law(strain, stress, def_gra, Young_, Poission_);
 
     Matrix3d stress = cons_law(strain, Young_, Poission_);
     // assert(stress_test == stress);
-    dat_str.save_ele_stress(i, stress);
+
+    
 
     //save energy
     double energy = 0.5*vol_i_(i)*(stress.array()*strain.array()).sum();
 #pragma omp critical
     {
+      dat_str.save_ele_strain(i, strain);
+      dat_str.save_ele_stress(i, stress);
       dat_str.save_val(energy);      
     }
 
@@ -237,6 +238,7 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
     // dat_str.ela_val_(i) += 0.5*vol_i_(i)*(stress.array()*strain.array());
     // dat_str.vol_val_(i) += 0.5*kv_*pow((def_gra.determinant() - 1), 2);
   }
+
   cout << "elasiticy energy" << dat_str.Val_ << endl;
  
 }

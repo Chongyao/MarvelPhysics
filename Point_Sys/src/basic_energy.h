@@ -27,5 +27,22 @@ class gravity_energy{
   const double gravity_;
   const Eigen::VectorXd mass_;
 };
+
+//simple collision with ground
+class collision{
+ public:
+  collision(const double &w_coll, const char &ground_axis, const double &ground_pos, const size_t &num_surf_point , const size_t &dim);
+  int Val(const double *init_points, const double *disp, energy_dat &dat_str);
+  int Gra(const double *init_points, const double *disp, energy_dat &dat_str);
+  int Hes(const double *disp, energy_dat &dat_str);
+ private:
+  const char ground_axis_;
+  const double w_coll_;
+  const double ground_pos_;
+  const size_t num_surf_point_;
+  const size_t dim_;
+  
+};
+
 }//namespace marvel
 #endif

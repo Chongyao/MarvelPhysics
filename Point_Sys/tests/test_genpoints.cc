@@ -1,12 +1,15 @@
 #include <string>
 #include <iostream>
-#include <zjucad/ptree/ptree.h>
 
 #include <Eigen/Core>
 #include "Point_Sys/src/gen_points.h"
 #include <libigl/include/igl/readOBJ.h>
 #include "Point_Sys/src/get_nn.h"
 
+#include "io.h"
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+#include <boost/filesystem.hpp>
 #include <chrono>
 
 using namespace marvel;
@@ -16,22 +19,47 @@ using namespace igl;
 using namespace chrono;
 
 int main(int argc, char** argv){
-
-  boost::property_tree::ptree pt;
-  zjucad::read_cmdline(argc, argv, pt);
+  boost::property_tree::ptree pt;{
+    const string jsonfile_path = argv[1];
+    
+    cout << jsonfile_path << endl;
+    const size_t ext = jsonfile_path.rfind(".json");
+    if (ext != std::string::npos){
+      read_json(jsonfile_path, pt);
+      cout << "read json successful" <<endl;
+    }
+    else{
+      cout << "json file extension error" << endl;
+      return 0;
+    }
+  }
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>IMPORT MESH<<<<<<<<<<<<<<<<<<" << endl;
+  const string mesh_name = pt.get<string>("surf");
+  const string indir = pt.get<string>("indir");
+  const string outdir = pt.get<string>("outdir") + mesh_name;
+  //mkdir
+  boost::filesystem::path outpath(outdir);
+  if ( !boost::filesystem::exists(outdir) )
+    boost::filesystem::create_directories(outdir);
 
   MatrixXi surf;
   MatrixXd nods;
-  // jtf::mesh::load_obj(pt.get<string>("surf.value").c_str(), surf, nods);
-  readOBJ(pt.get<string>("surf.value").c_str(), nods, surf);
+  readOBJ((indir+mesh_name+".obj").c_str(), nods, surf);
   cout << "surf: " << surf.rows() << " " << surf.cols() << endl << "nods: " << nods.rows() << " " << nods.cols() << endl;
-
   surf.transposeInPlace();
   nods.transposeInPlace();
-  MatrixXd points;
-  gen_points(nods, surf, pt.get<size_t>("num_in_axis.value"), points);
-
+  cout << surf.rows() << " " << surf.cols() << endl;
+  cout << nods.rows() << " " << nods.cols() << endl;                                               
   
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
+  MatrixXd points;
+  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
+  auto point_filename = outdir + "/" + mesh_name + "_points_" + ".vtk";
+  point_write_to_vtk(point_filename.c_str(), points.data(), points.cols());
+
+  cout << points.rows() << " " << points.cols() << endl;
+                                                                                  
 
 
 
