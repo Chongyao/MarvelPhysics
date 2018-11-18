@@ -13,6 +13,15 @@ target_link_libraries(test_genpoints
 #   zjucad-ptree
 #   jtf-mesh)
 
+<<<<<<< HEAD
+
+# add_executable(test_energy test_energy.cc)
+# target_link_libraries(test_energy
+#   PointSys
+#   marvel-core
+#   ${Boost_LIBRARIES}
+#   )
+=======
 add_executable(test_energy_implicit test_energy_implicit.cc)
 target_link_libraries(test_energy_implicit
   PointSys
@@ -25,13 +34,14 @@ target_link_libraries(test_energy
   marvel-core
   ${Boost_LIBRARIES}
   )
+>>>>>>> e5f7f7acae1949f023863e0e85e893b0a1487bfe
 
-add_executable(test_linearInterp test_linearInterp.cc)
-target_link_libraries(test_linearInterp
-  PointSys
-  marvel-core
-  ${Boost_LIBRARIES}
-  )
+# add_executable(test_linearInterp test_linearInterp.cc)
+# target_link_libraries(test_linearInterp
+#   PointSys
+#   marvel-core
+#   ${Boost_LIBRARIES}
+#   )
 
 
 add_executable(test_tet test_tet.cc)
