@@ -30,7 +30,7 @@ using namespace boost;
 
 int main(int argc, char** argv){
 
-  
+  //cout.precision(20);  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>READ JSON FILE<<<<<<<<<<<<<<<<<<" << endl;
   boost::property_tree::ptree pt;{
     const string jsonfile_path = argv[1];
@@ -94,14 +94,14 @@ int main(int argc, char** argv){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>friends<<<<<<<<<<<<<<<<<<" << endl;
-  for(size_t i = 0; i < dim; ++i){
-    cout << "i = " << i <<endl;
-    for(size_t j = 0; j < friends_all[i].size(); ++j){
-      cout << friends_all[i][j] << " ";
-    }
-    cout << endl;
-  }
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>friends<<<<<<<<<<<<<<<<<<" << endl;
+  // for(size_t i = 0; i < dim; ++i){
+  //   cout << "i = " << i <<endl;
+  //   for(size_t j = 0; j < friends_all[i].size(); ++j){
+  //     cout << friends_all[i][j] << " ";
+  //   }
+  //   cout << endl;
+  // }
 
   point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
@@ -127,42 +127,68 @@ int main(int argc, char** argv){
 
   
   PS.Val(displace.data(), dat_str);
-  cout << dat_str.def_gra_ << endl << endl;
-  cout << dat_str.stress_ << endl << endl;
-  cout << dat_str.strain_ << endl;
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>energy<<<<<<<<<<<<<<<<<<" << endl;
-
-
   PS.Gra(displace.data(), dat_str);
-  
-  cout << dat_str.ela_val_ << endl;
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.gra_ << endl;
+  cout << dat_str.gra_ << endl << endl;
 
   //check gra by difference
 
   
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
-  // { auto init_val = dat_str.Val_;
-  //   auto init_gra = dat_str.gra_;
-  //   cout << init_val << endl << endl << endl << endl;
-  //   MatrixXd new_gra(3, dim);
-  //   double delt_x = 1e-10;
-  //   for(size_t i = 0; i < points.size(); ++i){
-  //     dat_str.set_zero();
-  //     displace(i) += delt_x;
-  //     PS.Val(displace.data(), dat_str);
-  //     new_gra(i) = dat_str.Val_ - init_val;
-  //     displace(i) -= delt_x;
-  //   }
-  //   new_gra /= delt_x;
-  //   cout << -new_gra << endl <<endl << endl;
-  //   cout<< init_gra - (- new_gra);
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
+  { auto init_val = dat_str.Val_;
+    auto init_gra = dat_str.gra_;
+    cout << init_val << endl << endl << endl << endl;
+    MatrixXd new_gra(3, dim);
+    double delt_x = 1e-10;
+    for(size_t i = 0; i < points.size(); ++i){
+      dat_str.set_zero();
+      displace(i) += delt_x;
+      PS.Val(displace.data(), dat_str);
+      new_gra(i) = dat_str.Val_ - init_val;
+      displace(i) -= delt_x;
+    }
+    new_gra /= delt_x;
+    cout << -new_gra << endl <<endl << endl;
+    auto delt_gra = init_gra - (- new_gra);
+    cout<< delt_gra.array() / init_gra.array() << endl << endl;
     
-  // }
-
+  }
+  
+  PS.Val(displace.data(), dat_str);
+  PS.Gra(displace.data(), dat_str);
+  auto gra_now = dat_str.gra_;  
   PS.Hessian(displace.data(), dat_str);
   dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
+  cout << MatrixXd(dat_str.hes_) << endl;
+  MatrixXd init_hes = MatrixXd(dat_str.hes_);
+
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>numeric difference hes<<<<<<<<<<<<<<<<<<" << endl;
+  //check Hessian by difference
+  {
+    
+    double delt_x = 1e-8;
+    
+    MatrixXd hes_dif(3 * dim, 3 * dim);
+    for(size_t i = 0; i < points.size(); ++i){
+      dat_str.set_zero();
+      displace(i) += delt_x;
+      PS.Val(displace.data(), dat_str);
+      PS.Gra(displace.data(), dat_str);
+      MatrixXd one_hes = (dat_str.gra_ - gra_now) / delt_x;
+      hes_dif.col(i) = Map<VectorXd>(one_hes.data(), 3*dim);
+      displace(i) -= delt_x;
+    }
+    cout << -hes_dif <<endl << endl;
+    MatrixXd delt_hes = init_hes- (-hes_dif);
+    cout << delt_hes <<endl << endl;
+    cout << delt_hes.array() / init_hes.array()<< endl;
+
+  }
+
+  
+
+
+
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Hessian<<<<<<<<<<<<<<<<<<" << endl;
   cout << MatrixXd(dat_str.hes_);

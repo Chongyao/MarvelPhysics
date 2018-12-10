@@ -5,7 +5,7 @@
   "num_in_axis":4,
   "rho":5,
   "Poission":0.45,
-  "Young":900,
+  "Young":90000,
   "ker_cof":10,
   "max_iter":100000,
   "kv":0,

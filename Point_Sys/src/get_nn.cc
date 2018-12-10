@@ -1,4 +1,6 @@
 #include "get_nn.h"
+#include "geometry.h"
+
 #include <cmath>
 #include <algorithm>
 #include <iostream>
@@ -81,11 +83,6 @@ int spatial_hash::find_NN(const size_t &point_id, vector<pair_dis> &NN_cand, con
       if( range.first != range.second){
         for_each(range.first, range.second, [&](decltype(points_hash)::value_type  &one_point){
             double dis = (points.col(point_id) - points.col(one_point.second)).norm();
-            
-            // cout << "[INFO]>>>>>>>>>>>>>>>>>>>check dis<<<<<<<<<<<<<<<<<<" << endl;
-            // cout << points.col(point_id) << endl << points.col(one_point.second) << endl;
-            // cout << (points.col(point_id) - points.col(one_point.second)) << endl;
-            // cout << dis << endl;
             NN_cand.push_back({one_point.second, dis});
           });
       }
@@ -107,19 +104,22 @@ int spatial_hash::hash_NNN(){
   NN.setZero(nn_num, points_num);
   points_hash.clear();
   //set parameter
-  
-  cell_size = pow(points.cols()/float(nn_num), 1.0/3);
-  cout << cell_size << endl;
 
+
+  double cell_num = pow(points.cols()/float(nn_num), 1.0/3);
+  MatrixXd bdbox(3, 2);
+  build_bdbox(points, bdbox);
+  cell_size = (bdbox.col(1) - bdbox.col(0))/cell_num;
   //generate discretized 3D position
-  points_dis = floor(points.array()/cell_size).cast<int>();
-  cout << points_dis.block(0, 0, 3, 10);
+  points_dis = MatrixXi(3, points_num);
+  for(size_t i = 0; i < points.rows(); ++i){
+    points_dis.row(i) = floor(points.row(i).array() /= cell_size(i)).cast<int>(); 
+  }
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>_dis<<<<<<<<<<<<<<<<<<" << endl;
   max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(2).maxCoeff()};
   min_id = {points_dis.row(0).minCoeff(), points_dis.row(1).minCoeff(), points_dis.row(2).minCoeff()};
   
-  
-
-
 
   //insert elements
 // #pragma omp parallel for
@@ -149,7 +149,7 @@ const VectorXi spatial_hash::get_NN(const Vector3d &query, const size_t &nn_num_
   size_t cand_num = 0;
   int grid_delt = 0;
   int once_more = 0;
-  const Vector3i center_grid = floor(query.array()/cell_size).cast<int>();
+  const Vector3i center_grid = floor(query.array()/cell_size.array()).cast<int>();
   do{
     vector<Vector3i> shell;
     get_shell(center_grid, grid_delt, shell);
@@ -177,7 +177,7 @@ const VectorXi spatial_hash::get_NN(const Vector3d &query, const size_t &nn_num_
 
 const Eigen::MatrixXi spatial_hash::get_four_noncoplanar_NN(const Eigen::MatrixXd &nods){
   MatrixXi near_nei = MatrixXi::Zero(4, nods.cols());
-#pragma omp parallel for 
+// #pragma omp parallel for 
   for(size_t i = 0; i < nods.cols(); ++i){
     
     auto ver_nn_num = 4;
@@ -251,32 +251,22 @@ const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
 int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vector<size_t> &friends,bool is_sample) const{
   
   friends.clear();
-  // cout << "cell size is "  << cell_size << endl;
-  //TODO: fix this bug
-  int grid_delt = int(floor(sup_radi/cell_size)) + 40;
-    // cout << grid_delt << endl;
-  const Vector3i center_grid = floor(query.array()/cell_size).cast<int>();
-  // cout <<"center grid "<< center_grid << endl;
+  int grid_delt = static_cast<int>(ceil(sup_radi/cell_size.col(0).minCoeff())) + 1;
+  const Vector3i center_grid = floor(query.array()/cell_size.array()).cast<int>();
   for(size_t i = 0; i < grid_delt; ++i){
     vector<Vector3i> shell;
     get_shell(center_grid, i, shell);
     for(auto &one_grid : shell){
-      // cout << "once " << endl;
       auto range = points_hash.equal_range(one_grid);
       if( range.first != range.second){
         for_each(range.first, range.second, [&](const decltype(points_hash)::value_type  &one_point){
             double dis = (points.col(one_point.second) - query).norm();
-            // if(is_sample && dis < sup_radi && dis != 0)
-            //   friends.push_back(one_point.second);
-                        // else
-            // cout << dis << " " << sup_radi << endl;
             if(dis < sup_radi)
               friends.push_back(one_point.second);              
           });
       }
     }
   }
-  // cout << friends.size() << endl;
   assert(friends.size() > nn_num);
   return 0;
 }

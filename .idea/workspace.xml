@@ -14,9 +14,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c593bbd6-e4d3-4ee1-a5c4-6fada7c8bec6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Point_Sys/scripts/test_energy.json" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/scripts/test_energy.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Point_Sys/src/gen_surf.imp" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/gen_surf.imp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/scripts/test_energy_implicit.json" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/scripts/test_energy_implicit.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/scripts/test_tet.json" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/scripts/test_tet.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/basic_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/basic_energy.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/data_stream.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/data_stream.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/data_stream.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/data_stream.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/gen_points.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/gen_points.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/gen_points.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/gen_points.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/geometry.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/geometry.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/geometry.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/geometry.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/get_nn.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/get_nn.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/get_nn.h" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/get_nn.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/src/points_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/src/points_energy.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/tests/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/test_energy.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/tests/test_energy_implicit.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/test_energy_implicit.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Point_Sys/tests/test_tet.cc" beforeDir="false" afterPath="$PROJECT_DIR$/Point_Sys/tests/test_tet.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_ParallelUtil.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/external/WindingNumber/UT_SolidAngle.h" beforeDir="false" afterPath="$PROJECT_DIR$/external/WindingNumber/UT_SolidAngle.h" afterDir="false" />
@@ -39,28 +54,29 @@
     <session id="1301105899">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="5" />
+          <entry key="project.closed" value="6" />
+          <entry key="project.open.time.15" value="1" />
           <entry key="project.open.time.17" value="1" />
           <entry key="project.open.time.2" value="1" />
           <entry key="project.open.time.31" value="1" />
           <entry key="project.open.time.4" value="2" />
           <entry key="project.open.time.5" value="1" />
-          <entry key="project.opened" value="6" />
+          <entry key="project.opened" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="cc" value="6" />
-          <entry key="h" value="12" />
+          <entry key="cc" value="7" />
+          <entry key="h" value="13" />
           <entry key="hpp" value="2" />
           <entry key="imp" value="1" />
-          <entry key="test_energy (disassembly)" value="14" />
+          <entry key="test_energy (disassembly)" value="15" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Disassembly" value="14" />
-          <entry key="ObjectiveC" value="21" />
+          <entry key="Disassembly" value="15" />
+          <entry key="ObjectiveC" value="23" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -78,15 +94,6 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
-        <entry file="file:///usr/include/boost/property_tree/json_parser.hpp">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret selection-end-line="1" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Point_Sys/tests/test_energy.cc">
           <provider selected="true" editor-type-id="text-editor">
@@ -132,14 +139,32 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_points.cc">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="344">
-              <caret line="78" column="65" selection-start-line="78" selection-start-column="65" selection-end-line="78" selection-end-column="65" />
+            <state relative-caret-position="75">
+              <caret line="44" selection-start-line="44" selection-end-line="44" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file:///usr/include/eigen3/Eigen/src/Core/CwiseBinaryOp.h">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="184">
+              <caret line="109" selection-start-line="109" selection-end-line="109" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="176">
+              <caret line="118" column="14" selection-start-line="118" selection-start-column="14" selection-end-line="118" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -268,14 +293,16 @@
       <workItem from="1541679060966" duration="603000" />
       <workItem from="1541680363354" duration="758000" />
       <workItem from="1541746117001" duration="87000" />
+      <workItem from="1544433287199" duration="2102000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="16238000" />
+    <option name="totallyTimeSpent" value="18340000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1680" y="-1" width="1920" height="1080" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.18530351" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -377,13 +404,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3210">
-          <caret line="214" selection-start-line="214" selection-end-line="214" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/include/c++/7/bits/stl_algobase.h">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="5505">
@@ -452,11 +472,25 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Point_Sys/src/gen_points.cc">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="344">
-          <caret line="78" column="65" selection-start-line="78" selection-start-column="65" selection-end-line="78" selection-end-column="65" />
+        <state relative-caret-position="75">
+          <caret line="44" selection-start-line="44" selection-end-line="44" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/include/eigen3/Eigen/src/Core/CwiseBinaryOp.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="184">
+          <caret line="109" selection-start-line="109" selection-end-line="109" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Point_Sys/src/get_nn.cc">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="176">
+          <caret line="118" column="14" selection-start-line="118" selection-start-column="14" selection-end-line="118" selection-end-column="14" />
         </state>
       </provider>
     </entry>

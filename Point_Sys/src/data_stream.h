@@ -37,7 +37,7 @@ struct energy_dat{
   Eigen::MatrixXd gra_;
   Eigen::MatrixXd strain_;
   Eigen::MatrixXd stress_;
-  Eigen::MatrixXd pre_F_;
+
   Eigen::VectorXd ela_val_;
   Eigen::VectorXd vol_val_;
   double Val_;

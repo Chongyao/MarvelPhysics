@@ -43,7 +43,7 @@ Matrix3d safe_inv(const MatrixXd& sys_mat){
   
   for(size_t p = 0; p < 3; ++p)
     inv_sin_val(p, p) = sin_val(p)>0?1/sin_val(p):0;
-  
+
   return std::move(svd.matrixV() * inv_sin_val * svd.matrixU().transpose());
 }
 
@@ -112,7 +112,7 @@ size_t point_sys::Nx() const{
 int point_sys::calc_weig() const{
   // friends_ = vector<vector<size_t>>(dim_);
   weig_ = vector<vector<double>>(dim_);
-//#pragma omp parallel for  
+#pragma omp parallel for  
   for(size_t i = 0; i < dim_; ++i){
     vector<double> weig_of_one_p(friends_[i].size());
     for(size_t j = 0; j < friends_[i].size(); ++j){
@@ -215,13 +215,13 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
     //calculate strain and stress
     Matrix3d strain = def_gra.transpose()*def_gra - Matrix3d::Identity();
     // Matrix3d strain = 0.5*(def_gra + def_gra.transpose()) - Matrix3d::Identity();
-
-    // Matrix3d stress;
-    // cons_law(strain, stress, def_gra, Young_, Poission_);
+    
+    // Matrix3d stress_test;
+    // cons_law(strain, stress_test, def_gra, Young_, Poission_);
 
     Matrix3d stress = cons_law(strain, Young_, Poission_);
-    // assert(stress_test == stress);
-
+    // cout << stress_test << endl << endl << stress << endl;
+    // assert(stress == stress_test);
     
 
     //save energy
@@ -239,11 +239,10 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
     // dat_str.vol_val_(i) += 0.5*kv_*pow((def_gra.determinant() - 1), 2);
   }
 
-  cout << "elasiticy energy" << dat_str.Val_ << endl;
  
 }
 int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
-#pragma omp parallel for
+// #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     Map<const MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
@@ -260,12 +259,10 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
 
     //assemble Fe and Fv
     Map<MatrixXd> inv_A(dat_str.inv_A_all_.col(i).data(), 3, 3);
-    Matrix3d pre_F = -vol_i_(i)*(2*def_gra*stress + kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
-#pragma omp critical
-    {
-    dat_str.save_ele_pre_F(i, pre_F);      
-    }
+    
 
+    Matrix3d pre_F = -vol_i_(i)*(2*def_gra*stress + kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
+    
     
     //add to gra_
     Vector3d di;
@@ -291,17 +288,6 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
 
   }
 
-  return 0;
-}
-int point_sys::gravity(const double *x, energy_dat &dat_str,  const double &gravity) const{
-
-  MatrixXd g(3, dim_);
-  g.setZero(3, dim_);
-  g.row(2) = VectorXd::Constant(dim_, -gravity).cwiseProduct(mass_i_).transpose();
-
-                                                       
-  Map<MatrixXd> Gra(dat_str.gra_.data(), 3, dim_);
-  Gra += g;
   return 0;
 }
 
@@ -361,19 +347,13 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
       }
     }
-
-  //   SparseMatrix<double> EL_Hessian_test(dim_*3, dim_*3);
-  // EL_Hessian_test.setFromTriplets(test_Trip.begin(), test_Trip.end());
-  // MatrixXd dense_test = MatrixXd(EL_Hessian_test);
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>test elas hessian<<<<<<<<<<<<<<<<<<" << endl;
-  // cout << dense_test << endl << endl<<dense_test - dense_test.transpose() << endl;
   }
 
 }
 
 int point_sys::calc_Mass_matrix(){
   vector<Triplet<double>> mass_triplets(3 * dim_);
-//#pragma omp parallel for
+// #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < 3; ++j){
       mass_triplets[i*3 + j] = Triplet<double>(i * 3 + j, i * 3 + j, mass_i_(i));
@@ -382,7 +362,7 @@ int point_sys::calc_Mass_matrix(){
   M_ = SparseMatrix<double>(3*dim_, 3*dim_);
   M_.setFromTriplets(mass_triplets.begin(), mass_triplets.end());
   return 0;
-}
+ }
 
 const SparseMatrix<double>& point_sys::get_Mass_Matrix(){
   calc_Mass_matrix();

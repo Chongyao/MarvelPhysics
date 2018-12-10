@@ -89,6 +89,9 @@ int main(int argc, char** argv){
   double volume = clo_surf_vol(nods, surf);
   //calc support radii
   VectorXd sup_radi = SH.get_sup_radi();
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup_radi<<<<<<<<<<<<<<<<<<" << endl;
+  cout << sup_radi << endl;
   //get friends of every point
   vector<vector<size_t>> friends_all(dim);
 // #pragma omp parallel for
@@ -96,6 +99,16 @@ int main(int argc, char** argv){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
 
+  for(size_t i = 0; i < dim; ++i){
+    cout << "i = " << i << endl;
+    size_t f_size = friends_all[i].size();
+    for(size_t i = 0; i < 5; ++i){
+      cout << friends_all[i][f_size-1-i] << " ";
+    }
+    cout << endl;
+  }
+
+  return 0;
 
   
   point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
@@ -120,16 +133,7 @@ int main(int argc, char** argv){
   //This should read from file. We loop for some points to restrain here.
   //Constraints vary from different models and situations.
   vector<size_t> cons(0);
-  // for(size_t i = 0; i < points.cols(); ++i){
-  //   if( 2 == points(1, i)){
-  //     cons.push_back(i);
-  //     cout << i << " ";
-  //   }
-  // }
-  // cons.push_back(3737);
-  // cons.push_back(3773);
-  // cons.push_back(4157);
-  // cons.push_back(4179);
+
   cout << endl;
   position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
   

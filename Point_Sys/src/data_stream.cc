@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 namespace marvel{
-energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(3*dim_, 3*dim_), strain_(9, dim_), stress_(9, dim_), pre_F_(9, dim_), ela_val_(dim_), vol_val_(dim_), sigma_w_points_(3, dim_), Val_(0){
+energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(3*dim_, 3*dim_), strain_(9, dim_), stress_(9, dim_), ela_val_(dim_), vol_val_(dim_), sigma_w_points_(3, dim_), Val_(0){
   gra_.setZero(3, dim_);
   sigma_w_points_.setZero(3, dim_);
 
@@ -37,8 +37,7 @@ int energy_dat::save_ele_strain(const size_t &ele_id, const MatrixXd &ele_mat){
 }
 int energy_dat::save_ele_stress(const size_t &ele_id, const MatrixXd &ele_mat){
   return save_ele_mat(ele_id, 9, ele_mat, stress_, false);    }
-int energy_dat::save_ele_pre_F(const size_t &ele_id, const MatrixXd &ele_mat){
-  return save_ele_mat(ele_id, 9, ele_mat, pre_F_, false);    }
+
 
 int energy_dat::set_zero(){
   def_gra_.setZero(9, dim_);
@@ -46,7 +45,6 @@ int energy_dat::set_zero(){
   // hes_.setZero(9, dim_);
   strain_.setZero(9, dim_);
   stress_.setZero(9, dim_);
-  pre_F_.setZero(9, dim_);
   ela_val_.setZero(dim_, 1);
   vol_val_.setZero(dim_, 1);
   std::vector<Triplet<double>> to_swap(0);

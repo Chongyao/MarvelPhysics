@@ -7,6 +7,8 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <Eigen/SparseCore>
+#include <Eigen/SparseCholesky>
+#include<Eigen/SparseLU>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -73,7 +75,7 @@ int main(int argc, char** argv){
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
-  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points);
+  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, false);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>points<<<<<<<<<<<<<<<<<<" << endl;
@@ -153,7 +155,7 @@ int main(int argc, char** argv){
   vet_displace.setZero(3, nods.cols());
 
   PS.pre_compute(dat_str);
-  size_t iters_perframe = floor(1/delt_t/20);
+  size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
 
   SparseMatrix<double> A_CG(dim * 3, dim * 3);
   VectorXd b_CG(dim * 3);
@@ -164,15 +166,29 @@ int main(int argc, char** argv){
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
 
     PS.Val(displace.data(), dat_str);
-    PS.Gra(displace.data(), dat_str);
-    GE.Gra(displace.data(), dat_str);
-    pos_cons.Gra(displace.data(), dat_str);
-    PS.Hessian(displace.data(), dat_str);
-    pos_cons.Hes(displace.data(),dat_str);
     
+    MatrixXd temp_gra = dat_str.gra_;
+    PS.Gra(displace.data(), dat_str);
+    temp_gra = dat_str.gra_ - temp_gra;
+    cout << "elasticity gra " << temp_gra.array().square().sum()<<endl;
+    
+    PS.Hessian(displace.data(), dat_str);
+    
+    GE.Val(displace.data(), dat_str);
+    temp_gra = dat_str.gra_;
+    GE.Gra(displace.data(), dat_str);
+    temp_gra = dat_str.gra_ - temp_gra;
+    cout << "gravity gra " << temp_gra.array().square().sum()<<endl;
+
+    temp_gra = dat_str.gra_;
+    pos_cons.Gra(displace.data(), dat_str);
+    temp_gra = dat_str.gra_ - temp_gra;
+    cout << "position gra " << temp_gra.array().square().sum()<<endl;
+    
+    pos_cons.Hes(displace.data(),dat_str);
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra<<<<<<<<<<<<<<<<<<" << endl;
-    cout << dat_str.gra_.block(0, 0, 3, 8) << endl;
-    cout << dat_str.gra_.array().square().sum() << endl;
+    // cout << dat_str.gra_.block(0, 0, 3, 8) << endl;
+    // cout << dat_str.gra_.array().square().sum() << endl;
      
     //implicit time integral
     { 
@@ -181,42 +197,67 @@ int main(int argc, char** argv){
       Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
       dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
       A_CG = M + delt_t*delt_t*dat_str.hes_;
-      
-      cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
-      cout << MatrixXd(dat_str.hes_) << endl;
       b_CG = M * _velo + delt_t * _F;
-      ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-      // cg.setMaxIterations(50);
-      cg.setTolerance(1e-15);
-      cg.compute(A_CG);
-      _velo = cg.solve(b_CG);
-      cout << "#iterations:     " << cg.iterations() << endl;
-      cout << "estimated error: " << cg.error()      << endl;
+
+      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;      
+      // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
+      // // cg.setMaxIterations(50);
+      // // cg.setTolerance(1e-40);
+      // cg.compute(A_CG);
+      // _velo = cg.solve(b_CG);
+      // cout << "#iterations:     " << cg.iterations() << endl;
+      // cout << "estimated error: " << cg.error()      << endl;
+
+
+      
+      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+      // SimplicialLLT<SparseMatrix<double>,Lower> llt;
+      // llt.compute(A_CG);
+      // if(llt.info() != Success){
+      //   cout << "Not SPD !!!" << endl;
+      // }
+      // _velo = llt.solve(b_CG);
+      // if(llt.info()!=Success){
+      //   cout << "Solve fail" << endl;
+      // }
+
+      
+      cout << "[INFO]>>>>>>>>>>>>>>>>>>>LU<<<<<<<<<<<<<<<<<<" << endl;
+      SparseLU<SparseMatrix<double>> lu;
+      lu.compute(A_CG);
+      _velo = lu.solve(b_CG);
+      
+      // cout << (A_CG*_velo - b_CG).array()/b_CG.array() << endl << endl << endl;
     }
+    cout << velocity.block(0, 0, 3, 10) << endl;
     displace += delt_t * velocity;
     
 
     
     
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << dat_str.Val_;
+    cout << dat_str.Val_ << endl;
+    
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>GRA<<<<<<<<<<<<<<<<<<" << endl;
+    cout << dat_str.gra_.array().square().sum() << endl;
+    cout << endl << endl << endl;
     // cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
     // cout << dat_str.vol_val_.transpose();
         
     // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
-    acce = new_acce;
-
-    if(i%iters_perframe == 0){ 
+    if(i%iters_perframe == 0){
       auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
       auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
+
       MatrixXd points_now = points + displace;
+
       point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
       point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
-      point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
-      
-      tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
+
+      // vet_displace = displace.block(0, 0, 3, nods.cols());
+      // tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
     }
 
     dat_str.set_zero();

@@ -60,7 +60,7 @@ class spatial_hash{
   int find_NN(const size_t &point_id, std::vector<pair_dis> &NN_cand, const size_t &nn_num_);
   int hash_NNN();
 
-  double cell_size;
+  Eigen::Vector3d cell_size;
 
 };
 
