@@ -1,0 +1,31 @@
+{
+  "common":{
+    "time_step":0.0001,
+    "frame_rate":100,
+    "total_time":1000,
+    "density":5,    
+    "gravity":9.8
+  },
+  
+  "blender":{
+    "surf":"cube"
+  },
+  
+  "physics_para":{
+    "Poission":0.45,
+    "Young":7000
+  },
+  
+  "simulation_para":{
+    "num_in_axis":8,
+    "ker_cof":10,
+    "kv" : 500,
+    "nn_num":3,
+    "w_g": 10,
+    "dump":1,
+    "w_coll":200,
+    "g_pos":3,
+    "position_weig":99999    
+  }
+
+}

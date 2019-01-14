@@ -112,15 +112,20 @@ size_t point_sys::Nx() const{
 int point_sys::calc_weig() const{
   // friends_ = vector<vector<size_t>>(dim_);
   weig_ = vector<vector<double>>(dim_);
-#pragma omp parallel for  
+// #pragma omp parallel for  
   for(size_t i = 0; i < dim_; ++i){
     vector<double> weig_of_one_p(friends_[i].size());
     for(size_t j = 0; j < friends_[i].size(); ++j){
       weig_of_one_p[j] = kernel(i, friends_[i][j]);
     }
     weig_[i] = weig_of_one_p;
-  }
+    for(auto w : weig_[i]){
+      cout << w << " ";
+    }
+   cout << endl;
 
+  }
+  
   return 0;
 }
 
@@ -303,7 +308,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
   Matrix3d Kpq = Matrix3d::Zero();
   Matrix3d one_line;
-#pragma omp parallel for
+// #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Map<const MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
     Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);

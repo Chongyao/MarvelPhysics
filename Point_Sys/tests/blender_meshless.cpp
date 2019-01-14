@@ -51,10 +51,15 @@ int main(int argc, char** argv){
     }
   }
   
+  auto common = pt.get_child("common");
+  auto blender = pt.get_child("blender");
+  auto physics_para = pt.get_child("physics_para");
+  auto simulation_para = pt.get_child("simulation_para");
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>IMPORT MESH<<<<<<<<<<<<<<<<<<" << endl;
-  const string mesh_name = pt.get<string>("surf");
-  const string indir = pt.get<string>("indir");
-  const string outdir = pt.get<string>("outdir") + mesh_name;
+  const string mesh_name = blender.get<string>("surf");
+  const string indir = "../input";
+  const string outdir = "../output/" + mesh_name;
   //mkdir
   boost::filesystem::path outpath(outdir);
   if ( !boost::filesystem::exists(outdir) )
@@ -72,7 +77,7 @@ int main(int argc, char** argv){
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
-  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
+  gen_points(nods, surf, simulation_para.get<size_t>("num_in_axis"), points, true);
   cout << points.rows() << " " << points.cols() << endl;
   // #if 1
  // points = nods;
@@ -81,7 +86,7 @@ int main(int argc, char** argv){
   cout <<"generate points done." << endl;
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
-  spatial_hash SH(points, pt.get<size_t>("nn_num"));
+  spatial_hash SH(points, simulation_para.get<size_t>("nn_num"));
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
@@ -102,7 +107,7 @@ int main(int argc, char** argv){
 
 
   
-  point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
+  point_sys PS(points, common.get<double>("rho"), physics_para.get<double>("Young"), physics_para.get<double>("Poission"), volume, simulation_para.get<double>("kv"), friends_all, sup_radi);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Construct Deform_Surf<<<<<<<<<<<<<<<<<<" << endl;
@@ -126,15 +131,15 @@ int main(int argc, char** argv){
   vector<size_t> cons(0);
 
   cout << endl;
-  position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
+  position_constraint pos_cons(simulation_para.get<double>("position_weig"), cons, dim);
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
-  double gravity = pt.get<double>("gravity");
-  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
+  double gravity = common.get<double>("gravity");
+  gravity_energy GE(simulation_para.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  collision COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim);
+  collision COLL(simulation_para.get<double>("w_coll"),'y', simulation_para.get<double>("g_pos"), nods.cols(), dim);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
@@ -142,7 +147,7 @@ int main(int argc, char** argv){
   energy_dat dat_str (dim);
 
 
-  double delt_t = pt.get<double>("time_step");
+  double delt_t = common.get<double>("time_step");
   MatrixXd displace;
   MatrixXd velocity;
   MatrixXd acce;
@@ -157,13 +162,13 @@ int main(int argc, char** argv){
   vet_displace.setZero(3, nods.cols());
 
   PS.pre_compute(dat_str);
-  size_t iters_perframe = floor(1/delt_t/pt.get<size_t>("rate"));
-
-  double dump = pt.get<double>("dump");
+  size_t iters_perframe = floor(1/delt_t/common.get<size_t>("frame_rate"));
+  size_t max_iter  = static_cast<size_t>(ceil(common.get<size_t>("totao_time") / delt_t));
+  double dump = simulation_para.get<double>("dump");
   double previous_step_Val = 0;
 
   auto start = system_clock::now();
-  for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
+  for(size_t i = 0; i < max_iter; ++i){
     cerr << "iter is "<<endl<< i << endl;
     cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;

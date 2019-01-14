@@ -1,6 +1,7 @@
 {
   "indir":"../../Point_Sys/data/",
   "outdir":"../../Point_Sys/result/",
+  "constraint":"../../"
   "surf":"cube",  
   "num_in_axis":8,
   "rho":5,
