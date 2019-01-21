@@ -79,7 +79,7 @@ int main(int argc, char** argv){
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>points<<<<<<<<<<<<<<<<<<" << endl;
-  cout << points << endl;
+
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
   
@@ -94,7 +94,7 @@ int main(int argc, char** argv){
   VectorXd sup_radi = SH.get_sup_radi();
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup_radi<<<<<<<<<<<<<<<<<<" << endl;
-  cout << sup_radi << endl;
+
   
   //get friends of every point
   vector<vector<size_t>> friends_all(dim);
@@ -169,49 +169,21 @@ int main(int argc, char** argv){
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
-
-
-    auto point_cons_ptr = cons.begin();
-    size_t count = 0;
-    for(size_t i = 0; i < dim - cons.size(); ++i){
-      if(*point_cons_ptr != count){
-        displace_dyna.col(i) = displace.col(count);
-        --i;
-      }
-      else
-        ++point_cons_ptr;
-      ++count;
-    }
     cout << "displace is " << endl<< displace_dyna << endl;
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
 
     PS.Val(displace.data(), dat_str);
-    
-    MatrixXd temp_gra = dat_str.gra_;
     PS.Gra(displace.data(), dat_str);
-    temp_gra = dat_str.gra_ - temp_gra;
-    cout << "elasticity gra " << temp_gra.array().square().sum()<<endl;
     PS.Hessian(displace.data(), dat_str);
     
     GE.Val(displace.data(), dat_str);
-    temp_gra = dat_str.gra_;
     GE.Gra(displace.data(), dat_str);
-    temp_gra = dat_str.gra_ - temp_gra;
-    cout << "gravity gra " << temp_gra.array().square().sum()<<endl;
 
-    temp_gra = dat_str.gra_;
     pos_cons.Gra(displace.data(), dat_str);
-    temp_gra = dat_str.gra_ - temp_gra;
-    cout << "position gra " << temp_gra.array().square().sum()<<endl;
-    
     pos_cons.Hes(displace.data(),dat_str);
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra<<<<<<<<<<<<<<<<<<" << endl;
-    // cout << dat_str.gra_.block(0, 0, 3, 8) << endl;
-    // cout << dat_str.gra_.array().square().sum() << endl;
-    
 
     //implicit time integral
-    #if 0
+    #if 1
     { 
       A_CG.setZero();
       Map<VectorXd> _velo(velocity.data(), 3*dim);
@@ -252,7 +224,7 @@ int main(int argc, char** argv){
       displace += delt_t * velocity;
     }
     #endif
-
+    
     {
       A_CG.setZero();
       Map<VectorXd> _disp(displace.data(), 3*dim);
@@ -278,24 +250,14 @@ int main(int argc, char** argv){
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>GRA<<<<<<<<<<<<<<<<<<" << endl;
     cout << dat_str.gra_.array().square().sum() << endl;
     cout << endl << endl << endl;
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
-    // cout << dat_str.vol_val_.transpose();
-        
-    // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
-    // if(i%iters_perframe == 0){
       auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
       auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
 
       MatrixXd points_now = points + displace;
 
       point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-      // point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
-
-      // vet_displace = displace.block(0, 0, 3, nods.cols());
-      // tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
-    // }
 
     dat_str.set_zero();
   }

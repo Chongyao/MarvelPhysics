@@ -1,22 +1,36 @@
 {
   "indir":"../../Point_Sys/data/",
   "outdir":"../../Point_Sys/result/",
-  "surf":"cube",  
-  "num_in_axis":8,
+  "constraint":"../../",
+  "surf":"sphere",
+  "//num" : "set num of points added in each axis",
+  "num_in_axis":10,
   "rho":5,
   "Poission":0.45,
   "Young":7000,
-  "ker_cof":10,
-  "max_iter":50000,
-  "kv" : 500,
+  "max_iter":20000,
+  "//kv" : "//weight energy for preserving volume",
+  "kv" : 0.00,
+
+  "//time_step" : "//this has to set to be very small",
   "time_step":0.0001,
   "gravity":9.8,
-  "nn_num":3,
-  "rate":100,
-  "w_g": 10,
-  "dump":1,
-  "w_coll":200,
-  "g_pos":3,
+  "nn_num":10,
+  
+  "//rate" : "//frame rate",
+  "rate":50,
+  "//w_g":  "//weight of gravity",
+  
+  "w_g": 1,
+
+  "dump":0,
+  "//w_coll" : "//weight of collision energy",
+  "w_coll":400,
+
+  "//g_pos" : "//ground position",
+  "g_pos":-3,
+
+  "//position_weig" : "//weight of soft positon constraint",
   "position_weig":99999
 }
 

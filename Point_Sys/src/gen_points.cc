@@ -64,7 +64,7 @@ int get_inner_points(Eigen::MatrixXd &points, const Eigen::MatrixXi &surf, const
 }
 
 int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_axis, MatrixXd &points, const bool save_surf_points){
-  assert(num_in_axis > 1);
+  //assert(num_in_axis > 1);
   MatrixXd bdbox;
 
   int res = build_bdbox(nods, bdbox);
@@ -98,7 +98,6 @@ int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_
     points_inc_nods.block(0, nods.cols(), 3, points.cols()) = points;
     points = points_inc_nods;
   }
-    
   return 0;
 }
 

@@ -24,8 +24,9 @@ int read_fixed_verts(const char *filename, std::vector<size_t> &fixed) {
   ifs.close();
   return 0;
 }
+*/
 
-int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, matd_t *pos) {
+int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, MatrixXd *pos) {
   ifstream ifs(filename);
   if ( ifs.fail() ) {
     cerr << "[WARN] can not open " << filename << endl;
@@ -48,17 +49,17 @@ int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, 
     while ( getline(linestream, cell, ',') ) {
       coords.push_back(std::stod(cell));
     }    
-v  }
-  ASSERT(coords.size() == 3*fixed.size());
+  }
+  assert(coords.size() == 3*fixed.size());
 
   if ( pos != nullptr ) {
     pos->resize(3, fixed.size());
-    std::copy(coords.begin(), coords.end(), pos->begin());
+    std::copy(coords.begin(), coords.end(), pos->data());
   }
 
   return 0;
 }
-
+/*
 int hex_mesh_read_from_vtk(const char *path, matd_t *node, mati_t *hex, matd_t *mtr) {
   ifstream ifs(path);
   if(ifs.fail()) {

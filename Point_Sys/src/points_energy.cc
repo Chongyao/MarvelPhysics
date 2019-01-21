@@ -11,27 +11,12 @@
 using namespace std;
 using namespace Eigen;
 
-#define AUTODIFF_ENABLE_EIGEN_SUPPORT
-#include <autodiff/autodiff/autodiff.hpp>
-using namespace autodiff;
+
 
 #define PI 3.14159265359
 
 
 namespace marvel{
-#if 0
-var STRAIN_ENERGY(const VectorXv& u_all, const Matrix3d &inv_A, const MatrixXd &x){
-  size_t num_friends = u_all.size()/3;
-  
-  Matrix3v def_u;
-  for(size_t i = 0; i < num_friends; ++i){
-    Vector3d xij = x.col(i) - x.col(0);
-    def_u.col(i) = 
-  }
-
-}
-#endif
-
 
 Matrix3d safe_inv(const MatrixXd& sys_mat){
   //TODO: use better solver considering the sysmertic
@@ -89,8 +74,6 @@ point_sys::point_sys(const MatrixXd  &points, const double &rho, const double &Y
   double mass_total = rho*vol_all;
   double mass_sigma = (sup_radi_/3).array().cube().sum();
 
-  // scal_fac_ = mass_total/mass_sigma;
-  // scal_fac_ /= 19.2649;
   mass_i_ =  (sup_radi_/3).array().cube();
   
   calc_weig();
@@ -119,16 +102,10 @@ int point_sys::calc_weig() const{
       weig_of_one_p[j] = kernel(i, friends_[i][j]);
     }
     weig_[i] = weig_of_one_p;
-    for(auto w : weig_[i]){
-      cout << w << " ";
-    }
-   cout << endl;
-
   }
   
   return 0;
 }
-
 int point_sys::calc_rhoi_vi() const{
   //init
   rho_i_.setZero(dim_);
@@ -170,7 +147,6 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
       Vector3d xij = points_.col(friends_[i][iter_j]) - points_.col(i);
       for(size_t k = 0; k < 3; ++k){
         b.col(k) += (_disp(k, friends_[i][iter_j]) - _disp(k, i))*weig_[i][iter_j]*xij;
-        
       }
     }
     
@@ -181,6 +157,7 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
     for(size_t k = 0; k < 3; ++k){
       one_du.row(k) = (inv_A * b.col(k)).transpose();
     }
+
     MatrixXd F = one_du + MatrixXd::Identity(3, 3);
     dat_str.save_ele_def_gra(i, F);
 
@@ -204,7 +181,6 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
       sys_mat += weig_[i][iter_j]*xij*(xij.transpose());
     }
     auto inv_A = safe_inv(sys_mat);
-    
     dat_str.save_ele_inv_all(i, inv_A);
   }
 
@@ -212,25 +188,26 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
 }
 int point_sys::Val(const double *disp, energy_dat &dat_str)const {
   calc_defo_gra(disp, dat_str);
-  // dat_str.Val_ = 0;
-#pragma omp parallel for 
+
+// #pragma omp parallel for 
   for(size_t i = 0; i < dim_; ++i){
-    Map<MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
+    Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
 
     //calculate strain and stress
     Matrix3d strain = def_gra.transpose()*def_gra - Matrix3d::Identity();
+
     // Matrix3d strain = 0.5*(def_gra + def_gra.transpose()) - Matrix3d::Identity();
     
     // Matrix3d stress_test;
     // cons_law(strain, stress_test, def_gra, Young_, Poission_);
 
     Matrix3d stress = cons_law(strain, Young_, Poission_);
-    // cout << stress_test << endl << endl << stress << endl;
     // assert(stress == stress_test);
     
 
     //save energy
     double energy = 0.5*vol_i_(i)*(stress.array()*strain.array()).sum();
+    
 #pragma omp critical
     {
       dat_str.save_ele_strain(i, strain);
@@ -238,10 +215,6 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
       dat_str.save_val(energy);      
     }
 
-
-    // dat_str.Val_ += 0.5*kv_*pow((def_gra.determinant() - 1), 2);
-    // dat_str.ela_val_(i) += 0.5*vol_i_(i)*(stress.array()*strain.array());
-    // dat_str.vol_val_(i) += 0.5*kv_*pow((def_gra.determinant() - 1), 2);
   }
 
  
@@ -271,6 +244,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     
     //add to gra_
     Vector3d di;
+    
     di.setZero(3);
     Vector3d xij, force_j,force_i;
     for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
@@ -278,7 +252,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
       xij = (points_.col(friends_[i][iter_j]) - points_.col(i));
       di += -w*xij;
       force_j = w*pre_F*xij;
-#pragma omp critical
+// #pragma omp critical
       {
       dat_str.save_ele_gra(friends_[i][iter_j], force_j);      
       }
@@ -286,7 +260,13 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     }
     
     force_i = pre_F*di;
-#pragma omp critical
+    #if 0
+    assert(force_i.sum() == 0);
+    #endif
+    // get acce_i
+    // auto acce_i = force_i / mass_i_(i);
+    // dat_str.save_ele_gra(i, acce_i);
+#pragma omp critical 
     {
     dat_str.save_ele_gra(i, force_i);      
     }

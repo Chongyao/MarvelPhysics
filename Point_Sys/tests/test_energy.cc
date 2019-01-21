@@ -68,15 +68,13 @@ int main(int argc, char** argv){
   surf.transposeInPlace();
   nods.transposeInPlace();
   
-
+  cout << "nods is " << endl << nods.block(0, 0, 3, 8) <<endl;
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
   cout << points.rows() << " " << points.cols() << endl;
-  // #if 1
- // points = nods;
-  // #endif
+
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
   
@@ -91,7 +89,7 @@ int main(int argc, char** argv){
   VectorXd sup_radi = SH.get_sup_radi();
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup_radi<<<<<<<<<<<<<<<<<<" << endl;
-  cout << sup_radi << endl;
+
   //get friends of every point
   vector<vector<size_t>> friends_all(dim);
 // #pragma omp parallel for
@@ -105,17 +103,6 @@ int main(int argc, char** argv){
   point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>Construct Deform_Surf<<<<<<<<<<<<<<<<<<" << endl;
-  // //get friends of every vertex in mesh
-  // double kernel_cof = pt.get<double>("ker_cof");
-  // vector<vector<size_t>> vet_fris(nods.cols());
-  // for(size_t j = 0; j < nods.cols(); ++j){
-  //   vector<size_t> fris;
-  //   SH.get_friends(nods.col(j), kernel_cof, fris, false);
-  //   vet_fris[j] = fris;
-  // }
-  
-  // deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
 
 
 
@@ -130,11 +117,12 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
-  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
+  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'z');
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  collision COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim);
+  collision COLL(pt.get<double>("w_coll"),'z', pt.get<double>("g_pos"), nods.cols(), dim);
+
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
@@ -158,7 +146,6 @@ int main(int argc, char** argv){
 
   PS.pre_compute(dat_str);
   size_t iters_perframe = floor(1/delt_t/pt.get<size_t>("rate"));
-
   double dump = pt.get<double>("dump");
   double previous_step_Val = 0;
 
@@ -203,8 +190,8 @@ int main(int argc, char** argv){
     
 
 
-    COLL.Val(nods.data(), displace.data(), dat_str);
-    COLL.Gra(nods.data(), displace.data(), dat_str);
+    COLL.Val(points.data(), displace.data(), dat_str);
+    COLL.Gra(points.data(), displace.data(), dat_str, PS.get_Mass_VectorXd());
     // cout << new_acce - new_acce.col(0) * MatrixXd::Ones(1, dim);    
     // pos_cons.Gra(displace.data(), dat_str);
 #pragma omp parallel for
@@ -212,27 +199,14 @@ int main(int argc, char** argv){
       assert(PS.get_mass(j) > 0);
       new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
     }
-    // cout << "new acce is "<<endl << new_acce.block(0, 0, 3, 8) << endl;
+
 
 
     
-    // velocity += 0.5*(new_acce + acce)*delt_t;
+
 
     velocity += delt_t * new_acce;
-// #pragma omp parallel for
-//     for(size_t j = 0; j < cons.size(); ++j){
-//       velocity.col(cons[j]) = MatrixXd::Zero(3, 1);    
-//     }
-
-    // displace += velocity*delt_t + 0.5*acce*delt_t*delt_t;
     displace += delt_t *velocity;
-// #pragma omp parallel for
-//     for(size_t j = 0; j < cons.size(); ++j){
-//       displace.col(cons[j]) = MatrixXd::Zero(3, 1);    
-//     }
-
-
-
 
     cout << "delt energy :"<< dat_str.Val_ - previous_step_Val << endl;
     if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
@@ -240,10 +214,7 @@ int main(int argc, char** argv){
     
     previous_step_Val = dat_str.Val_;
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << "totao energy: " << dat_str.Val_ << endl;
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>VOL conservation val<<<<<<<<<<<<<<<<<<" << endl;
-    // cout << dat_str.vol_val_.transpose();
-        
+    cout << "total energy: " << dat_str.Val_ << endl;
 
     acce = new_acce;
 
@@ -257,6 +228,7 @@ int main(int argc, char** argv){
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
       point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
       // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
+      cout  << displace.rows() << " " << displace.cols() << "  " << nods.cols() << endl;
       vet_displace = displace.block(0, 0, 3, nods.cols());
       tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
 

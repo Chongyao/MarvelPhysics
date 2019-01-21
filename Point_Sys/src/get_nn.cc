@@ -18,7 +18,6 @@ spatial_hash::spatial_hash(const MatrixXd &points_, const size_t &nn_num_):point
   size_t table_size = size_t(floor(pow(points.cols(), 0.5)));
   //build hash_map
   points_hash = unordered_multimap<Vector3i,size_t>(table_size);
-  
   hash_NNN();
 }
 
@@ -113,16 +112,15 @@ int spatial_hash::hash_NNN(){
   //generate discretized 3D position
   points_dis = MatrixXi(3, points_num);
   for(size_t i = 0; i < points.rows(); ++i){
-    points_dis.row(i) = floor(points.row(i).array() /= cell_size(i)).cast<int>(); 
+    points_dis.row(i) = floor(points.row(i).array() / cell_size(i)).cast<int>(); 
   }
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>_dis<<<<<<<<<<<<<<<<<<" << endl;
   max_id = {points_dis.row(0).maxCoeff(), points_dis.row(1).maxCoeff(), points_dis.row(2).maxCoeff()};
   min_id = {points_dis.row(0).minCoeff(), points_dis.row(1).minCoeff(), points_dis.row(2).minCoeff()};
   
 
   //insert elements
-// #pragma omp parallel for
+
   for(size_t i = 0; i < points_num; ++i){
     points_hash.insert({points_dis.col(i), i});
   }
@@ -234,14 +232,13 @@ const VectorXd& spatial_hash::get_sup_radi(const size_t &nn_num_) {
 
   sup_radi.setZero(points_num);
   
-  // #pragma omp parallel for
+  #pragma omp parallel for
   for(size_t i = 0; i < points_num; ++i){
     vector<pair_dis> NN_cand;
     find_NN(i, NN_cand, nn_num_ + 2);
     sort(NN_cand.begin(), NN_cand.end(), [](const pair_dis &a, const pair_dis &b){return a.dis < b.dis;});
     for(size_t j = 0; j < nn_num_ ; ++j){
       NN(j, i) = NN_cand[j].n;
-      // cout << NN_cand[j].dis << endl;
       sup_radi[i] += NN_cand[j].dis;
     }
   }
@@ -270,10 +267,10 @@ int spatial_hash::get_friends(const Vector3d &query, const double &sup_radi, vec
   assert(friends.size() > nn_num);
   return 0;
 }
-int spatial_hash::update_points(const Eigen::MatrixXd &points_){
-  points = points_;
-  hash_NNN();
-  return 0;
-}
+// int spatial_hash::update_points(const Eigen::MatrixXd &points_){
+//   points = points_;
+//   hash_NNN();
+//   return 0;
+// }
 
 }//namespace:marvel

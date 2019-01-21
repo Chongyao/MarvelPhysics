@@ -13,7 +13,7 @@ namespace marvel {
 
 // int read_fixed_verts(const char *filename, std::vector<size_t> &fixed);
 
-// int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, matd_t *pos=nullptr);
+int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, Eigen::MatrixXd *pos=nullptr);
 // int hex_mesh_read_from_vtk(const char *path, matd_t *node=nullptr, mati_t *hex=nullptr, matd_t *mtr=nullptr);
 
 // int hex_mesh_write_to_vtk(const char *path, const matd_t &nods, const mati_t &hexs,
