@@ -42,7 +42,7 @@ target_link_libraries(test_tet
   ${Boost_LIBRARIES}
   )
 
-add_executable(test_autodiff test_autodiff.cc)
+#add_executable(test_autodiff test_autodiff.cc)
 add_executable(test_SparseMatrix test_SparseMatrix.cc)
 
 add_executable(blender_meshless blender_meshless.cpp)
