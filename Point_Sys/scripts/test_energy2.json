@@ -2,9 +2,9 @@
   "indir":"../../Point_Sys/data/",
   "outdir":"../../Point_Sys/result/",
 
-  "surf":"sphere",
+  "surf":"Cube",
   "//num" : "set num of points added in each axis",
-  "num_in_axis":10,
+  "num_in_axis":7,
   "rho":5,
   "Poission":0.45,
   "Young":7000,
@@ -21,14 +21,14 @@
   "rate":50,
   "//w_g":  "//weight of gravity",
   
-  "w_g": 1,
+  "w_g": 100,
 
   "dump":0,
   "//w_coll" : "//weight of collision energy",
-  "w_coll":400,
+  "w_coll":0.00,
 
   "//g_pos" : "//ground position",
-  "g_pos":0,
+  "g_pos":-3,
 
   "//position_weig" : "//weight of soft positon constraint",
   "position_weig":99999

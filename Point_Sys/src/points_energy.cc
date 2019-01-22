@@ -95,7 +95,7 @@ size_t point_sys::Nx() const{
 int point_sys::calc_weig() const{
   // friends_ = vector<vector<size_t>>(dim_);
   weig_ = vector<vector<double>>(dim_);
-// #pragma omp parallel for  
+ #pragma omp parallel for  
   for(size_t i = 0; i < dim_; ++i){
     vector<double> weig_of_one_p(friends_[i].size());
     for(size_t j = 0; j < friends_[i].size(); ++j){
@@ -113,7 +113,7 @@ int point_sys::calc_rhoi_vi() const{
 
   
   assert(friends_.size() > 0 && weig_.size() > 0);
-//#pragma omp parallel for
+#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < friends_[i].size(); ++j){
       rho_i_(i) += mass_i_(friends_[i][j])*weig_[i][j];
@@ -139,7 +139,7 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
 
 int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
   Map<const Matrix<double, Dynamic, Dynamic> > _disp(disp, 3, dim_);
-//#pragma omp parallel for
+#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d one_du;
     Matrix3d b = Matrix3d::Zero();
@@ -168,7 +168,7 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
 
 //calculate inv_A
 int point_sys::pre_compute(energy_dat &dat_str) const {
- // #pragma omp parallel for
+ #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d sys_mat;
     sys_mat.setZero(3, 3);
@@ -189,21 +189,13 @@ int point_sys::pre_compute(energy_dat &dat_str) const {
 int point_sys::Val(const double *disp, energy_dat &dat_str)const {
   calc_defo_gra(disp, dat_str);
 
-// #pragma omp parallel for 
+ #pragma omp parallel for 
   for(size_t i = 0; i < dim_; ++i){
     Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
 
     //calculate strain and stress
     Matrix3d strain = def_gra.transpose()*def_gra - Matrix3d::Identity();
-
-    // Matrix3d strain = 0.5*(def_gra + def_gra.transpose()) - Matrix3d::Identity();
-    
-    // Matrix3d stress_test;
-    // cons_law(strain, stress_test, def_gra, Young_, Poission_);
-
     Matrix3d stress = cons_law(strain, Young_, Poission_);
-    // assert(stress == stress_test);
-    
 
     //save energy
     double energy = 0.5*vol_i_(i)*(stress.array()*strain.array()).sum();
@@ -220,7 +212,7 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
  
 }
 int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
-// #pragma omp parallel for
+ #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     Map<const MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
@@ -252,7 +244,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
       xij = (points_.col(friends_[i][iter_j]) - points_.col(i));
       di += -w*xij;
       force_j = w*pre_F*xij;
-// #pragma omp critical
+ #pragma omp critical
       {
       dat_str.save_ele_gra(friends_[i][iter_j], force_j);      
       }
@@ -260,12 +252,6 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     }
     
     force_i = pre_F*di;
-    #if 0
-    assert(force_i.sum() == 0);
-    #endif
-    // get acce_i
-    // auto acce_i = force_i / mass_i_(i);
-    // dat_str.save_ele_gra(i, acce_i);
 #pragma omp critical 
     {
     dat_str.save_ele_gra(i, force_i);      
@@ -276,7 +262,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
   return 0;
 }
 
-// #ipf 0
+
 int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
   vector<Triplet<double>> TripletList;

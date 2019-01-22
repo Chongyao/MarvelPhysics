@@ -79,14 +79,11 @@ int collision::Gra(const double *init_points, const double *disp, energy_dat &da
   Map<const MatrixXd> _init_points(init_points, 3, dim_);
 
   for(size_t i = 0; i < dim_; ++i){
-  // for(size_t i = 0; i < num_surf_point_; ++i){
     double position_now = _disp(which_axis, i) + _init_points(which_axis, i);
 
     if (( position_now - ground_pos_) < 0){
       
-      // cout <<" i is " << i << " coll gra " << endl;
-      // cout << 2 * w_coll_ * (ground_pos_ - position_now) << endl;
-
+      dat_str.gra_(which_axis, i) += 2 * w_coll_ * (ground_pos_ - position_now);  
     }
 
   }

@@ -111,17 +111,20 @@ int main(int argc, char** argv){
   //This should read from file. We loop for some points to restrain here.
   //Constraints vary from different models and situations.
   vector<size_t> cons(0);
+  auto cons_file_path = indir + mesh_name +".csv";
+  if ( boost::filesystem::exists(cons_file_path) ) 
+    read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
 
   cout << endl;
   position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
-  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'z');
+  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  collision COLL(pt.get<double>("w_coll"),'z', pt.get<double>("g_pos"), nods.cols(), dim);
+  collision COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim);
 
 
   
@@ -192,8 +195,8 @@ int main(int argc, char** argv){
 
     COLL.Val(points.data(), displace.data(), dat_str);
     COLL.Gra(points.data(), displace.data(), dat_str, PS.get_Mass_VectorXd());
-    // cout << new_acce - new_acce.col(0) * MatrixXd::Ones(1, dim);    
-    // pos_cons.Gra(displace.data(), dat_str);
+
+    pos_cons.Gra(displace.data(), dat_str);
 #pragma omp parallel for
     for(size_t j = 0; j < dim; ++j){
       assert(PS.get_mass(j) > 0);
