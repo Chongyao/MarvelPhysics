@@ -80,9 +80,10 @@ int collision::Gra(const double *init_points, const double *disp, energy_dat &da
 
   for(size_t i = 0; i < dim_; ++i){
     double position_now = _disp(which_axis, i) + _init_points(which_axis, i);
-
+    
     if (( position_now - ground_pos_) < 0){
-      
+
+
       dat_str.gra_(which_axis, i) += 2 * w_coll_ * (ground_pos_ - position_now);  
     }
 

@@ -75,7 +75,7 @@ int main(int argc, char** argv){
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
-  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, false);
+  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>points<<<<<<<<<<<<<<<<<<" << endl;
@@ -106,38 +106,21 @@ int main(int argc, char** argv){
   point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>Construct Deform_Surf<<<<<<<<<<<<<<<<<<" << endl;
-  //get friends of every vertex in mesh
-  double kernel_cof = pt.get<double>("ker_cof");
-  vector<vector<size_t>> vet_fris(nods.cols());
-  for(size_t j = 0; j < nods.cols(); ++j){
-    vector<size_t> fris;
-    SH.get_friends(nods.col(j), kernel_cof, fris, false);
-    vet_fris[j] = fris;
-  }
-  
-  deform_surf_MLS<double> DS(surf, nods, points, vet_fris, kernel_cof);
-
-
-
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
 
   //add simple constraints
   //This should read from file. We loop for some points to restrain here.
   //Constraints vary from different models and situations.
   vector<size_t> cons;
-  for(size_t i = 0; i < points.cols(); ++i){
-    if(points(2, i) > 0.7 ){
-      cons.push_back(i);
-      cout << i << " ";
-    }
-  }
-  cout << endl;
+  auto cons_file_path = indir + mesh_name +".csv";
+  if ( boost::filesystem::exists(cons_file_path) )
+    read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
+  cout << "constrint " << cons.size() << " points" << endl;
   position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
-  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'z');
+  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
   
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
@@ -169,7 +152,7 @@ int main(int argc, char** argv){
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
-    cout << "displace is " << endl<< displace_dyna << endl;
+    cout << "displace is " << endl<< displace.block(0, 0, 3, 7) << endl;
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
 
     PS.Val(displace.data(), dat_str);
@@ -220,29 +203,10 @@ int main(int argc, char** argv){
       lu.compute(A_CG);
       _velo = lu.solve(b_CG);
       
-      cout << velocity.block(0, 0, 3, 10) << endl;
+      //out << velocity.block(0, 0, 3, 10) << endl;
       displace += delt_t * velocity;
     }
     #endif
-    
-    {
-      A_CG.setZero();
-      Map<VectorXd> _disp(displace.data(), 3*dim);
-      Map<VectorXd> _velo(velocity.data(), 3*dim);
-      Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
-      dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-      A_CG = M + delt_t*delt_t*dat_str.hes_;
-      b_CG = delt_t * M * _velo + delt_t * delt_t *  _F + (M + delt_t * delt_t * dat_str.hes_) * _disp;
-
-      cout << "[INFO]>>>>>>>>>>>>>>>>>>>LU<<<<<<<<<<<<<<<<<<" << endl;
-      SparseLU<SparseMatrix<double>> lu;
-      lu.compute(A_CG);
-      _disp = lu.solve(b_CG);
-
-      
-    }
-
-    
     
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
     cout << dat_str.Val_ << endl;
@@ -250,14 +214,14 @@ int main(int argc, char** argv){
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>GRA<<<<<<<<<<<<<<<<<<" << endl;
     cout << dat_str.gra_.array().square().sum() << endl;
     cout << endl << endl << endl;
-      auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
-      auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
+    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
+    auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
 
-      MatrixXd points_now = points + displace;
+    MatrixXd points_now = points + displace;
 
-      point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-      point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
-      point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
+    point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
+    //point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
+    //point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
 
     dat_str.set_zero();
   }
