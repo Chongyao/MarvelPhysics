@@ -161,7 +161,7 @@ int main(int argc, char** argv){
     Map<VectorXd> disp_t(displace.data(), 3*dim);
     Map<VectorXd> velo_t(velocity.data(), 3*dim);
     Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
-    VectorXd delt_X(3 * dim);
+
 
     for(size_t newton_i = 0; newton_i < 999; ++newton_i){
       cout << "newton iter " << newton_i << endl;
