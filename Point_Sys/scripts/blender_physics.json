@@ -1,14 +1,14 @@
 {
   "common":{
-    "time_step":0.0001,
-    "frame_rate":100,
-    "total_time":1000.0,
+    "time_step":0.001,
+    "frame_rate":1000,
+    "total_time":0.2,
     "density":5.0,    
     "gravity":9.8
   },
   
   "blender":{
-    "surf":"cube"
+    "surf":"Cube"
   },
   
   "physics_para":{
@@ -17,14 +17,15 @@
   },
   
   "simulation_para":{
-    "num_in_axis":8,
-    "kv" : 500.0,
-    "nn_num":3,
-    "w_g": 10.0,
-    "dump":1.0,
-    "w_coll":200.0,
+    "num_in_axis":7,
+    "kv" : 300.0,
+    "nn_num":10,
+    "w_g": 10000.0,
+    "dump":0.0,
+    "w_coll":0.0,
     "g_pos":3.0,
-    "position_weig":99999.0
+    "position_weig":1e20,
+    "solver":"implicit"
   }
 
 }
