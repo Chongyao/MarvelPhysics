@@ -161,6 +161,7 @@ int main(int argc, char** argv){
     Map<VectorXd> disp_t(displace.data(), 3*dim);
     Map<VectorXd> velo_t(velocity.data(), 3*dim);
     Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
+    VectorXd delt_X(3 * dim);
 
     for(size_t newton_i = 0; newton_i < 999; ++newton_i){
       cout << "newton iter " << newton_i << endl;
@@ -177,60 +178,51 @@ int main(int argc, char** argv){
     pos_cons.Gra(displace_plus.data(), dat_str);
     pos_cons.Hes(displace_plus.data(),dat_str);
 
+
+    //test  convergence
+    auto res = M * ((disp_t_plus - disp_t) / delt_t - velo_t) - delt_t * _F;
+    double res_value = res.array().square().sum();
+    if(res_value < 1e-10){
+      cout << "[INFO]Newton res " <<endl << res_value << endl;;
+      cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
+      cout << dat_str.Val_ << endl;
+      cout << "[INFO]>>>>>>>>>>>>>>>>>>>GRA<<<<<<<<<<<<<<<<<<" << endl;
+      cout << dat_str.gra_.array().square().sum() << endl;
+      cout << endl<<endl;
+      break;
+    }
+      
+      
+
+    
     //implicit time integral
     
     A_CG.setZero();
-    
     dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-    //cout <<"Hes is "<< MatrixXd(dat_str.hes_) << endl;
-    A_CG = M - delt_t*delt_t*dat_str.hes_;
-    b_CG =1/delt_t *  M * (delt_t * velo_t + disp_t - disp_t_plus) + delt_t * delt_t * _F;  
+    
+    
+    A_CG = M + delt_t*delt_t*dat_str.hes_;
+    b_CG = M * (delt_t * velo_t + disp_t - disp_t_plus) + delt_t * delt_t * _F;  
     
       
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;      
     ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-    cg.setMaxIterations(50);
-    cg.setTolerance(1e-40);
+    cg.setMaxIterations(3*dim);
+    cg.setTolerance(1e-8);
     cg.compute(A_CG);
-    disp_t_plus +=cg.solve(b_CG);
+    disp_t_plus += cg.solve(b_CG);
     dat_str.set_zero();
     cout << "#iterations:     " << cg.iterations() << endl;
     cout << "estimated error: " << cg.error()      << endl;
 
-
-      
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
-    // SimplicialLLT<SparseMatrix<double>,Lower> llt;
-    // llt.compute(A_CG);
-    // if(llt.info() != Success){
-    //   cout << "Not SPD !!!" << endl;
-    // }
-    // _velo = llt.solve(b_CG);
-    // if(llt.info()!=Success){
-    //   cout << "Solve fail" << endl;
-    // }
-
-      
-    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LU<<<<<<<<<<<<<<<<<<" << endl;
-    // SparseLU<SparseMatrix<double>> lu;
-    // lu.compute(A_CG);
-    // _velo = lu.solve(b_CG);
-    // displace += delt_t * velocity;
-
-    if(fabs(cg.error()) <1e-8)
-      break;
     }
     
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-  // cout << dat_str.Val_ << endl;
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>GRA<<<<<<<<<<<<<<<<<<" << endl;
-  // cout << dat_str.gra_.array().square().sum() << endl;
-  // cout << endl << endl << endl;
+    
     velocity = (displace_plus - displace)/delt_t;
     displace = displace_plus;
 
     auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
-  auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
+    auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
 
   MatrixXd points_now = points + displace;
 

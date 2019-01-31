@@ -18,7 +18,7 @@ int position_constraint::Hes(const double *disp, energy_dat &dat_str){
   Map<const MatrixXd> _disp(disp, 3, dim_);
   for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c){
     for(size_t j = 0; j < 3; ++j){
-      dat_str.hes_trips.push_back(Triplet<double>(*iter_c*3 + j, *iter_c*3 + j, -2 * w_));
+      dat_str.hes_trips.push_back(Triplet<double>(*iter_c*3 + j, *iter_c*3 + j, 2 * w_));
     }
   }
   return 0;
