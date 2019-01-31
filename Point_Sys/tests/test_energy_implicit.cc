@@ -33,7 +33,7 @@ using namespace chrono;
 using namespace boost;
 
 int main(int argc, char** argv){
-
+  
   Eigen::initParallel();
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Eigen parallel<<<<<<<<<<<<<<<<<<" << endl;
   cout << "enable parallel in Eigen in " << nbThreads() << " threads" << endl;
@@ -152,80 +152,96 @@ int main(int argc, char** argv){
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
-    cout << "displace is " << endl<< displace.block(0, 0, 3, 7) << endl;
+    cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
 
-    PS.Val(displace.data(), dat_str);
-    PS.Gra(displace.data(), dat_str);
-    PS.Hessian(displace.data(), dat_str);
-    
-    GE.Val(displace.data(), dat_str);
-    GE.Gra(displace.data(), dat_str);
+    //newtown iter
+    auto displace_plus = displace;
+    Map<VectorXd> disp_t_plus(displace_plus.data(), 3*dim);
+    Map<VectorXd> disp_t(displace.data(), 3*dim);
+    Map<VectorXd> velo_t(velocity.data(), 3*dim);
+    Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
 
-    pos_cons.Gra(displace.data(), dat_str);
-    pos_cons.Hes(displace.data(),dat_str);
+    for(size_t newton_i = 0; newton_i < 999; ++newton_i){
+      cout << "newton iter " << newton_i << endl;
+      
+
+    
+    PS.Val(displace_plus.data(), dat_str);
+    PS.Gra(displace_plus.data(), dat_str);
+    PS.Hessian(displace_plus.data(), dat_str);
+
+    GE.Val(displace_plus.data(), dat_str);
+    GE.Gra(displace_plus.data(), dat_str);
+
+    pos_cons.Gra(displace_plus.data(), dat_str);
+    pos_cons.Hes(displace_plus.data(),dat_str);
 
     //implicit time integral
-    #if 1
-    { 
-      A_CG.setZero();
-      Map<VectorXd> _velo(velocity.data(), 3*dim);
-      Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
-      dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-      A_CG = M + delt_t*delt_t*dat_str.hes_;
-      b_CG = M * _velo + delt_t * _F;
-
-      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;      
-      // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-      // // cg.setMaxIterations(50);
-      // // cg.setTolerance(1e-40);
-      // cg.compute(A_CG);
-      // _velo = cg.solve(b_CG);
-      // cout << "#iterations:     " << cg.iterations() << endl;
-      // cout << "estimated error: " << cg.error()      << endl;
-
-
-      
-      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
-      // SimplicialLLT<SparseMatrix<double>,Lower> llt;
-      // llt.compute(A_CG);
-      // if(llt.info() != Success){
-      //   cout << "Not SPD !!!" << endl;
-      // }
-      // _velo = llt.solve(b_CG);
-      // if(llt.info()!=Success){
-      //   cout << "Solve fail" << endl;
-      // }
-
-      
-      cout << "[INFO]>>>>>>>>>>>>>>>>>>>LU<<<<<<<<<<<<<<<<<<" << endl;
-      SparseLU<SparseMatrix<double>> lu;
-      lu.compute(A_CG);
-      _velo = lu.solve(b_CG);
-      
-      //out << velocity.block(0, 0, 3, 10) << endl;
-      displace += delt_t * velocity;
-    }
-    #endif
     
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << dat_str.Val_ << endl;
+    A_CG.setZero();
     
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>GRA<<<<<<<<<<<<<<<<<<" << endl;
-    cout << dat_str.gra_.array().square().sum() << endl;
-    cout << endl << endl << endl;
-    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
-    auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
-
-    MatrixXd points_now = points + displace;
-
-    point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-    //point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
-    //point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
-
+    dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
+    //cout <<"Hes is "<< MatrixXd(dat_str.hes_) << endl;
+    A_CG = M - delt_t*delt_t*dat_str.hes_;
+    b_CG =1/delt_t *  M * (delt_t * velo_t + disp_t - disp_t_plus) + delt_t * delt_t * _F;  
+    
+      
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;      
+    ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
+    cg.setMaxIterations(50);
+    cg.setTolerance(1e-40);
+    cg.compute(A_CG);
+    disp_t_plus +=cg.solve(b_CG);
     dat_str.set_zero();
-  }
-  //done
+    cout << "#iterations:     " << cg.iterations() << endl;
+    cout << "estimated error: " << cg.error()      << endl;
+
+
+      
+    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+    // SimplicialLLT<SparseMatrix<double>,Lower> llt;
+    // llt.compute(A_CG);
+    // if(llt.info() != Success){
+    //   cout << "Not SPD !!!" << endl;
+    // }
+    // _velo = llt.solve(b_CG);
+    // if(llt.info()!=Success){
+    //   cout << "Solve fail" << endl;
+    // }
+
+      
+    // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LU<<<<<<<<<<<<<<<<<<" << endl;
+    // SparseLU<SparseMatrix<double>> lu;
+    // lu.compute(A_CG);
+    // _velo = lu.solve(b_CG);
+    // displace += delt_t * velocity;
+
+    if(fabs(cg.error()) <1e-8)
+      break;
+    }
+    
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>Elasticity Energy Val<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << dat_str.Val_ << endl;
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>GRA<<<<<<<<<<<<<<<<<<" << endl;
+  // cout << dat_str.gra_.array().square().sum() << endl;
+  // cout << endl << endl << endl;
+    velocity = (displace_plus - displace)/delt_t;
+    displace = displace_plus;
+
+    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
+  auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
+
+  MatrixXd points_now = points + displace;
+
+  point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
+  //point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
+  //point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
+
+
+
+}
+//done
 }
 
 

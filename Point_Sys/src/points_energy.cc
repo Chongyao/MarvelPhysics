@@ -120,6 +120,7 @@ int point_sys::calc_rhoi_vi() const{
     }
   }  
   vol_i_ = mass_i_.array() / rho_i_.array();
+  //cout  <<" this is vol " << endl<< vol_i_ << endl;
   return 0;
 }
 double point_sys::kernel(const double &r, const double &h) const {
@@ -274,8 +275,9 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
   Matrix3d Kpq = Matrix3d::Zero();
   Matrix3d one_line;
-// #pragma omp parallel for
+  #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
+    //cout << "hessian i " << i << endl;
     Map<const MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
     Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     Map<const MatrixXd> inv_A(dat_str.inv_A_all_.col(i).data(), 3, 3);
@@ -297,7 +299,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
               cons_law(def_gra.row(l).transpose()*dq.transpose() + dq*def_gra.row(l), Young_, Poission_);
           
 
-          Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
+          Kpq.col(l) = -2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
         }
 
 
