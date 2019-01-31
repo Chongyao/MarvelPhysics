@@ -275,12 +275,13 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   // TripletList.reserve()
 
   //TODO:consider sysmetric
+#pragma omp parallel for
+  for(size_t i = 0; i < dim_; ++i){  
+    Matrix3d Kpq = Matrix3d::Zero();
+    Matrix3d one_line;
   
-  Matrix3d Kpq = Matrix3d::Zero();
-  Matrix3d one_line;
-  Matrix3d Kpq_vol = Matrix3d::Zero();
-  // #pragma omp parallel for
-  for(size_t i = 0; i < dim_; ++i){
+  
+
     Map<const MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
     Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
     Map<const MatrixXd> inv_A(dat_str.inv_A_all_.col(i).data(), 3, 3);
@@ -323,7 +324,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
 
 
-          Kpq_vol.col(l) = 2 * kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
+          Kpq.col(l) += 2 * kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
 
           
           
@@ -338,7 +339,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
           for(size_t n = 0; n < 3; ++n){
             if (Kpq(m, n) != 0){
               dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
-              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
+              //              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
              
               
             }
