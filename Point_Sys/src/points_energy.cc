@@ -279,7 +279,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   Matrix3d Kpq = Matrix3d::Zero();
   Matrix3d one_line;
   Matrix3d Kpq_vol = Matrix3d::Zero();
- #pragma omp parallel for
+  // #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Map<const MatrixXd> stress(dat_str.stress_.col(i).data(), 3, 3);
     Map<const MatrixXd> def_gra(dat_str.def_gra_.col(i).data(), 3, 3);
@@ -305,18 +305,27 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
           Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
         }
+
+        
         //volume conserving forcing
         for(size_t l = 0; l < 3; ++l){
           MatrixXd left_deri_det_matrix = def_gra;
           left_deri_det_matrix.row(l) = dq.transpose();
           double left_deri = left_deri_det_matrix.determinant();
           Matrix3d right_deri = Matrix3d::Zero();{
-            right_deri.row( (l + 1) % 3 ) = Vector3d(def_gra.col( (l + 2) % 3 )).cross(dq).transpose();
-            
-            right_deri.row( (l + 2) % 3 ) = dq.cross(Vector3d(def_gra.col( (l + 1) % 3 ))).transpose();
+            Vector3d next_line = def_gra.row( (1 + 1) % 3 ).transpose();
+            Vector3d next_next_line = def_gra.row( (1 + 2) % 3 ).transpose();
+            right_deri.row( (l + 1) % 3 ) = (next_next_line.cross(dq)).transpose();
+
+            right_deri.row( (l + 2) % 3 ) = (dq.cross(next_line)).transpose();
 
           }
-          Kpq.col(l) += 2 * kv_ * vol_i_(i) * (left_deri * vol_cross + def_gra_det * right_deri) * dp;
+
+
+
+          Kpq_vol.col(l) = 2 * kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
+
+          
           
         }
 
@@ -329,6 +338,8 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
           for(size_t n = 0; n < 3; ++n){
             if (Kpq(m, n) != 0){
               dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
+              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
+             
               
             }
           }
