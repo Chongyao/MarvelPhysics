@@ -15,6 +15,7 @@ struct energy_dat{
   
   // energy_dat(const energy_dat &other);
   //save data by element
+  int save_ele_vol_cross(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_def_gra(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_inv_all(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_gra(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
@@ -31,6 +32,7 @@ struct energy_dat{
   // Eigen::MatrixXd& ele_gra(const size_t &ele_id);
   // Eigen::MatrixXd& ele_hes(const size_t &ele_id);
  // private:
+  Eigen::MatrixXd vol_cross_;
   Eigen::MatrixXd def_gra_;
   Eigen::MatrixXd sigma_w_points_;
   Eigen::MatrixXd inv_A_all_;

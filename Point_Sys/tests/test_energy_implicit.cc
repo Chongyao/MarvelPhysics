@@ -181,6 +181,7 @@ int main(int argc, char** argv){
 
     //test  convergence
     auto res = M * ((disp_t_plus - disp_t) / delt_t - velo_t) - delt_t * _F;
+    cout << res.head(20);
     double res_value = res.array().square().sum();
     if(res_value < 1e-10){
       cout << "[INFO]Newton res " <<endl << res_value << endl;;

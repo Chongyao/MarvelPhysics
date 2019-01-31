@@ -2,7 +2,7 @@
 
 using namespace Eigen;
 namespace marvel{
-energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(3*dim_, 3*dim_), strain_(9, dim_), stress_(9, dim_), ela_val_(dim_), vol_val_(dim_), sigma_w_points_(3, dim_), Val_(0){
+energy_dat::energy_dat(const size_t &dim):dim_(dim),def_gra_(9, dim_), inv_A_all_(9, dim_), gra_(3, dim_), hes_(3*dim_, 3*dim_), strain_(9, dim_), stress_(9, dim_), ela_val_(dim_), vol_val_(dim_), sigma_w_points_(3, dim_), Val_(0), vol_cross_(9, dim_){
   gra_.setZero(3, dim_);
   sigma_w_points_.setZero(3, dim_);
 
@@ -22,6 +22,9 @@ int energy_dat::save_ele_mat(const size_t &ele_id, const size_t &rows, const Mat
     whole_mat.col(ele_id) = Map<const VectorXd>(ele_mat.data(), rows);
   return 0;
 }
+int energy_dat::save_ele_vol_cross(const size_t &ele_id, const MatrixXd &ele_mat){
+  return save_ele_mat(ele_id, 9, ele_mat, vol_cross_, false);
+}
 int energy_dat::save_ele_def_gra(const size_t &ele_id, const MatrixXd &ele_mat){
   return save_ele_mat(ele_id, 9, ele_mat, def_gra_, false);
 }
@@ -40,6 +43,7 @@ int energy_dat::save_ele_stress(const size_t &ele_id, const MatrixXd &ele_mat){
 
 
 int energy_dat::set_zero(){
+  vol_cross_.setZero(9, dim_);
   def_gra_.setZero(9, dim_);
   gra_.setZero(3, dim_);
   // hes_.setZero(9, dim_);
