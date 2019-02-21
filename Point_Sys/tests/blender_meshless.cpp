@@ -160,6 +160,7 @@ int main(int argc, char** argv){
   double previous_step_Val = 0;
 
   auto start = system_clock::now();
+  size_t frame_id = 0;
   if(solver == "explicit"){
     for(size_t i = 0; i < max_iter; ++i){
       cerr << "iter is "<<endl<< i << endl;
@@ -199,8 +200,8 @@ int main(int argc, char** argv){
       acce = new_acce;
       
       if(i%iters_perframe == 0){
-        auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
-        auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
+        auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
+        auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
         MatrixXd points_now = points + displace;
         point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
         point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
@@ -210,6 +211,7 @@ int main(int argc, char** argv){
 
         vet_displace = displace.block(0, 0, 3, nods.cols());
         writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
+        ++frame_id;
 
       }
 
@@ -295,8 +297,8 @@ int main(int argc, char** argv){
       velocity = (displace_plus - displace)/delt_t;
       displace = displace_plus;
       if(i%iters_perframe == 0){
-        auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
-        auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
+        auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
+        auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
         MatrixXd points_now = points + displace;
         point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
         point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
@@ -306,6 +308,7 @@ int main(int argc, char** argv){
 
         vet_displace = displace.block(0, 0, 3, nods.cols());
         writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
+        ++frame_id;
 
       }
     }
