@@ -55,6 +55,7 @@ public:
 
 
 	static Collision* instance;
+  	Collision():_is_first(true){}
 
 private:
 	vector<CollisionDate> bodys;     
@@ -63,7 +64,7 @@ private:
 	vector<mesh*> dl_mesh;//delete mesh points
 	vector<double> contact_time;
 
-	Collision():_is_first(true){}
+
 
 	bool _is_first;//是否第一次传入网格
 

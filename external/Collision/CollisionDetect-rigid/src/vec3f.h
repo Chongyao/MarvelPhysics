@@ -71,6 +71,7 @@ public:
 };
 
 class vec3f {
+ public:
 	union {
 		struct {
 		double x, y, z;
