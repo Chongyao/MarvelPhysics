@@ -61,11 +61,13 @@ int collision::Val(const double *init_points, const double *disp, energy_dat &da
   Map<const MatrixXd> _disp(disp, 3, dim_);
   Map<const MatrixXd> _init_points(init_points, 3, dim_);
   cout << num_surf_point_  <<" " << _disp.cols() << endl;
+
   for(size_t i = 0; i < dim_; ++i){
     double position_now = _disp(which_axis, i) + _init_points(which_axis, i);
     if (( position_now - ground_pos_) < 0){
       // cout <<" i is " << i << " coll val " << endl;
       // cout << w_coll_ * pow((ground_pos_ - position_now), 2) << endl;
+      
       dat_str.Val_ += w_coll_ * pow((ground_pos_ - position_now), 2);      
     }
 
@@ -84,14 +86,31 @@ int collision::Gra(const double *init_points, const double *disp, energy_dat &da
     if (( position_now - ground_pos_) < 0){
 
 
-      dat_str.gra_(which_axis, i) += 2 * w_coll_ * (ground_pos_ - position_now);  
+      dat_str.gra_(which_axis, i) += -2 * w_coll_ * (position_now - ground_pos_);  
     }
 
   }
   return 0;
 
 }
-int Hes(const double *disp, energy_dat &dat_str){
+int collision::Hes(const double *init_points, const double *disp, energy_dat &dat_str){
+  size_t which_axis = size_t(ground_axis_ - 'x');
+  Map<const MatrixXd> _disp(disp, 3, dim_);
+  Map<const MatrixXd> _init_points(init_points, 3, dim_);
+  #pragma omp parallel for
+  for(size_t i = 0; i < dim_; ++i){
+    double position_now = _disp(which_axis, i) + _init_points(which_axis, i);
+    if (( position_now - ground_pos_) < 0){
+      for(size_t j = 0; j < 3; ++j){
+#pragma omp critical
+        {
+        dat_str.hes_trips.push_back(Triplet<double>(i * 3 + j, i * 3 + j, 2 * w_coll_));
+        }
+      }
+    }
+    
+  }
+
   return 0;
 }
 

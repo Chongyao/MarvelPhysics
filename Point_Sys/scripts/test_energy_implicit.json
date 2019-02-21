@@ -6,7 +6,7 @@
   "rho":5,
   "Poission":0.45,
   "Young":7000,
-  "max_iter":100,
+  "max_iter":200,
   "kv":300,
   "time_step":0.001,
   "gravity":9.8,
