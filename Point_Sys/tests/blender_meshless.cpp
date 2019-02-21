@@ -120,6 +120,12 @@ int main(int argc, char** argv){
   if ( boost::filesystem::exists(cons_file_path) )
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
   cout << "constrint " << cons.size() << " points" << endl;
+  #if 1
+  for(auto con : cons){
+    cout << con << " ";
+  }
+  cout << endl;
+  #endif
 
   position_constraint pos_cons(simulation_para.get<double>("position_weig"), cons, dim);
 
