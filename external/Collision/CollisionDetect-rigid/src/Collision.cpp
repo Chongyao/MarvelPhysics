@@ -8,8 +8,8 @@ void Collision::Transform_Pair(unsigned int a,unsigned int b) {
 		mesh_pairs.push_back(mesh_pair(a, b));
 }
 
-void Collision::Transform_Mesh(unsigned int numVtx, unsigned int numTri, vector<unsigned int> tris, vector<double> vtxs,
-	vector<double> p_vtxs,
+void Collision::Transform_Mesh(unsigned int numVtx, unsigned int numTri, const vector<unsigned int>& tris, const vector<double>& vtxs,
+	const vector<double>& p_vtxs,
 	int m_id,
 	bool able_selfcollision) {
 

@@ -28,9 +28,9 @@ public:
 	void Transform_Pair(unsigned int a,unsigned int b);
 	
 	//模型网格输入接口，输入模型网格的点集和面集
-	void Transform_Mesh(unsigned int numVtx, unsigned int numTri, vector<unsigned int> tris, 
-		vector<double> vtxs,
-		vector<double> pre_vtxs,
+	void Transform_Mesh(unsigned int numVtx, unsigned int numTri, const vector<unsigned int>& tris, 
+		const vector<double>& vtxs,
+		const vector<double>& pre_vtxs,
 		int m_id,bool able_selfcollision=false
 		);
 

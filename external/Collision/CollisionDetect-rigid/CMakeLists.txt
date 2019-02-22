@@ -1,6 +1,7 @@
 file(GLOB coll_rigid_header src/*.h)
 file(GLOB coll_rigid_source src/*.cc src/*.c src/*.cpp)
-file(GLOB coll_rigid_cuda src/*.cuh)
+file(GLOB coll_rigid_cuda src/*.cuh src/*.cu)
+
 #find_package(CUDA)
 FIND_PACKAGE(CUDA ${CUDA_VERSION} REQUIRED)
 STRING (TOLOWER ${CMAKE_SYSTEM_NAME} LOWER_SYSTEM_NAME)
@@ -17,6 +18,7 @@ include_directories(${CUDA_HELPER_PATH})
 
 CUDA_ADD_LIBRARY(coll_rigid ${coll_rigid_header} ${coll_rigid_source} ${coll_rigid_cuda})
 target_link_libraries(coll_rigid
+  GLU glut GL
   ${CUDA_cusparse_LIBRARY}
   ${CUDA_CUBLAS_LIBRARIES}
 )
