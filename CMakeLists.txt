@@ -1,7 +1,7 @@
 project(MarvalPhysics)
 cmake_minimum_required(VERSION 2.8)
 
-list(APPEND CMAKE_CXX_FLAGS "-fopenmp -std=c++11 -O3 -fpermissive")
+list(APPEND CMAKE_CXX_FLAGS "-fopenmp -std=c++11 -O0 -fpermissive")
 # list(APPEND CMAKE_CXX_FLAGS " -std=c++11 -o3 -fpermissive")
 
 # set(CMAKE_BUILD_TYPE "Release")
@@ -30,6 +30,19 @@ if(EIGEN3_FOUND)
   message("-- Eigen version: ${EIGEN3_VERSION}")
   include_directories(${EIGEN3_INCLUDE_DIR})
 endif(EIGEN3_FOUND)
+
+#CUDA
+FIND_PACKAGE(CUDA ${CUDA_VERSION} REQUIRED)
+STRING (TOLOWER ${CMAKE_SYSTEM_NAME} LOWER_SYSTEM_NAME)
+SET(CUDA_TARGET_INCLUDE  ${CUDA_TOOLKIT_ROOT_DIR}-${CUDA_VERSION}/targets/${CMAKE_HOST_SYSTEM_PROCESSOR}-${LOWER_SYSTEM_NAME}/include)
+message(${CUDA_INCLUDE_DIRS})
+message(${CUDA_TOOLKIT_ROOT_DIR})
+#TODO: make this available for others
+SET(CUDA_CUBLAS_LIBRARIES /usr/local/cuda/lib64/libcublas.so)
+SET(CUDA_NVCC_FLAGS --compiler-options "-std=c++11")
+SET(CUDA_HELPER_PATH ${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc)
+include_directories(${CUDA_HELPER_PATH})
+list(APPEND CUDA_NVCC_FLAGS "-g -G")
 
 # # PETSC
 # set(PETSC_DIR "/usr/lib/petscdir/3.7.7")

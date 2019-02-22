@@ -246,6 +246,13 @@ void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vect
 	static std::vector<mesh *> meshes;
 
 	//FILE* f = fopen("bvh.txt", "a");
+    for(int i = 0; i < bodys[1].ms->_num_vtx;++i){
+    	cout << bodys[1].ms->_vtxs[i].x << " " << bodys[1].ms->_vtxs[i].y  << " " << bodys[1].ms->_vtxs[i].z << endl;
+    }
+
+	for(int i = 0; i < bodys[1].ms->_num_vtx;++i){
+		cout << bodys[1].ms->_ovtxs[i].x << " " << bodys[1].ms->_ovtxs[i].y  << " " << bodys[1].ms->_ovtxs[i].z << endl;
+	}
 
 	vector<tri_pair> fret;
 	static vector<int> _tri_offset;

@@ -2,7 +2,7 @@
 
 typedef unsigned int uint;
 // #define MAX_PAIR_NUM 20000000
-#define MAX_PAIR_NUM 10000000
+#define MAX_PAIR_NUM 1000000
 typedef struct {
 	uint3 _ids;
 

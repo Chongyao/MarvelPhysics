@@ -55,9 +55,10 @@ public:
 
 
 	static Collision* instance;
-  	Collision():_is_first(true){}
+
 
 private:
+        Collision():_is_first(true){}
 	vector<CollisionDate> bodys;     
 	vector<mesh_pair> mesh_pairs;
 	vector<vector<tri_pair>> contact_pairs;

@@ -10,7 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <chrono>
 #include <limits>
-#include <Collision/CollisionDetect-rigid/src/Collision.h>
+#include <Collision/CollisionDetect-cloth/src/Collision.h>
 using namespace marvel;
 using namespace std;
 using namespace Eigen;
@@ -59,7 +59,7 @@ int main(int argc, char** argv){
   const auto num_nods = static_cast<size_t>(nods.cols());  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLL<<<<<<<<<<<<<<<<<<" << endl;
   
-
+  cout << surf << endl;
 
   //set plane
   MatrixXi plane_surf(3, 1);
@@ -84,26 +84,23 @@ int main(int argc, char** argv){
   copy(surf.data(), surf.data() + surf.size(), &vec_obj_surf[0]);
   
   //coll
-  Collision COLL;
-  COLL.Transform_Pair(0, 1);
-  COLL.Transform_Mesh(3, 1, vec_plane_surf, vec_plane_nods, vec_plane_nods, 0);
-  COLL.Transform_Mesh(num_nods, num_surf,
+   // Collision COLL;
+  auto COLL_ptr = Collision::getInstance();
+  // COLL_ptr->Transform_Pair(0, 1);
+  COLL_ptr->Transform_Mesh(3, 1, vec_plane_surf, vec_plane_nods, vec_plane_nods, 0);
+  COLL_ptr->Transform_Mesh(num_nods, num_surf,
                       vec_obj_surf, vec_obj_nods, vec_obj_nods, 1);
-  
+
   cout << nods << endl << endl;
   for(size_t i = 0; i < pt.get<size_t>("times"); ++i){
     
     nods.row(2) -= MatrixXd::Ones(1, nods.cols());
     copy(nods.data(), nods.data() + nods.size(), &vec_obj_nods_next[0]);
-    for(auto p : vec_obj_nods_next){
-      cout << p << " ";
-    }
-    cout << endl;
-    COLL.Transform_Mesh(num_nods, num_surf,
+    
+    COLL_ptr->Collid();
+    COLL_ptr->Transform_Mesh(num_nods, num_surf,
                         vec_obj_surf, vec_obj_nods_next, vec_obj_nods, 1, false);
     
-    COLL.Collid();
-    cout << "time is " << i << " coll num is " << COLL.getNumContacts() << endl;
     vec_obj_nods = vec_obj_nods_next;
     cout << nods << endl << endl;
   }

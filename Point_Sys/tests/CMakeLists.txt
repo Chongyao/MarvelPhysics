@@ -1,6 +1,6 @@
-cuda_add_executable(test_coll test_coll.cc)
+cuda_add_executable(test_coll test_coll_rky.cc)
 target_link_libraries(test_coll
-  coll_rigid
+  coll_cloth
   marvel-core
   PointSys
   ${Boost_LIBRARIES}
