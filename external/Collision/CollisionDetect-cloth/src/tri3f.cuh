@@ -1,7 +1,7 @@
 #pragma once
 
 typedef unsigned int uint;
-#define MAX_PAIR_NUM 5000000
+#define MAX_PAIR_NUM 2000000
 
 typedef struct {
 	uint3 _ids;

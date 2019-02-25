@@ -1,4 +1,4 @@
-cuda_add_executable(test_coll test_coll_rky.cc)
+cuda_add_executable(test_coll test_coll.cc)
 target_link_libraries(test_coll
   coll_cloth
   marvel-core

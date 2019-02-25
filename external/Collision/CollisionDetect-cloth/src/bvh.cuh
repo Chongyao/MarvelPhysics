@@ -91,7 +91,7 @@ typedef struct {
 } g_cone_front;
 
 #define SAFE_FRONT_NUM  54000000
-#define MAX_FRONT_NUM   1000000
+#define MAX_FRONT_NUM   500000
 
 typedef struct {
 	uint4 *_dFront; // left, right, valid 0/1, dummy

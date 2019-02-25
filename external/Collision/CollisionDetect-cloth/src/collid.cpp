@@ -405,7 +405,7 @@ bool cmp(vector<tri_pair> a, vector<tri_pair> b) {
 		return ta[3] < tb[3];
 }
 
-void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vector<vector<tri_pair>> &contacts,vector<double> contact_time) {
+void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vector<vector<tri_pair>> &contacts,vector<double>& contact_time) {
 	static bvh *bvhC = NULL;
 	static front_list fIntra;
 	static std::vector<mesh *> meshes;

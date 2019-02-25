@@ -17,8 +17,8 @@ using namespace Eigen;
 using namespace igl;
 using namespace chrono;
 
-const double DOUBLE_MAX = std::numeric_limits<double>::max();
-// const double DOUBLE_MAX = 9999;
+// const double DOUBLE_MAX = std::numeric_limits<double>::max();
+const double DOUBLE_MAX = 100;
 int main(int argc, char** argv){
 
   
@@ -94,10 +94,23 @@ int main(int argc, char** argv){
   cout << nods << endl << endl;
   for(size_t i = 0; i < pt.get<size_t>("times"); ++i){
     
-    nods.row(2) -= MatrixXd::Ones(1, nods.cols());
+    nods.row(2) -= MatrixXd::Ones(1, nods.cols()) * 0.333;
     copy(nods.data(), nods.data() + nods.size(), &vec_obj_nods_next[0]);
     
     COLL_ptr->Collid();
+    auto pairs = COLL_ptr->getContactPairs();
+    auto times = COLL_ptr->getContactTimes();
+    cout <<" times size is " <<  times.size() << endl;
+    for(size_t i = 0; i < pairs.size(); ++i){
+      cout << "ContactTime is "  << times[i] << endl;
+      cout << pairs[i].size() << endl;
+      cout << "pair " << i << " :" << endl;
+      uint mesh_id, face_id;
+      pairs[i][0].get(mesh_id, face_id);
+      cout << "mesh id is " << mesh_id << " face id is " << face_id << endl;
+      pairs[i][1].get(mesh_id, face_id);
+      cout << "mesh id is " << mesh_id << " face id is " << face_id << endl;      
+    }
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
                         vec_obj_surf, vec_obj_nods_next, vec_obj_nods, 1, false);
     

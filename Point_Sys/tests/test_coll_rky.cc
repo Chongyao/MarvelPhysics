@@ -3,9 +3,12 @@
 #include <Collision/CollisionDetect-cloth/src/Collision.h>
 using namespace std;
 
-const double DOUBLE_MAX = std::numeric_limits<double>::max();
-
+// const double DOUBLE_MAX = std::numeric_limits<double>::max(); 
+const double DOUBLE_MAX = 100;
 int main(int argc, char** argv){
+
+
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SET CUBE<<<<<<<<<<<<<<<<<<" << endl;
   vector<unsigned int> cube_surf =
       {1,3,0,
@@ -47,12 +50,12 @@ int main(int argc, char** argv){
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
                       cube_surf, cube_nods, cube_nods_pre, 1);
 
-  for(size_t i = 0; i < 5; ++i){
+  for(size_t i = 0; i < 20; ++i){
     cout <<endl<<endl<< "time is " << i << endl << " before: " << endl;
     for(auto& p : cube_nods){cout << p << " ";}
     
     for(size_t j = 0; j < num_nods; ++j){
-      cube_nods[j*3 + 2] -= 1;
+      cube_nods[j*3 + 2] -= 0.333;
     }
     cout <<endl<< "after : " << endl;
     for(auto& p : cube_nods){cout << p << " ";}
@@ -60,6 +63,22 @@ int main(int argc, char** argv){
 
     
     COLL_ptr->Collid();
+
+    auto pairs = COLL_ptr->getContactPairs();
+    auto times = COLL_ptr->getContactTimes();
+    cout <<" times size is " <<  times.size() << endl;
+    for(size_t i = 0; i < pairs.size(); ++i){
+      // cout << "ContactTime is "  << times[i] << endl;
+      cout << pairs[i].size() << endl;
+      cout << "pair " << i << " :" << endl;
+      uint mesh_id, face_id;
+      pairs[i][0].get(mesh_id, face_id);
+      cout << "mesh id is " << mesh_id << " face id is " << face_id << endl;
+      pairs[i][1].get(mesh_id, face_id);
+      cout << "mesh id is " << mesh_id << " face id is " << face_id << endl;      
+    }
+
+
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
                         cube_surf, cube_nods, cube_nods_pre, 1, false);
     
