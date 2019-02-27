@@ -160,12 +160,29 @@ int main(int argc, char** argv){
     }    
   }
 
-  for(size_t i = 0; i < obta_surfs.size(); ++i){
-    cout << obta_surfs[i]->cols() << " " << obta_nods[i]->cols() << endl;
+  size_t obta_num = obta_surfs.size();
+
+  size_t num_fake_tris = dim%3 ? dim / 3 + 1: dim / 3 ;
+  MatrixXi fake_surf(3, num_fake_tris);{
+    #pragma omp parallel for
+    for(size_t i = 0; i < num_fake_tris; ++i){
+      fake_surf(0, i) = i * 3;
+      fake_surf(1, i) = i * 3 + 1 > dim ? i * 3 - 1 : i * 3 + 1;
+      fake_surf(2, i) = i * 3 + 2 > dim ? i * 3 - 2 : i * 3 + 2;
+    }
+  }
+  
+  
+  auto COLL_ptr = Collision_zcy::getInstance();
+  COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), points.data(), points.data(), 0, false);
+  for(size_t i = 0; i < obta_num; ++i){
+    COLL_ptr->Transform_Mesh(obta_nods[i]->cols(), obta_surfs[i]->cols(), obta_surfs[i]->data(), obta_nods[i]->data(), obta_nods[i]->data(), i + 1, false);
+    COLL_ptr->Transform_Pair(0, i + 1);
   }
 
+  COLL_ptr->Collid();
 
-
+  
 
              
 
@@ -178,17 +195,19 @@ int main(int argc, char** argv){
   string solver = simulation_para.get<string>("solver");
 
   double delt_t = common.get<double>("time_step");
-  MatrixXd displace;
-  MatrixXd velocity;
+  MatrixXd points_pos, new_pos;
+  MatrixXd displace, new_displace;
+  MatrixXd velocity, new_velocity;
   MatrixXd acce;
   MatrixXd new_acce;
   MatrixXd gra;
   MatrixXd vet_displace;
-  displace.setZero(3, dim);
-  velocity.setZero(3, dim);
-  acce.setZero(3, dim);
+  points_pos.setZero(3, dim); new_pos.setZero(3, dim);
+  displace.setZero(3, dim); new_displace.setZero(3, dim);
+  velocity.setZero(3, dim); new_velocity.setZero(3, dim);
+  acce.setZero(3, dim); new_acce.setZero(3, dim);
   gra.setZero(3, dim);
-  new_acce.setZero(3, dim);
+
   vet_displace.setZero(3, nods.cols());
 
   PS.pre_compute(dat_str);
@@ -207,7 +226,7 @@ int main(int argc, char** argv){
       cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 7) << endl;
       // cout << "acce is " << endl << acce.block(0, 0, 3, 8) << endl;
 
-
+      points_pos = points + displace;
       GE.Val(displace.data(), dat_str);
       GE.Gra(displace.data(), dat_str);
 
@@ -220,7 +239,7 @@ int main(int argc, char** argv){
       pos_cons.Hes(displace.data(),dat_str);
          
 
-
+      
 
 
       for(size_t j = 0; j < dim; ++j){
@@ -228,15 +247,23 @@ int main(int argc, char** argv){
         new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
       }
     
-      velocity += delt_t * new_acce;
-      displace += delt_t *velocity;
+      new_velocity += delt_t * new_acce;
+      new_displace += delt_t *velocity;
+      new_pos = points + new_displace;
 
+     
+      COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), new_pos.data(), points_pos.data(), 0, false);
+      COLL_ptr->Collid();
+      
+      
       if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
         break;
     
       previous_step_Val = dat_str.Val_;
-    
+      
       acce = new_acce;
+      velocity = new_velocity;
+      displace = new_displace;
       
       if(i%iters_perframe == 0){
         auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
