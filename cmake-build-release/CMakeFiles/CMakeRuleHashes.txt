@@ -1,3 +1,0 @@
-# Hashes of file build rules.
-145aaf9b60a07e6680e3e49e6dd17d7b external/Collision/CollisionDetect-cloth/CMakeFiles/coll_cloth.dir/src/coll_cloth_generated_collision.cu.o
-3451bfdf00a3aa6da3d7ea94397a1c36 external/Collision/CollisionDetect-rigid/CMakeFiles/coll_rigid.dir/src/coll_rigid_generated_collision.cu.o

@@ -1,2 +1,0 @@
-/usr/bin/ar qc libcoll_cloth.a  CMakeFiles/coll_cloth.dir/src/Collision.cpp.o CMakeFiles/coll_cloth.dir/src/Collision_zcy.cpp.o CMakeFiles/coll_cloth.dir/src/ccd.cpp.o CMakeFiles/coll_cloth.dir/src/cmesh.cpp.o CMakeFiles/coll_cloth.dir/src/cmodel.cpp.o CMakeFiles/coll_cloth.dir/src/collid.cpp.o CMakeFiles/coll_cloth.dir/src/cubic.cpp.o CMakeFiles/coll_cloth.dir/src/tmbvh.cpp.o CMakeFiles/coll_cloth.dir/src/coll_cloth_generated_collision.cu.o
-/usr/bin/ranlib libcoll_cloth.a
