@@ -10,7 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <chrono>
 #include <limits>
-#include <Collision/CollisionDetect-rigid/src/Collision.h>
+#include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
 using namespace marvel;
 using namespace std;
 using namespace Eigen;
@@ -71,31 +71,18 @@ int main(int argc, char** argv){
       -3, -3, -3;
   cout << plane_nods << endl;
   
-  vector<unsigned int> vec_plane_surf(plane_surf.size());
-  vector<double> vec_plane_nods(plane_nods.size());
-  // vector<double> vec_plane_nods_next(plane_nods.size());
-  copy(plane_nods.data(), plane_nods.data() + plane_nods.size(), &vec_plane_nods[0]);
-  copy(plane_surf.data(), plane_surf.data() + plane_surf.size(), &vec_plane_surf[0]);
 
-  vector<unsigned int> vec_obj_surf(surf.size());
-  vector<double> vec_obj_nods(nods.size());
-  vector<double> vec_obj_nods_next(nods.size());
-  copy(nods.data(), nods.data() + nods.size(), &vec_obj_nods[0]);
-  copy(surf.data(), surf.data() + surf.size(), &vec_obj_surf[0]);
-  
-  //coll
-   // Collision COLL;
-  auto COLL_ptr = Collision::getInstance();
+  auto COLL_ptr = Collision_zcy::getInstance();
   // COLL_ptr->Transform_Pair(0, 1);
-  COLL_ptr->Transform_Mesh(3, 1, vec_plane_surf, vec_plane_nods, vec_plane_nods, 0);
-  COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                      vec_obj_surf, vec_obj_nods, vec_obj_nods, 1);
 
-  cout << nods << endl << endl;
+  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 0);
+  COLL_ptr->Transform_Mesh(num_nods, num_surf,
+                           surf.data(), nods.data(), nods.data(), 1);
+
+  auto nods_pre = nods;
   for(size_t i = 0; i < pt.get<size_t>("times"); ++i){
     
     nods.row(2) -= MatrixXd::Ones(1, nods.cols()) * 0.333;
-    copy(nods.data(), nods.data() + nods.size(), &vec_obj_nods_next[0]);
     
     COLL_ptr->Collid();
     auto pairs = COLL_ptr->getContactPairs();
@@ -112,9 +99,9 @@ int main(int argc, char** argv){
       cout << "mesh id is " << mesh_id << " face id is " << face_id << endl;      
     }
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                        vec_obj_surf, vec_obj_nods_next, vec_obj_nods, 1, false);
-    
-    vec_obj_nods = vec_obj_nods_next;
+                             surf.data(), nods.data(), nods_pre.data(), 1, false);
+
+    nods_pre = nods;
     cout << nods << endl << endl;
   }
 
@@ -131,7 +118,6 @@ int main(int argc, char** argv){
        << "秒" << endl;
 
   cout << "all done " << endl;
-                                                                                                                        
 
   
 }
