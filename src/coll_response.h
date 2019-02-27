@@ -23,7 +23,7 @@ Vector3d get_cross_point(const Eigen::Vector3d& before, const Eigen::Vector3d& a
   return std::move(before + offset * line);
       
 }
-int response(const double* const obstacle, const double& area,
+int response(const double* const obstacle,
              const double time, 
              const double* const pre_pos, const double* const next_pos,
              const double* const pre_velo, const double* const next_velo,
@@ -39,11 +39,13 @@ int response(const double* const obstacle, const double& area,
   Map<MatrixXd> res_velo_(res_velo, 3, 3);
   res_velo_ = next_velo_;
 
+  double area;
   Vector3d plane_normal;{
     Vector3d one_edge = obstacle_.col(1) - obstacle_.col(0);
     Vector3d other_edge = obstacle_.col(2) - obstacle_.col(0);
     plane_normal = one_edge.cross(other_edge);
     double norm  = plane_normal.norm();
+    area = norm / 2;
     if(norm > 1e-6)
       plane_normal = plane_normal / norm;
     else

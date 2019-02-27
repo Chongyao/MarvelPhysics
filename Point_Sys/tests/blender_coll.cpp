@@ -35,6 +35,16 @@ using namespace igl;
 using namespace chrono;
 using namespace boost;
 
+
+Matrix3d get_tri_pos(const MatrixXi& tris, const MatrixXd& verts, const size_t& face_id){
+  Matrix3d tri;
+  for(size_t i = 0; i < 3; ++i){
+    size_t vert_id = tris(i, face_id);
+    tri.col(i) = verts.col(vert_id);
+  }
+  return std::move(tri);
+}
+
 int main(int argc, char** argv){
 
   Eigen::initParallel();
@@ -161,7 +171,14 @@ int main(int argc, char** argv){
   }
 
   size_t obta_num = obta_surfs.size();
+  // vector<vector<double>> obta_areas(obta_num);{
+  //   for(auto& obta : obta_areas){
+  //     obta.resize(obta_surfs[i]->cols());
+      
+  //   }
 
+  // }
+  
   size_t num_fake_tris = dim%3 ? dim / 3 + 1: dim / 3 ;
   MatrixXi fake_surf(3, num_fake_tris);{
     #pragma omp parallel for
@@ -251,9 +268,50 @@ int main(int argc, char** argv){
       new_displace += delt_t *velocity;
       new_pos = points + new_displace;
 
-     
+
+
+      //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
       COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), new_pos.data(), points_pos.data(), 0, false);
       COLL_ptr->Collid();
+
+      auto pairs = COLL_ptr->getContactPairs();
+      auto times = COLL_ptr->getContactTimes();
+      for(size_t j = 0; j < pairs.size(); ++j){
+        uint mesh_id1, face_id1, mesh_id2, face_id2;{
+          pairs[j][0].get(mesh_id1, face_id1);
+          pairs[j][1].get(mesh_id2, face_id2);
+          if(mesh_id2 == 0){
+            mesh_id2 = mesh_id1;
+            mesh_id1 = 0;
+
+            auto exchange = face_id2;
+            face_id2 = face_id1;
+            face_id1 = exchange;
+          }
+        }
+        //TODO: can be faster
+        auto coll_plane = get_tri_pos(*obta_surfs[mesh_id2 - 1], *obta_nods[mesh_id2 - 1], face_id2);
+        auto pre_pos = get_tri_pos(fake_surf, points_pos, face_id1);
+        auto pre_velo = get_tri_pos(fake_surf, velocity, face_id1);
+        auto next_pos = get_tri_pos(fake_surf, new_pos, face_id1);
+        auto next_velo = get_tri_pos(fake_surf, new_velocity, face_id1);
+        
+        Matrix3d res_pos = Matrix3d::Zero();
+        Matrix3d res_velo = Matrix3d::Zero();
+        
+        response(coll_plane.data(), times[j], pre_pos.data(), next_pos.data(),
+                 pre_velo.data(), next_velo.data(),
+                 res_pos.data(), res_velo.data());
+        for(size_t k = 0; k < 3; ++k){
+          size_t vert_id = fake_surf(k, face_id1);
+          new_velocity.col(vert_id) = res_velo.col(k);
+          new_displace.col(vert_id) = res_pos.col(k) - points.col(k);
+          new_pos.col(vert_id) = res_pos.col(k);
+        }
+      }//TODO:make it a new class
+      //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
+      
+      
       
       
       if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
