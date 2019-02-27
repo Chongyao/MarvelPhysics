@@ -1,0 +1,47 @@
+/home/zcy/Downloads/clion-2018.3.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Release -G "CodeBlocks - Unix Makefiles" /home/zcy/Documents/projects/MarvelPhysics
+-- The C compiler identification is GNU 7.3.0
+-- The CXX compiler identification is GNU 7.3.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Boost version: 1.65.1
+-- Found the following Boost libraries:
+--   filesystem
+--   system
+--   program_options
+-- Boost @ /usr/include
+-- Found Eigen3: /usr/include/eigen3 (Required is at least version "2.91.0") 
+-- Eigen @ /usr/include/eigen3
+-- Eigen version: 3.3.4
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Looking for pthread_create
+-- Looking for pthread_create - not found
+-- Looking for pthread_create in pthreads
+-- Looking for pthread_create in pthreads - not found
+-- Looking for pthread_create in pthread
+-- Looking for pthread_create in pthread - found
+-- Found Threads: TRUE  
+-- Found CUDA: /usr/local/cuda (found version "10.0") 
+/usr/local/cuda/include
+/usr/local/cuda
+-- Found TBB: /usr/include (found version "2017.0")  
+-- TBB @ /usr/include
+-- Found OpenMP_C: -fopenmp (found version "4.5") 
+-- Found OpenMP_CXX: -fopenmp (found version "4.5") 
+-- Found OpenMP: TRUE (found version "4.5")  
+-- Found CUDA: /usr/local/cuda (found suitable version "10.0", minimum required is "10.0") 
+/usr/local/cuda/include
+/usr/local/cuda
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/zcy/Documents/projects/MarvelPhysics/cmake-build-release

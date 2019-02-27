@@ -1,0 +1,1043 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="MarvalPhysics"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;CMake Files\cmake\;CMake Files\external\;CMake Files\external\Collision\;CMake Files\external\Collision\CollisionDetect-cloth\;CMake Files\external\Collision\CollisionDetect-rigid\;CMake Files\Point_Sys\;CMake Files\Point_Sys\src\;CMake Files\Point_Sys\tests\;CMake Files\src\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="coll_cloth">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/libcoll_cloth.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/Makefile&quot;  VERBOSE=1 coll_cloth"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="coll_cloth/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/libcoll_cloth.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/Makefile&quot;  VERBOSE=1 coll_cloth/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="coll_rigid">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/libcoll_rigid.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/Makefile&quot;  VERBOSE=1 coll_rigid"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="coll_rigid/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/libcoll_rigid.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid"/>
+				<Option object_output="./"/>
+				<Option type="2"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/Makefile&quot;  VERBOSE=1 coll_rigid/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="PointSys">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/libPointSys.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/Makefile&quot;  VERBOSE=1 PointSys"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="PointSys/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/libPointSys.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/Makefile&quot;  VERBOSE=1 PointSys/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/src/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="blender_meshless_coll">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/blender_meshless_coll" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 blender_meshless_coll"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="blender_meshless_coll/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/blender_meshless_coll" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 blender_meshless_coll/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="blender_meshless">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/blender_meshless" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 blender_meshless"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="blender_meshless/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/blender_meshless" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 blender_meshless/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_genpoints">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_genpoints" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_genpoints"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_genpoints/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_genpoints" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_genpoints/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_coll">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_coll" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_coll"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_coll/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_coll" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_coll/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_tet">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_tet" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_tet"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_tet/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_tet" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_tet/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_energy_implicit">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_energy_implicit" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_energy_implicit"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_energy_implicit/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_energy_implicit" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_energy_implicit/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_energy">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_energy" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_energy"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_energy/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_energy" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_energy/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_SparseMatrix">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_SparseMatrix" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_SparseMatrix"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="test_SparseMatrix/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin/test_SparseMatrix" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/bin"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/local/cuda/include"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 test_SparseMatrix/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/Point_Sys/tests/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="marvel-core">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/libmarvel-core.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/Makefile&quot;  VERBOSE=1 marvel-core"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="marvel-core/fast">
+				<Option output="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/libmarvel-core.so" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src"/>
+				<Option object_output="./"/>
+				<Option type="3"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/src"/>
+					<Add directory="/home/zcy/Documents/projects/MarvelPhysics/external"/>
+					<Add directory="/usr/include/eigen3"/>
+					<Add directory="/usr/local/cuda/samples/common/inc"/>
+					<Add directory="/usr/include/c++/7"/>
+					<Add directory="/usr/include/x86_64-linux-gnu/c++/7"/>
+					<Add directory="/usr/include/c++/7/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/Makefile&quot;  VERBOSE=1 marvel-core/fast"/>
+					<CompileFile command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j8 -f &quot;/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/src/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/basic_energy.cc">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/basic_energy.h">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/data_stream.cc">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/data_stream.h">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/gen_points.cc">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/gen_points.h">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/geometry.cc">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/geometry.h">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/get_nn.cc">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/get_nn.h">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/points_energy.cc">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/points_energy.h">
+			<Option target="PointSys"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/blender_coll.cpp">
+			<Option target="blender_meshless_coll"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/blender_meshless.cpp">
+			<Option target="blender_meshless"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/test_SparseMatrix.cc">
+			<Option target="test_SparseMatrix"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/test_coll.cc">
+			<Option target="test_coll"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/test_energy.cc">
+			<Option target="test_energy"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/test_energy_implicit.cc">
+			<Option target="test_energy_implicit"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/test_genpoints.cc">
+			<Option target="test_genpoints"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/test_tet.cc">
+			<Option target="test_tet"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-cloth/CMakeFiles/coll_cloth.dir/src/coll_cloth_generated_collision.cu.o">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/cmake-build-release/external/Collision/CollisionDetect-rigid/CMakeFiles/coll_rigid.dir/src/coll_rigid_generated_collision.cu.o">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/Collision.cpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/Collision.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/CollisionAPI.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/CollisionDate.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/Collision_zcy.cpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/Collision_zcy.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/aabb.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/box.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/box.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/bvh.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/ccd.cpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/ccd.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/cmesh.cpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/cmesh.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/cmodel.cpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/collid.cpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/collid.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/collision.cu">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/cubic.cpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/cubic.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/def.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/edge.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/forceline.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/impact.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/mat3f.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/mesh.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/pair.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/tmbvh.cpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/tmbvh.hpp">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/tools.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/tri-contact.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/tri.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/tri3f.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/vec3.cuh">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/src/vec3f.h">
+			<Option target="coll_cloth"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/Collision.cpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/Collision.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/CollisionAPI.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/CollisionDate.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/Collision_eigen.cpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/Collision_eigen.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/aabb.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/box.cuh">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/box.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/bvh.cuh">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/ccd.cpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/ccd.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/cmesh.cpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/cmesh.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/cmodel.cpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/collid.cpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/collid.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/collision.cu">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/cubic.cpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/cubic.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/def.cuh">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/edge.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/forceline.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/mat3f.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/pair.cuh">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/tmbvh.cpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/tmbvh.hpp">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/tools.cuh">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/tri-contact.cuh">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/tri.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/tri3f.cuh">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/vec3.cuh">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/src/vec3f.h">
+			<Option target="coll_rigid"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/src/io.cc">
+			<Option target="marvel-core"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/src/io.h">
+			<Option target="marvel-core"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/cmake/FindEigen3.cmake">
+			<Option virtualFolder="CMake Files\cmake\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/cmake/FindTBB.cmake">
+			<Option virtualFolder="CMake Files\cmake\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\external\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\external\Collision\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-cloth/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\external\Collision\CollisionDetect-cloth\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/external/Collision/CollisionDetect-rigid/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\external\Collision\CollisionDetect-rigid\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Point_Sys\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Point_Sys\src\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/Point_Sys/tests/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\Point_Sys\tests\"/>
+		</Unit>
+		<Unit filename="/home/zcy/Documents/projects/MarvelPhysics/src/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\src\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,1 @@
+/usr/bin/c++  -fopenmp -std=c++11 -O3 -fpermissive -fopenmp -O3 -DNDEBUG    -rdynamic CMakeFiles/test_SparseMatrix.dir/test_SparseMatrix.cc.o  -o ../../bin/test_SparseMatrix 

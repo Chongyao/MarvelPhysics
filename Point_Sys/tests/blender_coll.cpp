@@ -25,7 +25,7 @@
 
 
 #include "coll_response.h"
-#include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
+#include <Collision/CollisionDetect-rigid/src/Collision_eigen.h>
 
 
 using namespace marvel;
@@ -276,10 +276,14 @@ int main(int argc, char** argv){
 
       auto pairs = COLL_ptr->getContactPairs();
       auto times = COLL_ptr->getContactTimes();
+      
       for(size_t j = 0; j < pairs.size(); ++j){
+
         uint mesh_id1, face_id1, mesh_id2, face_id2;{
+          cout << "j is " << j << endl;
           pairs[j][0].get(mesh_id1, face_id1);
           pairs[j][1].get(mesh_id2, face_id2);
+          cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2;
           if(mesh_id2 == 0){
             mesh_id2 = mesh_id1;
             mesh_id1 = 0;
@@ -289,8 +293,13 @@ int main(int argc, char** argv){
             face_id1 = exchange;
           }
         }
+        if(mesh_id2 == 0)
+          break;
+
         //TODO: can be faster
-        auto coll_plane = get_tri_pos(*obta_surfs[mesh_id2 - 1], *obta_nods[mesh_id2 - 1], face_id2);
+        assert(mesh_id2 != 0);
+        auto coll_plane = get_tri_pos(*(obta_surfs[mesh_id2 - 1]), *(obta_nods[mesh_id2 - 1]), face_id2);
+        cout << "here A" << endl ;
         auto pre_pos = get_tri_pos(fake_surf, points_pos, face_id1);
         auto pre_velo = get_tri_pos(fake_surf, velocity, face_id1);
         auto next_pos = get_tri_pos(fake_surf, new_pos, face_id1);
@@ -298,7 +307,7 @@ int main(int argc, char** argv){
         
         Matrix3d res_pos = Matrix3d::Zero();
         Matrix3d res_velo = Matrix3d::Zero();
-        
+        cout << "before response" << endl;
         response(coll_plane.data(), times[j], pre_pos.data(), next_pos.data(),
                  pre_velo.data(), next_velo.data(),
                  res_pos.data(), res_velo.data());
