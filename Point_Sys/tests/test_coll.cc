@@ -10,7 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <chrono>
 #include <limits>
-#include <Collision/CollisionDetect-cloth/src/Collision.h>
+#include <Collision/CollisionDetect-rigid/src/Collision.h>
 using namespace marvel;
 using namespace std;
 using namespace Eigen;

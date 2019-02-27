@@ -47,6 +47,7 @@ void Collision::Transform_Mesh(unsigned int numVtx, unsigned int numTri, const v
 
  void Collision::Collid(){
 	contact_pairs.clear();
+        contact_time.clear();
 	body_collide_gpu(mesh_pairs, bodys, contact_pairs,contact_time);
 
 	_is_first = false;

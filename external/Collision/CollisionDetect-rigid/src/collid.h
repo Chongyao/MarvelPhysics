@@ -6,6 +6,6 @@
 
 //void body_collide(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vector<vector<tri_pair>> &contacts);
 
-void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vector<vector<tri_pair>> &contacts,vector<double> contact_time);
+void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vector<vector<tri_pair>> &contacts,vector<double>& contact_time);
 
 #endif

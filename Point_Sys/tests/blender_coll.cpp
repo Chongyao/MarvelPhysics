@@ -22,6 +22,9 @@
 #include "vtk2surf.h"
 
 
+#include "coll_response.h"
+#include <Collision/CollisionDetect-cloth/src/Collision.h>
+
 
 using namespace marvel;
 using namespace std;
