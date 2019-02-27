@@ -2,6 +2,8 @@
 #include <iostream>
 #include <chrono>
 
+#include <memory>
+
 #include <libigl/include/igl/readOBJ.h>
 #include <libigl/include/igl/writeOBJ.h>
 #include <Eigen/Core>
@@ -94,7 +96,7 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
   //calc volume 
-  double volume = clo_surf_vol(nods, surf);
+  const double volume = clo_surf_vol(nods, surf);
   //calc support radii
   VectorXd sup_radi = SH.get_sup_radi();
   
@@ -133,12 +135,40 @@ int main(int argc, char** argv){
   position_constraint pos_cons(simulation_para.get<double>("position_weig"), cons, dim);
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
-  double gravity = common.get<double>("gravity");
+  const double gravity = common.get<double>("gravity");
   gravity_energy GE(simulation_para.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  collision COLL(simulation_para.get<double>("w_coll"),'y', simulation_para.get<double>("g_pos"), nods.cols(), dim);
+  // collision COLL(simulation_para.get<double>("w_coll"),'y', simulation_para.get<double>("g_pos"), nods.cols(), dim);
+  vector<std::shared_ptr<MatrixXi> > obta_surfs;
+  vector<std::shared_ptr<MatrixXd>> obta_nods;{
+    filesystem::path obstacles_path(indir + "/" + "obstacles");
+    filesystem::directory_iterator end_iter;
+    for(filesystem::directory_iterator file_iter(obstacles_path); file_iter != end_iter; ++file_iter){
+      if(filesystem::is_regular_file(file_iter->path())){
+        string one_obstacle = file_iter->path().string();
+        MatrixXd one_obta_nods;
+        MatrixXi one_obta_surf;
+        readOBJ(one_obstacle.c_str(), one_obta_nods, one_obta_surf);
+        one_obta_surf.transposeInPlace();
+        one_obta_nods.transposeInPlace();
+        obta_surfs.push_back(std::move(make_shared<MatrixXi>(one_obta_surf)));
+        obta_nods.push_back(std::move(make_shared<MatrixXd>(one_obta_nods)));
+        cout << one_obstacle << endl;
+      }
+    }    
+  }
+
+  for(size_t i = 0; i < obta_surfs.size(); ++i){
+    cout << obta_surfs[i]->cols() << " " << obta_nods[i]->cols() << endl;
+  }
+
+
+
+
+             
+
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
@@ -184,8 +214,8 @@ int main(int argc, char** argv){
       PS.Val(displace.data(), dat_str);
       PS.Gra(displace.data(), dat_str);
 
-      COLL.Val(points.data(), displace.data(), dat_str);
-      COLL.Gra(points.data(), displace.data(), dat_str, PS.get_Mass_VectorXd());
+      // COLL.Val(points.data(), displace.data(), dat_str);
+      // COLL.Gra(points.data(), displace.data(), dat_str, PS.get_Mass_VectorXd());
       pos_cons.Gra(displace.data(), dat_str);
       pos_cons.Hes(displace.data(),dat_str);
          
@@ -260,8 +290,9 @@ int main(int argc, char** argv){
         pos_cons.Gra(displace_plus.data(), dat_str);
         pos_cons.Hes(displace_plus.data(),dat_str);
 
-        COLL.Val(points.data(), displace_plus.data(), dat_str);
-        COLL.Gra(points.data(), displace_plus.data(), dat_str, PS.get_Mass_VectorXd());
+        // COLL.Val(points.data(), displace_plus.data(), dat_str);
+        // COLL.Gra(points.data(), displace_plus.data(), dat_str, PS.get_Mass_VectorXd());
+        // COLL.Hes(displace_plus.data(), dat_str);
               
 
         //test  convergence
