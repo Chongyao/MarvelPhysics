@@ -265,7 +265,7 @@ int main(int argc, char** argv){
       }
     
       new_velocity += delt_t * new_acce;
-      new_displace += delt_t *velocity;
+      new_displace += delt_t *new_velocity;
       new_pos = points + new_displace;
 
 
