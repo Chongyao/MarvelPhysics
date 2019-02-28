@@ -276,7 +276,7 @@ int main(int argc, char** argv){
 
       auto pairs = COLL_ptr->getContactPairs();
       auto times = COLL_ptr->getContactTimes();
-      
+      // assert(pairs.size() == 0);
       for(size_t j = 0; j < pairs.size(); ++j){
 
         uint mesh_id1, face_id1, mesh_id2, face_id2;{
@@ -294,23 +294,24 @@ int main(int argc, char** argv){
           }
         }
         if(mesh_id2 == 0)
-          break;
+          continue;
 
         //TODO: can be faster
-        assert(mesh_id2 != 0);
         auto coll_plane = get_tri_pos(*(obta_surfs[mesh_id2 - 1]), *(obta_nods[mesh_id2 - 1]), face_id2);
-        cout << "here A" << endl ;
         auto pre_pos = get_tri_pos(fake_surf, points_pos, face_id1);
         auto pre_velo = get_tri_pos(fake_surf, velocity, face_id1);
         auto next_pos = get_tri_pos(fake_surf, new_pos, face_id1);
         auto next_velo = get_tri_pos(fake_surf, new_velocity, face_id1);
-        
+
+        cout << "before response" << endl << "pre pos : " <<endl << pre_pos << endl << "after_pos :" <<endl<< next_pos << "pre velo :" << endl << pre_velo << endl << "after pos : " << endl << next_velo << endl;
         Matrix3d res_pos = Matrix3d::Zero();
         Matrix3d res_velo = Matrix3d::Zero();
-        cout << "before response" << endl;
+
         response(coll_plane.data(), times[j], pre_pos.data(), next_pos.data(),
                  pre_velo.data(), next_velo.data(),
                  res_pos.data(), res_velo.data());
+
+        cout << "after response" << res_pos << endl << endl << res_velo << endl;
         for(size_t k = 0; k < 3; ++k){
           size_t vert_id = fake_surf(k, face_id1);
           new_velocity.col(vert_id) = res_velo.col(k);
@@ -320,7 +321,8 @@ int main(int argc, char** argv){
       }//TODO:make it a new class
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
       
-      
+      if (pairs.size() != 0)
+        return 0;
       
       
       if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)

@@ -65,7 +65,7 @@ target_link_libraries(blender_meshless
 
 add_executable(blender_meshless_coll blender_coll.cpp)
 target_link_libraries(blender_meshless_coll
-  coll_cloth
+  coll_rigid
   PointSys
   marvel-core
   ${Boost_LIBRARIES}

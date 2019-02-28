@@ -110,14 +110,7 @@ int main(int argc, char** argv){
 
   
   
-  auto start = system_clock::now();
-  auto end = system_clock::now();
-  auto duration = duration_cast<microseconds>(end - start);
-  cout <<  "花费了" 
-       << double(duration.count()) * microseconds::period::num / microseconds::period::den 
-       << "秒" << endl;
 
-  cout << "all done " << endl;
 
   
 }
