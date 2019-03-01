@@ -461,7 +461,7 @@ void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vect
 		int mid1, mid2;
 		unsigned int fid1, fid2;
 		ret[i].get(fid1, fid2);
-			
+		cout << fid1 << " " << fid2 << endl;
 		for (int j = 0; j < _tri_offset.size(); j++) {
 			if (fid1 <= _tri_offset[j]) {
 				mid1 = j == 0 ? 0 : j;

@@ -64,7 +64,7 @@ int main(int argc, char** argv){
   nods.transposeInPlace();
   cout << surf.rows() << " " << surf.cols() << endl;
   cout << nods.rows() << " " << nods.cols() << endl;
-
+  cout << surf << endl;
   const auto num_surf = static_cast<size_t>(surf.cols());
   const auto num_nods = static_cast<size_t>(nods.cols());  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLL<<<<<<<<<<<<<<<<<<" << endl;
@@ -82,11 +82,12 @@ int main(int argc, char** argv){
   
 
   auto COLL_ptr = Collision_zcy::getInstance();
-
+  COLL_ptr->Transform_Pair(1, 2);
+  
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                           surf.data(), nods.data(), nods.data(), 0,false);
+                           surf.data(), nods.data(), nods.data(), 2,false);
   COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1,false);
-  COLL_ptr->Transform_Pair(0, 1);
+
 
   COLL_ptr->Collid();
   double gravity = pt.get<double>("gravity");
@@ -99,25 +100,30 @@ int main(int argc, char** argv){
   size_t max_iter = pt.get<size_t>("times");
   cout << "max iter is " << max_iter <<" " << num_surf << " " << num_nods << endl;
   for(size_t i = 0; i < max_iter; ++i){
-    // cout << nods << endl;
+    cout << new_nods << endl;
     
     new_velo += acce * delt_t;
-    new_nods += new_velo * delt_t;
+    // new_nods += new_velo * delt_t;
+    cout << new_nods.row(2)<<endl;
+    new_nods.row(2) -= MatrixXd::Ones(1, num_nods) * 0.1;
+
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), new_nods.data(), nods.data(), 0,false);
+                             surf.data(), new_nods.data(), nods.data(), 2,false);
     
     
     COLL_ptr->Collid();
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
-    assert(times.size() == 0);
+
     for(size_t j = 0; j < pairs.size(); ++j){
-      uint mesh_id1, face_id1, mesh_id2, face_id2;{
-        cout << "j is " << j << endl;
+      unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
+        cout <<endl<<endl<<endl<< "j is " << j <<  " " << pairs[j].size() << endl;
         pairs[j][0].get(mesh_id1, face_id1);
         pairs[j][1].get(mesh_id2, face_id2);
         cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2;
+        if(mesh_id1 == mesh_id2)
+          continue;
         if(mesh_id2 == 0){
           mesh_id2 = mesh_id1;
           mesh_id1 = 0;
@@ -127,8 +133,7 @@ int main(int argc, char** argv){
           face_id1 = exchange;
         }
       }
-      if(mesh_id2 == 0)
-        continue;
+
 
       //TODO: can be faster
       cout <<endl<< surf.cols() << " " << nods.cols() << endl;
@@ -137,7 +142,7 @@ int main(int argc, char** argv){
       auto next_pos = get_tri_pos(surf, new_nods, face_id1);
       auto next_velo = get_tri_pos(surf, new_velo, face_id1);
 
-      cout << "before response" << endl << "pre pos : " <<endl << pre_pos << endl << "after_pos :" <<endl<< next_pos << "pre velo :" << endl << pre_velo << endl << "after pos : " << endl << next_velo << endl;
+      cout << "before response" << endl << "pre pos : " <<endl << pre_pos << endl << "after_pos :" <<endl<< next_pos <<endl<< "pre velo :" << endl << pre_velo << endl << "after pos : " << endl << next_velo << endl;
       Matrix3d res_pos = Matrix3d::Zero();
       Matrix3d res_velo = Matrix3d::Zero();
 
@@ -152,6 +157,7 @@ int main(int argc, char** argv){
       }
 
     }
+    // assert(times.size() == 0); 
     auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
     if(i%50 == 0)
       writeOBJ(surf_filename.c_str(), new_nods.transpose(), surf.transpose());
@@ -159,10 +165,6 @@ int main(int argc, char** argv){
     velo = new_velo;
   }
 
-  
-  
-
-  
   
 
 
