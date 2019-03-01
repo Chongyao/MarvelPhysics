@@ -180,6 +180,7 @@ int main(int argc, char** argv){
   // }
   
   size_t num_fake_tris = dim%3 ? dim / 3 + 1: dim / 3 ;
+  cout << " face surf tris num is " << num_fake_tris << endl;
   MatrixXi fake_surf(3, num_fake_tris);{
     #pragma omp parallel for
     for(size_t i = 0; i < num_fake_tris; ++i){
@@ -240,8 +241,8 @@ int main(int argc, char** argv){
   if(solver == "explicit"){
     for(size_t i = 0; i < max_iter; ++i){
       cerr << "iter is "<<endl<< i << endl;
-      cout << "displace is " << endl<< displace.block(0, 0, 3, 7) << endl;
-      cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 7) << endl;
+      // cout << "displace is " << endl<< displace.block(0, 0, 3, 7) << endl;
+      // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 7) << endl;
       // cout << "acce is " << endl << acce.block(0, 0, 3, 8) << endl;
 
       points_pos = points + displace;
@@ -283,10 +284,11 @@ int main(int argc, char** argv){
         
         for(size_t j = 0; j < pairs.size(); ++j){
           unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
-            cout <<endl<<endl<<endl<< "j is " << j <<  " " << pairs[j].size() << endl;
+
             pairs[j][0].get(mesh_id1, face_id1);
             pairs[j][1].get(mesh_id2, face_id2);
-            cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2;
+            cout << ">>>>>>>>>>>>>>>>collid<<<<<<<<<<<<<<<"<<endl;
+            cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2 << endl;
             if(mesh_id1 == mesh_id2)
               continue;
             if(mesh_id2 == 0){
@@ -300,8 +302,8 @@ int main(int argc, char** argv){
           }//mesh_id,face_id...
 
           for(size_t tri_dim = 0; tri_dim < 3; ++tri_dim){
-            candidates.insert({surf(tri_dim, face_id1), {mesh_id2, face_id2}});
-            get_time.insert({surf(tri_dim), times[j]});
+            candidates.insert({fake_surf(tri_dim, face_id1), {mesh_id2, face_id2}});
+            get_time.insert({fake_surf(tri_dim), times[j]});
           }
         }//loop for pairs
 
@@ -315,7 +317,10 @@ int main(int argc, char** argv){
                          velocity.col(vert_id).data(), new_velocity.col(vert_id).data());
       
         }
-
+#pragma omp parallel for
+        for(size_t j = 0; j < dim; ++j){
+          assert(new_pos(2, j) >= 0.3);
+        }
         
 
         
@@ -323,8 +328,8 @@ int main(int argc, char** argv){
 
       //TODO:make it a new class
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
-      
-      
+
+
       
       if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
         break;
@@ -335,7 +340,7 @@ int main(int argc, char** argv){
       velocity = new_velocity;
       displace = new_displace;
       
-      if(i%iters_perframe == 0){
+      // if(i%iters_perframe == 0){
         auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
         auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
         MatrixXd points_now = points + displace;
@@ -349,7 +354,7 @@ int main(int argc, char** argv){
         writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
         ++frame_id;
 
-      }
+      // }
 
       dat_str.set_zero();
     }

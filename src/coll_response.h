@@ -9,7 +9,7 @@ bool check_inside(const Eigen::Vector3d& point, const Eigen::MatrixXd& obstacle,
   double s = (obstacle(1, 0)*obstacle(0, 2) - obstacle(0, 0)*obstacle(1, 2) + (obstacle(1, 2) - obstacle(1, 0))*point(0) + (obstacle(0, 0) - obstacle(0, 2))*point(1)) / (2*area);
   double t = (obstacle(0, 0)*obstacle(1, 1) - obstacle(1, 0)*obstacle(0, 1) + (obstacle(1, 0) - obstacle(1, 1))*point(0) + (obstacle(0, 1) - obstacle(0, 0))*point(1)) / (2*area);
   
-  cout<< " check through : " << s << " " << t << " " << 1 - s - t << endl;
+  // cout<< " check through : " << s << " " << t << " " << 1 - s - t << endl;
   return ( s > 0 && s < 1 && t > 0 && t < 1 && (1 - s - t) > 0 && (1 - s - t) < 1 );
         
   
@@ -21,7 +21,8 @@ Vector3d get_cross_point(const Eigen::Vector3d& before, const Eigen::Vector3d& a
   const double offset = ( -d - norm(0) * before(0) - norm(1) * before(1) - norm(2) * before(2) )
       / ( norm(0) * line(0) + norm(1) * line(1) + norm(2) * line(2) );
 
-  if(offset > 1){
+  // cout << offset << endl;
+  if(offset > 1 || offset < 0){
     is_through = false;
     return after;
   }
@@ -49,8 +50,8 @@ int response(const double* const obstacle,
 
 
 
-  cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl<< "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
-  cout << "beore  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
+  // cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl<< "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
+  // cout << "beore  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
   
   double area;
   Vector3d plane_normal;{
@@ -77,7 +78,7 @@ int response(const double* const obstacle,
       res_velo_.col(i) = (res_velo_.col(i) - projection) * (1 - friction) - projection * res;
     }
   }
-  cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
+  // cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
   return 0;
 }
 int point_response(const double* const obstacle,
@@ -85,7 +86,7 @@ int point_response(const double* const obstacle,
              const double* const pre_pos, double* const next_pos,
              const double* const pre_velo, double* const next_velo,
              // double* const res_pos, double* const res_velo,
-             const double& friction = 0, const double& res = 0.5){
+             const double& friction = 0, const double& res = 1){
   
   Map<const MatrixXd> obstacle_(obstacle, 3, 3);
   Map<const Vector3d> pre_pos_(pre_pos);
@@ -99,8 +100,8 @@ int point_response(const double* const obstacle,
 
 
 
-  cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl<< "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
-  cout << "beore  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
+  // cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl<< "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
+  // cout << "beore  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
   
   double area;
   //TODO:can pre_store to speed up
@@ -132,7 +133,7 @@ int point_response(const double* const obstacle,
         
   }
 
-  cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
+  // cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
 
   return 0;
 }

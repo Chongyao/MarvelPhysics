@@ -77,7 +77,7 @@ int main(int argc, char** argv){
   MatrixXd plane_nods(3, 3);
   plane_nods << 0, -DOUBLE_MAX, DOUBLE_MAX,
       DOUBLE_MAX, -DOUBLE_MAX, -DOUBLE_MAX,
-      0, 0, 0;
+      0.5, 0.5, 0.5;
   cout << plane_nods << endl;
   
 
@@ -100,10 +100,18 @@ int main(int argc, char** argv){
   size_t max_iter = pt.get<size_t>("times");
   cout << "max iter is " << max_iter <<" " << num_surf << " " << num_nods << endl;
   for(size_t i = 0; i < max_iter; ++i){
+    cout << "iter is " << i << endl;
+    // cout << "position" << endl;
     cout << new_nods << endl;
-    
+    // cout << "velocity" << endl;
+    // cout << new_velo << endl;
     new_velo += acce * delt_t;
     new_nods += new_velo * delt_t;
+
+    cout << "position" << endl;
+    cout << new_nods << endl;
+    cout << "velocity" << endl;
+    cout << new_velo << endl;
 
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
                              surf.data(), new_nods.data(), nods.data(), 0,false);
@@ -119,7 +127,7 @@ int main(int argc, char** argv){
     map<size_t, double> get_time;
     for(size_t j = 0; j < pairs.size(); ++j){
       unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
-        cout <<endl<<endl<<endl<< "j is " << j <<  " " << pairs[j].size() << endl;
+        cout <<endl<<endl<<endl<< "j is " << j <<endl;
         pairs[j][0].get(mesh_id1, face_id1);
         pairs[j][1].get(mesh_id2, face_id2);
         cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2;
@@ -144,10 +152,10 @@ int main(int argc, char** argv){
     for(auto iter = candidates.begin(); iter != candidates.end(); ++iter){
       size_t vert_id =  iter->first,
           obta_id = iter->second.first, coll_plane_id = iter->second.second;
-      
+      cout << "vert id is " <<  vert_id << endl;
       point_response(plane_nods.data(), get_time[vert_id],
                      nods.col(vert_id).data(), new_nods.col(vert_id).data(),
-                     velo.col(vert_id).data(), new_velo.col(vert_id).data());
+                     velo.col(vert_id).data(), new_velo.col(vert_id).data(),0, 0.5);
       
     }
     for(size_t i = 0; i < num_nods; ++i){
