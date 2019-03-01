@@ -82,10 +82,10 @@ int main(int argc, char** argv){
   
 
   auto COLL_ptr = Collision_zcy::getInstance();
-  COLL_ptr->Transform_Pair(1, 2);
+  COLL_ptr->Transform_Pair(1, 0);
   
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                           surf.data(), nods.data(), nods.data(), 2,false);
+                           surf.data(), nods.data(), nods.data(), 0,false);
   COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1,false);
 
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv){
     new_nods.row(2) -= MatrixXd::Ones(1, num_nods) * 0.1;
 
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), new_nods.data(), nods.data(), 2,false);
+                             surf.data(), new_nods.data(), nods.data(), 0,false);
     
     
     COLL_ptr->Collid();
