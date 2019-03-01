@@ -103,10 +103,7 @@ int main(int argc, char** argv){
     cout << new_nods << endl;
     
     new_velo += acce * delt_t;
-    // new_nods += new_velo * delt_t;
-    cout << new_nods.row(2)<<endl;
-    new_nods.row(2) -= MatrixXd::Ones(1, num_nods) * 0.1;
-
+    new_nods += new_velo * delt_t;
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
                              surf.data(), new_nods.data(), nods.data(), 0,false);
     
@@ -115,7 +112,8 @@ int main(int argc, char** argv){
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
-
+    MatrixXd res_pos = MatrixXd::Zero(3, num_nods);
+    MatrixXd res_velo = MatrixXd::Zero(3, num_nods);
     for(size_t j = 0; j < pairs.size(); ++j){
       unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
         cout <<endl<<endl<<endl<< "j is " << j <<  " " << pairs[j].size() << endl;
@@ -142,14 +140,14 @@ int main(int argc, char** argv){
       auto next_pos = get_tri_pos(surf, new_nods, face_id1);
       auto next_velo = get_tri_pos(surf, new_velo, face_id1);
 
-      cout << "before response" << endl << "pre pos : " <<endl << pre_pos << endl << "after_pos :" <<endl<< next_pos <<endl<< "pre velo :" << endl << pre_velo << endl << "after pos : " << endl << next_velo << endl;
+
       Matrix3d res_pos = Matrix3d::Zero();
       Matrix3d res_velo = Matrix3d::Zero();
 
       response(plane_nods.data(), times[j], nods.data(), new_nods.data(),
                velo.data(), new_velo.data(),
                res_pos.data(), res_velo.data());
-      cout << "after response" << res_pos << endl << endl << res_velo << endl;
+
       for(size_t k = 0; k < 3; ++k){
         size_t vert_id = surf(k, face_id1);
         new_velo.col(vert_id) = res_velo.col(k);
