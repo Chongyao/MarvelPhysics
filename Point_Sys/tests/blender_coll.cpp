@@ -25,7 +25,7 @@
 
 
 #include "coll_response.h"
-#include <Collision/CollisionDetect-rigid/src/Collision_eigen.h>
+#include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
 
 
 using namespace marvel;
