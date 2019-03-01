@@ -36,7 +36,7 @@ int response(const double* const obstacle,
              const double* const pre_pos, const double* const next_pos,
              const double* const pre_velo, const double* const next_velo,
              double* const res_pos, double* const res_velo,
-             const double& friction = 0, const double& res = 1){
+             const double& friction = 0, const double& res = 0.5){
   Map<const MatrixXd> obstacle_(obstacle, 3, 3);
   Map<const MatrixXd> pre_pos_(pre_pos, 3, 3);
   Map<const MatrixXd> next_pos_(next_pos, 3, 3);
@@ -82,21 +82,20 @@ int response(const double* const obstacle,
 }
 int point_response(const double* const obstacle,
              const double time, 
-             const double* const pre_pos, const double* const next_pos,
-             const double* const pre_velo, const double* const next_velo,
-             double* const res_pos, double* const res_velo,
-             const double& friction = 0, const double& res = 1){
+             const double* const pre_pos, double* const next_pos,
+             const double* const pre_velo, double* const next_velo,
+             // double* const res_pos, double* const res_velo,
+             const double& friction = 0, const double& res = 0.5){
   
   Map<const MatrixXd> obstacle_(obstacle, 3, 3);
   Map<const Vector3d> pre_pos_(pre_pos);
-  Map<const Vector3d> next_pos_(next_pos);
-  Map<const Vector3d> next_velo_(next_velo);
+  Map<Vector3d> next_pos_(next_pos);
+  Map<Vector3d> next_velo_(next_velo);
   Map<const Vector3d> pre_velo_(pre_velo);
   
-  Map<Vector3d> res_pos_(res_pos);
-  res_pos_ = next_pos_;
-  Map<Vector3d> res_velo_(res_velo);
-  res_velo_ = next_velo_;
+  Vector3d res_pos_ = next_pos_;
+  Vector3d res_velo_ = next_velo_;
+
 
 
 
@@ -127,9 +126,14 @@ int point_response(const double* const obstacle,
     res_velo_ = pre_velo_ * (1 - time) + time * next_velo_;
     Vector3d projection = res_velo_.dot(plane_normal) * plane_normal;
     res_velo_ = (res_velo_ - projection) * (1 - friction) - projection * res;
+
+    next_pos_ = res_pos_;
+    next_velo_ = res_velo_;
+        
   }
 
   cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
+
   return 0;
 }
 

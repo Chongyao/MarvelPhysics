@@ -113,8 +113,6 @@ int main(int argc, char** argv){
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
-    MatrixXd res_pos = new_nods;
-    MatrixXd res_velo = new_velo;
     
     vector<size_t> if_response(num_nods, false);
     map<size_t , pair<size_t, size_t>> candidates;
@@ -149,14 +147,14 @@ int main(int argc, char** argv){
       
       point_response(plane_nods.data(), get_time[vert_id],
                      nods.col(vert_id).data(), new_nods.col(vert_id).data(),
-                     velo.col(vert_id).data(), new_velo.col(vert_id).data(),
-                     res_pos.col(vert_id).data(), res_velo.col(vert_id).data());
+                     velo.col(vert_id).data(), new_velo.col(vert_id).data());
       
     }
-    new_nods = res_pos;
-    new_velo = res_velo;
-    // assert(times.size() == 0); 
+    for(size_t i = 0; i < num_nods; ++i){
+      assert(new_nods(2, i) >= 0);
+    }
 
+    
     if(i%50 == 0){
       auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
       writeOBJ(surf_filename.c_str(), new_nods.transpose(), surf.transpose());      
