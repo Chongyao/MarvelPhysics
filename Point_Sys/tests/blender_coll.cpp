@@ -146,7 +146,7 @@ int main(int argc, char** argv){
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   const double gravity = common.get<double>("gravity");
-  gravity_energy GE(simulation_para.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
+  gravity_energy GE(simulation_para.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'z');
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
@@ -193,8 +193,9 @@ int main(int argc, char** argv){
   auto COLL_ptr = Collision_zcy::getInstance();
   COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), points.data(), points.data(), 0, false);
   for(size_t i = 0; i < obta_num; ++i){
-    COLL_ptr->Transform_Mesh(obta_nods[i]->cols(), obta_surfs[i]->cols(), obta_surfs[i]->data(), obta_nods[i]->data(), obta_nods[i]->data(), i + 1, false);
     COLL_ptr->Transform_Pair(0, i + 1);
+    COLL_ptr->Transform_Mesh(obta_nods[i]->cols(), obta_surfs[i]->cols(), obta_surfs[i]->data(), obta_nods[i]->data(), obta_nods[i]->data(), i + 1, false);
+
   }
 
   COLL_ptr->Collid();
@@ -273,56 +274,56 @@ int main(int argc, char** argv){
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
       COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), new_pos.data(), points_pos.data(), 0, false);
       COLL_ptr->Collid();
-
       auto pairs = COLL_ptr->getContactPairs();
       auto times = COLL_ptr->getContactTimes();
-      // assert(pairs.size() == 0);
-      for(size_t j = 0; j < pairs.size(); ++j){
 
-        uint mesh_id1, face_id1, mesh_id2, face_id2;{
-          cout << "j is " << j << endl;
-          pairs[j][0].get(mesh_id1, face_id1);
-          pairs[j][1].get(mesh_id2, face_id2);
-          cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2;
-          if(mesh_id2 == 0){
-            mesh_id2 = mesh_id1;
-            mesh_id1 = 0;
+      if(pairs.size() != 0){
+        map<size_t , pair<size_t, size_t>> candidates;
+        map<size_t, double> get_time;
+        
+        for(size_t j = 0; j < pairs.size(); ++j){
+          unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
+            cout <<endl<<endl<<endl<< "j is " << j <<  " " << pairs[j].size() << endl;
+            pairs[j][0].get(mesh_id1, face_id1);
+            pairs[j][1].get(mesh_id2, face_id2);
+            cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2;
+            if(mesh_id1 == mesh_id2)
+              continue;
+            if(mesh_id2 == 0){
+              mesh_id2 = mesh_id1;
+              mesh_id1 = 0;
 
-            auto exchange = face_id2;
-            face_id2 = face_id1;
-            face_id1 = exchange;
+              auto exchange = face_id2;
+              face_id2 = face_id1;
+              face_id1 = exchange;
+            }
+          }//mesh_id,face_id...
+
+          for(size_t tri_dim = 0; tri_dim < 3; ++tri_dim){
+            candidates.insert({surf(tri_dim, face_id1), {mesh_id2, face_id2}});
+            get_time.insert({surf(tri_dim), times[j]});
           }
+        }//loop for pairs
+
+        for(auto iter = candidates.begin(); iter != candidates.end(); ++iter){
+          size_t vert_id =  iter->first,
+              obta_id = iter->second.first, coll_plane_id = iter->second.second;
+
+          auto plane_nods = get_tri_pos(*(obta_surfs[obta_id - 1]), *(obta_nods[obta_id - 1]), coll_plane_id);
+          point_response(plane_nods.data(), get_time[vert_id],
+                         points_pos.col(vert_id).data(), new_pos.col(vert_id).data(),
+                         velocity.col(vert_id).data(), new_velocity.col(vert_id).data());
+      
         }
-        if(mesh_id2 == 0)
-          continue;
 
-        //TODO: can be faster
-        auto coll_plane = get_tri_pos(*(obta_surfs[mesh_id2 - 1]), *(obta_nods[mesh_id2 - 1]), face_id2);
-        auto pre_pos = get_tri_pos(fake_surf, points_pos, face_id1);
-        auto pre_velo = get_tri_pos(fake_surf, velocity, face_id1);
-        auto next_pos = get_tri_pos(fake_surf, new_pos, face_id1);
-        auto next_velo = get_tri_pos(fake_surf, new_velocity, face_id1);
+        
 
-        cout << "before response" << endl << "pre pos : " <<endl << pre_pos << endl << "after_pos :" <<endl<< next_pos << "pre velo :" << endl << pre_velo << endl << "after pos : " << endl << next_velo << endl;
-        Matrix3d res_pos = Matrix3d::Zero();
-        Matrix3d res_velo = Matrix3d::Zero();
+        
+      }//IF COLLIDE
 
-        response(coll_plane.data(), times[j], pre_pos.data(), next_pos.data(),
-                 pre_velo.data(), next_velo.data(),
-                 res_pos.data(), res_velo.data());
-
-        cout << "after response" << res_pos << endl << endl << res_velo << endl;
-        for(size_t k = 0; k < 3; ++k){
-          size_t vert_id = fake_surf(k, face_id1);
-          new_velocity.col(vert_id) = res_velo.col(k);
-          new_displace.col(vert_id) = res_pos.col(k) - points.col(k);
-          new_pos.col(vert_id) = res_pos.col(k);
-        }
-      }//TODO:make it a new class
+      //TODO:make it a new class
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
       
-      if (pairs.size() != 0)
-        return 0;
       
       
       if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
