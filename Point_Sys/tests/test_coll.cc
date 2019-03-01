@@ -141,12 +141,12 @@ int main(int argc, char** argv){
       auto next_velo = get_tri_pos(surf, new_velo, face_id1);
 
 
-      Matrix3d res_pos = Matrix3d::Zero();
-      Matrix3d res_velo = Matrix3d::Zero();
+      Matrix3d tri_res_pos = Matrix3d::Zero();
+      Matrix3d tri_res_velo = Matrix3d::Zero();
 
       response(plane_nods.data(), times[j], nods.data(), new_nods.data(),
                velo.data(), new_velo.data(),
-               res_pos.data(), res_velo.data());
+               tri_res_pos.data(), tri_res_velo.data());
 
       for(size_t k = 0; k < 3; ++k){
         size_t vert_id = surf(k, face_id1);
