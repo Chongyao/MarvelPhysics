@@ -104,6 +104,7 @@ int main(int argc, char** argv){
     
     new_velo += acce * delt_t;
     new_nods += new_velo * delt_t;
+
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
                              surf.data(), new_nods.data(), nods.data(), 0,false);
     
@@ -112,8 +113,12 @@ int main(int argc, char** argv){
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
-    MatrixXd res_pos = MatrixXd::Zero(3, num_nods);
-    MatrixXd res_velo = MatrixXd::Zero(3, num_nods);
+    MatrixXd res_pos = new_nods;
+    MatrixXd res_velo = new_velo;
+    
+    vector<size_t> if_response(num_nods, false);
+    map<size_t , pair<size_t, size_t>> candidates;
+    map<size_t, double> get_time;
     for(size_t j = 0; j < pairs.size(); ++j){
       unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
         cout <<endl<<endl<<endl<< "j is " << j <<  " " << pairs[j].size() << endl;
@@ -130,35 +135,32 @@ int main(int argc, char** argv){
           face_id2 = face_id1;
           face_id1 = exchange;
         }
+      }//mesh_id,face_id...
+
+      for(size_t tri_dim = 0; tri_dim < 3; ++tri_dim){
+        candidates.insert({surf(tri_dim, face_id1), {mesh_id2, face_id2}});
+        get_time.insert({surf(tri_dim), times[j]});
       }
+    }//loop for pairs
 
-
-      //TODO: can be faster
-      cout <<endl<< surf.cols() << " " << nods.cols() << endl;
-      auto pre_pos = get_tri_pos(surf, nods, face_id1);
-      auto pre_velo = get_tri_pos(surf, velo, face_id1);
-      auto next_pos = get_tri_pos(surf, new_nods, face_id1);
-      auto next_velo = get_tri_pos(surf, new_velo, face_id1);
-
-
-      Matrix3d tri_res_pos = Matrix3d::Zero();
-      Matrix3d tri_res_velo = Matrix3d::Zero();
-
-      response(plane_nods.data(), times[j], nods.data(), new_nods.data(),
-               velo.data(), new_velo.data(),
-               tri_res_pos.data(), tri_res_velo.data());
-
-      for(size_t k = 0; k < 3; ++k){
-        size_t vert_id = surf(k, face_id1);
-        new_velo.col(vert_id) = res_velo.col(k);
-        new_nods.col(vert_id) = res_pos.col(k);
-      }
-
+    for(auto iter = candidates.begin(); iter != candidates.end(); ++iter){
+      size_t vert_id =  iter->first,
+          obta_id = iter->second.first, coll_plane_id = iter->second.second;
+      
+      point_response(plane_nods.data(), get_time[vert_id],
+                     nods.col(vert_id).data(), new_nods.col(vert_id).data(),
+                     velo.col(vert_id).data(), new_velo.col(vert_id).data(),
+                     res_pos.col(vert_id).data(), res_velo.col(vert_id).data());
+      
     }
+    new_nods = res_pos;
+    new_velo = res_velo;
     // assert(times.size() == 0); 
-    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
-    if(i%50 == 0)
-      writeOBJ(surf_filename.c_str(), new_nods.transpose(), surf.transpose());
+
+    if(i%50 == 0){
+      auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
+      writeOBJ(surf_filename.c_str(), new_nods.transpose(), surf.transpose());      
+    }
     nods = new_nods;
     velo = new_velo;
   }
