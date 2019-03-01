@@ -340,7 +340,7 @@ int main(int argc, char** argv){
       velocity = new_velocity;
       displace = new_displace;
       
-      // if(i%iters_perframe == 0){
+      if(i%iters_perframe == 0){
         auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
         auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
         MatrixXd points_now = points + displace;
@@ -354,7 +354,7 @@ int main(int argc, char** argv){
         writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
         ++frame_id;
 
-      // }
+      }
 
       dat_str.set_zero();
     }

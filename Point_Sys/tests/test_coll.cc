@@ -74,10 +74,11 @@ int main(int argc, char** argv){
   MatrixXi plane_surf(3, 1);
   plane_surf << 0 , 1 , 2;
   cout << plane_surf << endl;
+  const double plane_z = 0.5;
   MatrixXd plane_nods(3, 3);
   plane_nods << 0, -DOUBLE_MAX, DOUBLE_MAX,
       DOUBLE_MAX, -DOUBLE_MAX, -DOUBLE_MAX,
-      0.5, 0.5, 0.5;
+      plane_z, plane_z, plane_z;
   cout << plane_nods << endl;
   
 
@@ -125,6 +126,7 @@ int main(int argc, char** argv){
     vector<size_t> if_response(num_nods, false);
     map<size_t , pair<size_t, size_t>> candidates;
     map<size_t, double> get_time;
+    assert(pairs.size() == 0);
     for(size_t j = 0; j < pairs.size(); ++j){
       unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
         cout <<endl<<endl<<endl<< "j is " << j <<endl;
@@ -159,7 +161,7 @@ int main(int argc, char** argv){
       
     }
     for(size_t i = 0; i < num_nods; ++i){
-      assert(new_nods(2, i) >= 0);
+      assert(new_nods(2, i) >= plane_z);
     }
 
     
