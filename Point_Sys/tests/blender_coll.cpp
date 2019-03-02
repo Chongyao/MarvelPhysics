@@ -3,7 +3,7 @@
 #include <chrono>
 
 #include <memory>
-
+#include <set>
 #include <libigl/include/igl/readOBJ.h>
 #include <libigl/include/igl/writeOBJ.h>
 #include <Eigen/Core>
@@ -44,6 +44,15 @@ Matrix3d get_tri_pos(const MatrixXi& tris, const MatrixXd& verts, const size_t& 
   }
   return std::move(tri);
 }
+class coll_info{
+ public:
+  coll_info(const size_t& point_id, const size_t& mesh_id, const size_t& face_id, const double& time):mesh_id_(mesh_id),face_id_(face_id),time_(time),point_id_(point_id){}
+
+  const size_t point_id_;
+  const size_t mesh_id_;
+  const size_t face_id_;
+  const double time_;
+};
 
 int main(int argc, char** argv){
 
@@ -170,6 +179,7 @@ int main(int argc, char** argv){
     }    
   }
 
+  cout << "obtacles num is " << obta_surfs.size() << endl;
   size_t obta_num = obta_surfs.size();
   // vector<vector<double>> obta_areas(obta_num);{
   //   for(auto& obta : obta_areas){
@@ -185,19 +195,26 @@ int main(int argc, char** argv){
     #pragma omp parallel for
     for(size_t i = 0; i < num_fake_tris; ++i){
       fake_surf(0, i) = i * 3;
-      fake_surf(1, i) = i * 3 + 1 > dim ? i * 3 - 1 : i * 3 + 1;
-      fake_surf(2, i) = i * 3 + 2 > dim ? i * 3 - 2 : i * 3 + 2;
+      fake_surf(1, i) = i * 3 + 1 >= dim ? i * 3 - 1 : i * 3 + 1;
+      fake_surf(2, i) = i * 3 + 2 >= dim ? i * 3 - 2 : i * 3 + 2;
     }
   }
   
   
   auto COLL_ptr = Collision_zcy::getInstance();
-  COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), points.data(), points.data(), 0, false);
+
   for(size_t i = 0; i < obta_num; ++i){
     COLL_ptr->Transform_Pair(0, i + 1);
-    COLL_ptr->Transform_Mesh(obta_nods[i]->cols(), obta_surfs[i]->cols(), obta_surfs[i]->data(), obta_nods[i]->data(), obta_nods[i]->data(), i + 1, false);
-
   }
+  COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), points.data(), points.data(), 0, false);
+  
+  for(size_t i = 0; i < obta_num; ++i){
+    COLL_ptr->Transform_Mesh(obta_nods[i]->cols(), obta_surfs[i]->cols(), obta_surfs[i]->data(), obta_nods[i]->data(), obta_nods[i]->data(), i + 1, false);    
+  }
+
+
+
+
 
   COLL_ptr->Collid();
 
@@ -246,6 +263,12 @@ int main(int argc, char** argv){
       // cout << "acce is " << endl << acce.block(0, 0, 3, 8) << endl;
 
       points_pos = points + displace;
+#pragma omp parallel for
+      for(size_t j = 0; j < dim; ++j){
+        if(points_pos(2, j) < 0.3)
+          cout << "wrong point  " << j << endl << points_pos.col(j) << endl;
+        assert(points_pos(2, j) >= 0.3);
+      }
       GE.Val(displace.data(), dat_str);
       GE.Gra(displace.data(), dat_str);
 
@@ -277,10 +300,20 @@ int main(int argc, char** argv){
       COLL_ptr->Collid();
       auto pairs = COLL_ptr->getContactPairs();
       auto times = COLL_ptr->getContactTimes();
-
+      
       if(pairs.size() != 0){
-        map<size_t , pair<size_t, size_t>> candidates;
-        map<size_t, double> get_time;
+        // map<size_t , pair<size_t, size_t>> candidates;
+        // map<size_t, double> get_time;
+        auto coll_comp = [](const coll_info& one, const coll_info& other)->bool{
+          if(one.point_id_ != other.point_id_)
+            return one.point_id_ < other.point_id_;            
+          else if(one.mesh_id_ != other.point_id_)
+            return one.mesh_id_ < other.mesh_id_;
+          else
+            return(one.face_id_ < other.face_id_); 
+
+        };
+        auto candidates = set<coll_info, decltype(coll_comp)>(coll_comp) ;
         
         for(size_t j = 0; j < pairs.size(); ++j){
           unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
@@ -302,17 +335,23 @@ int main(int argc, char** argv){
           }//mesh_id,face_id...
 
           for(size_t tri_dim = 0; tri_dim < 3; ++tri_dim){
-            candidates.insert({fake_surf(tri_dim, face_id1), {mesh_id2, face_id2}});
-            get_time.insert({fake_surf(tri_dim), times[j]});
+            // candidates.insert({fake_surf(tri_dim, face_id1), {mesh_id2, face_id2}});
+            // get_time.insert({fake_surf(tri_dim), times[j]});
+            coll_info one_info(fake_surf(tri_dim, face_id1), mesh_id2, face_id2, times[j]);
+            candidates.insert(one_info);
           }
         }//loop for pairs
 
         for(auto iter = candidates.begin(); iter != candidates.end(); ++iter){
-          size_t vert_id =  iter->first,
-              obta_id = iter->second.first, coll_plane_id = iter->second.second;
-
+          // size_t vert_id =  iter->first,
+          //     obta_id = iter->second.first, coll_plane_id = iter->second.second;
+          size_t vert_id = iter->point_id_, obta_id = iter->mesh_id_, coll_plane_id = iter->face_id_;
+          cout << "vert_id is " << vert_id << endl;
           auto plane_nods = get_tri_pos(*(obta_surfs[obta_id - 1]), *(obta_nods[obta_id - 1]), coll_plane_id);
-          point_response(plane_nods.data(), get_time[vert_id],
+          // point_response(plane_nods.data(), get_time[vert_id],
+          //                points_pos.col(vert_id).data(), new_pos.col(vert_id).data(),
+          //                velocity.col(vert_id).data(), new_velocity.col(vert_id).data());
+          point_response(plane_nods.data(), iter->time_,
                          points_pos.col(vert_id).data(), new_pos.col(vert_id).data(),
                          velocity.col(vert_id).data(), new_velocity.col(vert_id).data());
       
@@ -338,7 +377,7 @@ int main(int argc, char** argv){
       
       acce = new_acce;
       velocity = new_velocity;
-      displace = new_displace;
+      displace = new_pos - points;
       
       if(i%iters_perframe == 0){
         auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
