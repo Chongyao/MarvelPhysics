@@ -40,10 +40,9 @@ int main(int argc, char** argv){
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SET PLANE<<<<<<<<<<<<<<<<<<" << endl;
   vector<unsigned int> plane_surf = {0, 1, 2};
   vector<double> plane_nods =
-      {0, DOUBLE_MAX, -3,
-       -DOUBLE_MAX, -DOUBLE_MAX, -3,
-       DOUBLE_MAX,-DOUBLE_MAX, -3};
-
+      {0, DOUBLE_MAX, -2,
+       -DOUBLE_MAX, -DOUBLE_MAX, -2,
+       DOUBLE_MAX,-DOUBLE_MAX, -2};
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
   auto COLL_ptr = Collision_zcy::getInstance();
   COLL_ptr->Transform_Pair(0, 1);

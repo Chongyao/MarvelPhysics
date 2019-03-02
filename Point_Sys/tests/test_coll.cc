@@ -83,11 +83,12 @@ int main(int argc, char** argv){
   
 
   auto COLL_ptr = Collision_zcy::getInstance();
-  COLL_ptr->Transform_Pair(1, 0);
+  COLL_ptr->Transform_Pair(0, 1);
   
+
+  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 0);
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                           surf.data(), nods.data(), nods.data(), 0);
-  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
+                             surf.data(), nods.data(), nods.data(), 1);
 
 
   COLL_ptr->Collid();
@@ -96,7 +97,7 @@ int main(int argc, char** argv){
       new_velo = velo;
   MatrixXd new_nods = nods;
   MatrixXd acce = MatrixXd::Zero(3, num_nods);
-  acce.row(2) = MatrixXd::Ones(1, num_nods) * (-gravity) * 100000;
+  acce.row(2) = MatrixXd::Ones(1, num_nods) * (-gravity);
   double delt_t = pt.get<double>("time_step");
   size_t max_iter = pt.get<size_t>("times");
   cout << "max iter is " << max_iter <<" " << num_surf << " " << num_nods << endl;
@@ -115,14 +116,14 @@ int main(int argc, char** argv){
     cout << new_velo << endl;
 
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), new_nods.data(), nods.data(), 0);
+                             surf.data(), new_nods.data(), nods.data(), 1);
     
     
     COLL_ptr->Collid();
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
-    assert(pairs.size() == 0);
+    // assert(pairs.size() == 0);
     vector<size_t> if_response(num_nods, false);
     map<size_t , pair<size_t, size_t>> candidates;
     map<size_t, double> get_time;
@@ -132,14 +133,15 @@ int main(int argc, char** argv){
         cout <<endl<<endl<<endl<< "j is " << j <<endl;
         pairs[j][0].get(mesh_id1, face_id1);
         pairs[j][1].get(mesh_id2, face_id2);
-        cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2;
+        cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2 <<endl;
         if(mesh_id1 == mesh_id2)
           continue;
-        if(mesh_id2 == 0){
+        if(mesh_id2 == 1){
+          auto exchange = mesh_id2;
           mesh_id2 = mesh_id1;
-          mesh_id1 = 0;
+          mesh_id1 = exchange;
 
-          auto exchange = face_id2;
+          exchange = face_id2;
           face_id2 = face_id1;
           face_id1 = exchange;
         }
@@ -161,6 +163,8 @@ int main(int argc, char** argv){
       
     }
     for(size_t i = 0; i < num_nods; ++i){
+      if(new_nods(2, i) < plane_z)
+        cout << "i is " << i << endl << new_nods.col(i) << endl;
       assert(new_nods(2, i) >= plane_z);
     }
 

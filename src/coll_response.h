@@ -100,8 +100,8 @@ int point_response(const double* const obstacle,
 
 
 
-  // cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl<< "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
-  // cout << "beore  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
+  cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl<< "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
+
   
   double area;
   //TODO:can pre_store to speed up
@@ -133,7 +133,7 @@ int point_response(const double* const obstacle,
         
   }
 
-  // cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
+  cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
 
   return 0;
 }
