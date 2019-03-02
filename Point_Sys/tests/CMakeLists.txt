@@ -69,7 +69,7 @@ target_link_libraries(blender_meshless
   ${Boost_LIBRARIES}
   )
 
-add_executable(blender_meshless_coll blender_coll.cpp)
+cuda_add_executable(blender_meshless_coll blender_coll.cpp)
 target_link_libraries(blender_meshless_coll
   coll_cloth
   PointSys

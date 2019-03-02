@@ -39,21 +39,27 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SET PLANE<<<<<<<<<<<<<<<<<<" << endl;
   vector<unsigned int> plane_surf = {0, 1, 2};
+  const double plane_z = -1.5;
   vector<double> plane_nods =
-      {0, DOUBLE_MAX, -2,
-       -DOUBLE_MAX, -DOUBLE_MAX, -2,
-       DOUBLE_MAX,-DOUBLE_MAX, -2};
+      {0, DOUBLE_MAX, plane_z,
+       -DOUBLE_MAX, -DOUBLE_MAX, plane_z,
+       DOUBLE_MAX,-DOUBLE_MAX, plane_z};
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
   auto COLL_ptr = Collision_zcy::getInstance();
   COLL_ptr->Transform_Pair(0, 1);
-  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 0);
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                           cube_surf.data(), cube_nods.data(), cube_nods_pre.data(), 1);
+                             cube_surf.data(), cube_nods.data(), cube_nods_pre.data(), 0);
+  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
+
+
+
+
 
   for(size_t i = 0; i < 999999; ++i){
     cout <<endl<<endl<< "time is " << i << endl << " before: " << endl;
     for(auto& p : cube_nods){cout << p << " ";}
-    
+    auto iter = i;
+    cout << iter << endl;
     for(size_t j = 0; j < num_nods; ++j){
       cube_nods[j*3 + 2] -= 0.0003;
     }
@@ -67,6 +73,7 @@ int main(int argc, char** argv){
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
+    assert(pairs.size() == 0);
     for(size_t i = 0; i < pairs.size(); ++i){
       // cout << "ContactTime is "  << times[i] << endl;
       cout << pairs[i].size() << endl;
@@ -80,7 +87,7 @@ int main(int argc, char** argv){
 
 
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             cube_surf.data(), cube_nods.data(), cube_nods_pre.data(), 1, false);
+                             cube_surf.data(), cube_nods.data(), cube_nods_pre.data(), 0, false);
     
     cube_nods_pre = cube_nods;
   }

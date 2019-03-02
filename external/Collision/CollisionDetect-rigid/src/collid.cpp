@@ -170,9 +170,13 @@ void updateMesh2GPU(vector <mesh *> &ms)
 	vec3f *oldcurVert = preVert;
 	for (int i = 0; i < ms.size(); i++) {
 		mesh *m = ms[i];
+		cout << m->_num_vtx << endl;
 		memcpy(oldcurVert, m->_ovtxs, sizeof(vec3f)*m->_num_vtx);
 		oldcurVert += m->_num_vtx;
 	}
+    for (int j = 0; j < s_numVert; ++j) {
+        cout << preVert[j].x << " "<< preVert[j].y << " " << preVert[j].z << endl;
+    }
 
 	for (int i = 0; i < ms.size(); i++) {
 		mesh *m = ms[i];

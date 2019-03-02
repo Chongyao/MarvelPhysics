@@ -86,9 +86,9 @@ int main(int argc, char** argv){
   COLL_ptr->Transform_Pair(0, 1);
   
 
-  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 0);
+  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), nods.data(), nods.data(), 1);
+                             surf.data(), nods.data(), nods.data(), 0);
 
 
   COLL_ptr->Collid();
@@ -116,7 +116,7 @@ int main(int argc, char** argv){
     cout << new_velo << endl;
 
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), new_nods.data(), nods.data(), 1);
+                             surf.data(), new_nods.data(), nods.data(), 0);
     
     
     COLL_ptr->Collid();
@@ -136,7 +136,7 @@ int main(int argc, char** argv){
         cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2 <<endl;
         if(mesh_id1 == mesh_id2)
           continue;
-        if(mesh_id2 == 1){
+        if(mesh_id2 == 0){
           auto exchange = mesh_id2;
           mesh_id2 = mesh_id1;
           mesh_id1 = exchange;
