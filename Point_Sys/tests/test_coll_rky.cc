@@ -1,6 +1,6 @@
 #include <iostream>
 #include <limits>
-#include <Collision/CollisionDetect-cloth/src/Collision.h>
+#include <Collision/CollisionDetect-rigid/src/Collision_eigen.h>
 using namespace std;
 
 // const double DOUBLE_MAX = std::numeric_limits<double>::max(); 
@@ -45,17 +45,18 @@ int main(int argc, char** argv){
        DOUBLE_MAX,-DOUBLE_MAX, -3};
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  auto COLL_ptr = Collision::getInstance();
-  COLL_ptr->Transform_Mesh(3, 1, plane_surf, plane_nods, plane_nods, 0);
+  auto COLL_ptr = Collision_zcy::getInstance();
+  COLL_ptr->Transform_Pair(0, 1);
+  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 0);
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                      cube_surf, cube_nods, cube_nods_pre, 1);
+                           cube_surf.data(), cube_nods.data(), cube_nods_pre.data(), 1);
 
-  for(size_t i = 0; i < 20; ++i){
+  for(size_t i = 0; i < 999999; ++i){
     cout <<endl<<endl<< "time is " << i << endl << " before: " << endl;
     for(auto& p : cube_nods){cout << p << " ";}
     
     for(size_t j = 0; j < num_nods; ++j){
-      cube_nods[j*3 + 2] -= 0.333;
+      cube_nods[j*3 + 2] -= 0.0003;
     }
     cout <<endl<< "after : " << endl;
     for(auto& p : cube_nods){cout << p << " ";}
@@ -80,7 +81,7 @@ int main(int argc, char** argv){
 
 
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                        cube_surf, cube_nods, cube_nods_pre, 1, false);
+                             cube_surf.data(), cube_nods.data(), cube_nods_pre.data(), 1, false);
     
     cube_nods_pre = cube_nods;
   }

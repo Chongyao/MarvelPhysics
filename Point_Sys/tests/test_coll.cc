@@ -11,7 +11,7 @@
 #include <boost/filesystem.hpp>
 #include <chrono>
 #include <limits>
-#include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
+#include <Collision/CollisionDetect-rigid/src/Collision_eigen.h>
 #include "coll_response.h"
 using namespace marvel;
 using namespace std;
@@ -86,8 +86,8 @@ int main(int argc, char** argv){
   COLL_ptr->Transform_Pair(1, 0);
   
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                           surf.data(), nods.data(), nods.data(), 0,false);
-  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1,false);
+                           surf.data(), nods.data(), nods.data(), 0);
+  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
 
 
   COLL_ptr->Collid();
@@ -96,7 +96,7 @@ int main(int argc, char** argv){
       new_velo = velo;
   MatrixXd new_nods = nods;
   MatrixXd acce = MatrixXd::Zero(3, num_nods);
-  acce.row(2) = MatrixXd::Ones(1, num_nods) * (-gravity);
+  acce.row(2) = MatrixXd::Ones(1, num_nods) * (-gravity) * 100000;
   double delt_t = pt.get<double>("time_step");
   size_t max_iter = pt.get<size_t>("times");
   cout << "max iter is " << max_iter <<" " << num_surf << " " << num_nods << endl;
@@ -115,18 +115,18 @@ int main(int argc, char** argv){
     cout << new_velo << endl;
 
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), new_nods.data(), nods.data(), 0,false);
+                             surf.data(), new_nods.data(), nods.data(), 0);
     
     
     COLL_ptr->Collid();
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
-    
+    assert(pairs.size() == 0);
     vector<size_t> if_response(num_nods, false);
     map<size_t , pair<size_t, size_t>> candidates;
     map<size_t, double> get_time;
-    assert(pairs.size() == 0);
+    
     for(size_t j = 0; j < pairs.size(); ++j){
       unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
         cout <<endl<<endl<<endl<< "j is " << j <<endl;
