@@ -27,13 +27,27 @@ bool check_inside(const Eigen::Vector3d& point, const Eigen::MatrixXd& obstacle,
 
 int main(int argc, char** argv){
   Matrix3d tri;
-  tri << 5.14254, 5.14254, -4.85746,
-      -4.95604, 5.04396, 5.04396,
-      0.3, 0.3, 0.3;
-  cout << tri << endl;
+  tri <<  50.1425 ,-40.8575, -40.8575,
+      -40.956,   50.044,  -40.956,
+      0.3,      0.3,      0.3;
+  // tri <<  50.1425 ,50.1425,-40.8575
+  //     -40.956 ,50.044, 50.044
+  //     0.3,  0.3,  0.3;
 
+  cout << tri << endl;
+  double k = (50.044 + 40.956) / -(40.8575 + 50.1425);
+  double b =50.044 - k * (-40.8575);
+  
   Vector3d point;
-  point << -0.343676, 0.441254,0.3;
+  
+  point <<-0.343676,
+      0.441254,
+      0.3;
+
+  cout << point << endl;
+
+  cout << "kx + b" << k*point(0) + b << endl;
+  
   cout << check_inside(point, tri, 0);
   
 }

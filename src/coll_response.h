@@ -5,21 +5,55 @@
 
 using namespace Eigen;
 //only for triangles
-bool check_inside(const Eigen::Vector3d& point, const Eigen::MatrixXd& obstacle, const double& area){
-  // double s = (obstacle(1, 0)*obstacle(0, 2) - obstacle(0, 0)*obstacle(1, 2) + (obstacle(1, 2) - obstacle(1, 0))*point(0) + (obstacle(0, 0) - obstacle(0, 2))*point(1)) / (2*area);
-  // double t = (obstacle(0, 0)*obstacle(1, 1) - obstacle(1, 0)*obstacle(0, 1) + (obstacle(1, 0) - obstacle(1, 1))*point(0) + (obstacle(0, 1) - obstacle(0, 0))*point(1)) / (2*area);
-  //TODO:  divide zero
-  const double s = ( (point(0) - obstacle(0, 2)) * (obstacle(1, 0) - obstacle(1, 2))
-                     - (point(1) - obstacle(1, 2)) * (obstacle(0, 0) - obstacle(0, 2)) ) /
-                    ( (obstacle(0, 1) - obstacle(0, 2)) * (obstacle(1, 0) - obstacle(1, 2)) -
-                     (obstacle(1, 1) - obstacle(1, 2)) * (obstacle(0, 0) - obstacle(0, 2)) );
-  const double t = ( (point(0) - obstacle(0, 2)) * (obstacle(1, 1) - obstacle(1, 2))
-                     - (point(1) - obstacle(1, 2)) * (obstacle(0, 1) - obstacle(0, 2)) ) /
-      ((obstacle(0, 0) - obstacle(0, 2)) * (obstacle(1, 1) - obstacle(1, 2))
-       - (obstacle(1, 0) - obstacle(1, 2)) * (obstacle(0, 1) - obstacle(0, 2)));
+
+enum axis{x, y, z};
+
+inline bool project_dim(const Eigen::Vector3d& normal, axis& dim1, axis& dim2){
+  dim1 = x;
+  dim2 = y;
+  
+  size_t count = 0;
+  for(size_t i = 0; i < 3; ++i){
+    if(fabs(normal(i)) < 1e-6){
+      if(count == 0){
+        dim1 = i;
+        dim2 = (i + 1) % 3;
+        ++count;
+      }
+      if(count == 1){
+        dim2 = i;
+        ++count;
+      }
+    }
+  }
+
+  if(count > 2)
+    return false;
+  else
+    return true;
+
+}
+
+bool check_inside(const axis& dim1, const axis& dim2, const Eigen::Vector3d& point, const Eigen::MatrixXd& obstacle, const double& area){
+  
+  const double s = ( (point(dim1) - obstacle(dim1, 2)) * (obstacle(dim2, 0) - obstacle(dim2, 2))
+                 - (point(dim2) - obstacle(dim2, 2)) * (obstacle(dim1, 0) - obstacle(dim1, 2)) ) /
+             ( (obstacle(dim1, 1) - obstacle(dim1, 2)) * (obstacle(dim2, 0) - obstacle(dim2, 2))
+           -(obstacle(dim2, 1) - obstacle(dim2, 2)) * (obstacle(dim1, 0) - obstacle(dim1, 2)) );
+  const double t = ( (point(dim1) - obstacle(dim1, 2)) * (obstacle(dim2, 1) - obstacle(dim2, 2))
+             - (point(dim2) - obstacle(dim2, 2)) * (obstacle(dim1, 1) - obstacle(dim1, 2)) ) /
+      ((obstacle(dim1, 0) - obstacle(dim1, 2)) * (obstacle(dim2, 1) - obstacle(dim2, 2))
+       - (obstacle(dim2, 0) - obstacle(dim2, 2)) * (obstacle(dim1, 1) - obstacle(dim1, 2)));
   
   cout<< " check through : " << s << " " << t << " " << 1 - s - t << endl;
-  cout << obstacle << endl;
+  if(s != s){
+    cout << "nan" << endl << point << endl << endl << obstacle;
+    cout << " jerer" << endl;
+    
+    assert(s == s);
+  }
+
+  // cout << obstacle << endl;
   return ( s > 0 && s < 1 && t > 0 && t < 1 && (1 - s - t) > 0 && (1 - s - t) < 1 );
         
   
@@ -38,11 +72,12 @@ Vector3d get_cross_point(const Eigen::Vector3d& before, const Eigen::Vector3d& a
   }
   else{
     is_through = true;
-    cout << "cross point is " << before + offset * line << endl;
+    // cout << "cross point is " << before + offset * line << endl;
     return (before + offset * line);
   }
       
 }
+#if 0
 int response(const double* const obstacle,
              const double time, 
              const double* const pre_pos, const double* const next_pos,
@@ -92,6 +127,7 @@ int response(const double* const obstacle,
   // cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
   return 0;
 }
+#endif
 int point_response(const double* const obstacle,
              const double time, 
              const double* const pre_pos, double* const next_pos,
@@ -111,7 +147,8 @@ int point_response(const double* const obstacle,
 
 
 
-  cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl<< "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
+
+  // cout << "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
 
   
   double area;
@@ -129,11 +166,16 @@ int point_response(const double* const obstacle,
   }
   
   const double para_d = -plane_normal.dot(obstacle_.col(0)) ;
-
+  
 
   bool is_through= false;
   auto cross_point = get_cross_point(pre_pos_, next_pos_, plane_normal, para_d, is_through);
-  if(is_through && check_inside(cross_point, obstacle_, area)){
+  if(!is_through)
+    return 0;
+
+  axis dim1, dim2;
+  if(project_dim(plane_normal, dim1, dim2) && check_inside(dim1, dim2, cross_point, obstacle_, area)){
+    cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl;
     res_pos_ = cross_point;
     res_velo_ = pre_velo_ * (1 - time) + time * next_velo_;
     Vector3d projection = res_velo_.dot(plane_normal) * plane_normal;
@@ -141,10 +183,10 @@ int point_response(const double* const obstacle,
 
     next_pos_ = res_pos_;
     next_velo_ = res_velo_;
+    cout << "after  response" <<endl<< res_pos_ << endl ;
         
   }
-
-  cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
+  // cout << endl << res_velo_ << endl;
 
   return 0;
 }
