@@ -193,17 +193,16 @@ int main(int argc, char** argv){
   string solver = simulation_para.get<string>("solver");
 
   double delt_t = common.get<double>("time_step");
-  MatrixXd points_pos, new_pos;
-  MatrixXd displace, new_displace;
-  MatrixXd velocity, new_velocity;
+  MatrixXd points_pos;
+  MatrixXd displace;
+  MatrixXd velocity;
   MatrixXd acce;
-  MatrixXd new_acce;
   MatrixXd gra;
   MatrixXd vet_displace;
-  points_pos.setZero(3, dim); new_pos.setZero(3, dim);
-  displace.setZero(3, dim); new_displace.setZero(3, dim);
-  velocity.setZero(3, dim); new_velocity.setZero(3, dim);
-  acce.setZero(3, dim); new_acce.setZero(3, dim);
+  points_pos.setZero(3, dim); 
+  displace.setZero(3, dim); 
+  velocity.setZero(3, dim); 
+  acce.setZero(3, dim); 
   gra.setZero(3, dim);
 
   vet_displace.setZero(3, nods.cols());
@@ -248,19 +247,19 @@ int main(int argc, char** argv){
 
       for(size_t j = 0; j < dim; ++j){
         assert(PS.get_mass(j) > 0);
-        new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
+        acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
       }
     
-      new_velocity += delt_t * new_acce;
-      new_displace += delt_t *new_velocity;
-      new_pos = points + new_displace;
+      velocity += delt_t * acce;
+      displace += delt_t *velocity;
+      points_pos = points + displace;
 
 
 
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
 
-      COLLISION.Collide(obta_surfs, obta_nods, new_velocity, new_pos);
-      
+      COLLISION.Collide(obta_surfs, obta_nods, velocity, points_pos);
+      displace = points_pos - points;      
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
 
 
@@ -270,9 +269,6 @@ int main(int argc, char** argv){
     
       previous_step_Val = dat_str.Val_;
       
-      acce = new_acce;
-      velocity = new_velocity;
-      displace = new_pos - points;
       
       if(i%iters_perframe == 0){
         auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";

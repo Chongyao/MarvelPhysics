@@ -1,5 +1,5 @@
 #include "coll_wrapper.h"
-
+#include <map>
 
 using namespace std;
 using namespace Eigen;
@@ -70,7 +70,8 @@ int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& o
 
     };
     auto candidates = set<coll_info, decltype(coll_comp)>(coll_comp) ;
-        
+    map<size_t, bool> get_if_response;
+    
     for(size_t j = 0; j < pairs.size(); ++j){
       unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
 
@@ -92,19 +93,27 @@ int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& o
       cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2 << endl;
 
       for(size_t tri_dim = 0; tri_dim < 3; ++tri_dim){
-        coll_info one_info((*core_tris_ptr)(tri_dim, face_id1), mesh_id2, face_id2, times[j]);
+        size_t point_id  = (*core_tris_ptr)(tri_dim, face_id1);
+        coll_info one_info(point_id, mesh_id2, face_id2, times[j]);
+        
         candidates.insert(one_info);
+        get_if_response.insert({point_id, false});
       }
     }//loop for pairs
 
+    
     for(auto iter = candidates.begin(); iter != candidates.end(); ++iter){
       size_t vert_id = iter->point_id_, obta_id = iter->mesh_id_, coll_plane_id = iter->face_id_;
       cout << "vert_id is " << vert_id << " " << obta_id << " " << coll_plane_id << endl;
       auto plane_nods = get_tri_pos(*(obta_surfs[obta_id - 1]), *(obta_nods[obta_id - 1]), coll_plane_id);
 
-      point_response(plane_nods.data(), iter->time_,
-                     pre_core_nods.col(vert_id).data(), new_core_nods.col(vert_id).data(),
-                     pre_core_velo.col(vert_id).data(), new_core_velo.col(vert_id).data());
+      if(!get_if_response[vert_id] && point_response(plane_nods.data(), iter->time_,
+                        pre_core_nods.col(vert_id).data(), new_core_nods.col(vert_id).data(),
+                        pre_core_velo.col(vert_id).data(), new_core_velo.col(vert_id).data())){
+
+        get_if_response[vert_id] = true;
+      }
+      
       
     }
 #pragma omp parallel for

@@ -129,7 +129,7 @@ int response(const double* const obstacle,
   return 0;
 }
 #endif
-int point_response(const double* const obstacle,
+bool point_response(const double* const obstacle,
              const double time, 
              const double* const pre_pos, double* const next_pos,
              const double* const pre_velo, double* const next_velo,
@@ -172,7 +172,7 @@ int point_response(const double* const obstacle,
   bool is_through= false;
   auto cross_point = get_cross_point(pre_pos_, next_pos_, plane_normal, para_d, is_through);
   if(!is_through)
-    return 0;
+    return false;
 
   axis dim1, dim2;
   if(project_dim(plane_normal, dim1, dim2) && check_inside(dim1, dim2, cross_point, obstacle_, area)){
@@ -185,11 +185,13 @@ int point_response(const double* const obstacle,
     next_pos_ = res_pos_;
     next_velo_ = res_velo_;
     cout << "after  response" <<endl<< res_pos_ << endl ;
-        
+    return true;        
   }
-  // cout << endl << res_velo_ << endl;
+  else
+    return false;
 
-  return 0;
+
+
 }
 
 
