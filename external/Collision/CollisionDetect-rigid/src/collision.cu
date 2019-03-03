@@ -430,7 +430,7 @@ inline __device__ void Front_Shrink(uint left, uint right, int* bvhA, int*bvhB, 
 	{
 		while (1)
 		{
-			//Èç¹û¶¼²»ÊÇ¸ù½Úµã ÔÙ¼ì²éÊÇ·ñ¶¼ÊÇ×ó½áµã
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½Úµï¿½ ï¿½Ù¼ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			if (tem_left != p_left&&tem_right != p_right)
 			{
 				if (tem_left != getLeftChild(p_left, bvhA) || tem_right != getLeftChild(p_right, bvhB))
@@ -439,7 +439,7 @@ inline __device__ void Front_Shrink(uint left, uint right, int* bvhA, int*bvhB, 
 				}
 			}
 
-			//Èç¹ûÓÐÒ»¸ö¸ù½Úµã ÁíÒ»¸ö²»ÊÇ×ó½áµã break
+			//ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½Úµï¿½ ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ break
 			if (tem_left == p_left&&tem_right != getLeftChild(p_right, bvhB))
 			{
 				break;
@@ -1273,11 +1273,11 @@ int getCollisionsGPU(int *rets,double *time)
 		cutilSafeCall(cudaMemcpy(rets, retPairs._dPairs, sizeof(uint)*2*len, cudaMemcpyDeviceToHost));
 	}
 
-	FILE* file = fopen("time.txt", "a");
+	//FILE* file = fopen("time.txt", "a");
 
-	fprintf(file, "%f\n", timing_finish - timing_start);
+	//fprintf(file, "%f\n", timing_finish - timing_start);
 
-	fclose(file);
+	//fclose(file);
 	//fprintf(file, "\n");
 	return len;
 }

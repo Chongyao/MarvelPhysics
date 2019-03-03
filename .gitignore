@@ -5,6 +5,7 @@
 *#
 Point_Sys/result
 /cmake-build-debug
+/cmake-build-release
 /build
 /build-debug
 /*result

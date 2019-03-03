@@ -4,7 +4,6 @@
 #include <vector>
 #include <iostream>
 #include <cmath>
-
 #include <WindingNumber/UT_Array.h>
 #include <WindingNumber/UT_Array.cpp>
 #include <WindingNumber/UT_SolidAngle.h>

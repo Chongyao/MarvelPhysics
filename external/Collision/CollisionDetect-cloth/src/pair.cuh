@@ -12,8 +12,8 @@ typedef struct _g_pair {
 		cutilSafeCall(cudaMemcpy(_dIdx, dummy, 1 * sizeof(uint), cudaMemcpyHostToDevice));
 
 		_length = length;
-		cutilSafeCall(cudaMalloc((void**)&_dPairs, length*sizeof(int2)));
-		cutilSafeCall(cudaMemset(_dPairs, 0, length*sizeof(uint2)));
+		cutilSafeCall(cudaMalloc((void**)&_dPairs, length*sizeof(uint)));
+		cutilSafeCall(cudaMemset(_dPairs, 0, length*sizeof(uint)));
 		reportMemory("g_pair.init");
 
 		_offset = 0;

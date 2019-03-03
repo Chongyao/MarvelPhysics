@@ -1,6 +1,6 @@
 #include "geometry.h"
 #include <Eigen/LU>
-
+#include <Eigen/Geometry>
 using namespace Eigen;
 namespace marvel{
 double clo_surf_vol(const MatrixXd &nods, const MatrixXi &surf){
@@ -33,5 +33,7 @@ int build_bdbox(const MatrixXd &nods, MatrixXd & bdbox){
   }
   return 0;
 }
+
+
 
 }//namespace : marvel

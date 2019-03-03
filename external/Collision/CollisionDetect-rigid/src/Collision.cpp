@@ -8,8 +8,8 @@ void Collision::Transform_Pair(unsigned int a,unsigned int b) {
 		mesh_pairs.push_back(mesh_pair(a, b));
 }
 
-void Collision::Transform_Mesh(unsigned int numVtx, unsigned int numTri, vector<unsigned int> tris, vector<double> vtxs,
-	vector<double> p_vtxs,
+void Collision::Transform_Mesh(unsigned int numVtx, unsigned int numTri, const vector<unsigned int>& tris, const vector<double>& vtxs,
+	const vector<double>& p_vtxs,
 	int m_id,
 	bool able_selfcollision) {
 
@@ -47,6 +47,7 @@ void Collision::Transform_Mesh(unsigned int numVtx, unsigned int numTri, vector<
 
  void Collision::Collid(){
 	contact_pairs.clear();
+        contact_time.clear();
 	body_collide_gpu(mesh_pairs, bodys, contact_pairs,contact_time);
 
 	_is_first = false;

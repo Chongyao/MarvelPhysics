@@ -170,9 +170,13 @@ void updateMesh2GPU(vector <mesh *> &ms)
 	vec3f *oldcurVert = preVert;
 	for (int i = 0; i < ms.size(); i++) {
 		mesh *m = ms[i];
+		cout << m->_num_vtx << endl;
 		memcpy(oldcurVert, m->_ovtxs, sizeof(vec3f)*m->_num_vtx);
 		oldcurVert += m->_num_vtx;
 	}
+    for (int j = 0; j < s_numVert; ++j) {
+        cout << preVert[j].x << " "<< preVert[j].y << " " << preVert[j].z << endl;
+    }
 
 	for (int i = 0; i < ms.size(); i++) {
 		mesh *m = ms[i];
@@ -240,7 +244,7 @@ bool cmp(vector<tri_pair> a, vector<tri_pair> b){
 //static std::vector<mesh *> meshes;
 
 
-void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vector<vector<tri_pair>> &contacts,vector<double> contact_time){
+void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vector<vector<tri_pair>> &contacts,vector<double>& contact_time){
 	static vector<bvh*> bvhC;
 	//front_list fIntra;
 	static std::vector<mesh *> meshes;
@@ -323,22 +327,24 @@ void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vect
 		ret[i].get(fid1, fid2);
 
 		for (int j = 0; j < _tri_offset.size(); j++){
-			if (fid1 <= _tri_offset[j]){
+			if (fid1 < _tri_offset[j]){
+			    //if (fid1 <= _tri_offset[j]){
 				mid1 = j == 0 ? 0 : j;
 				break;
 			}			
 		}
-		tem.push_back(tri_pair(mid1, fid1 -1- (mid1 == 0 ? 0 : _tri_offset[mid1 - 1])));
-
+		tem.push_back(tri_pair(mid1, fid1 - (mid1 == 0 ? 0 : _tri_offset[mid1 - 1])));
+        //tem.push_back(tri_pair(mid1, fid1 - 1-(mid1 == 0 ? 0 : _tri_offset[mid1 - 1])));
 		for (int j = 0; j < _tri_offset.size(); j++){
-			if (fid2 <= _tri_offset[j]){
+			if (fid2 < _tri_offset[j]){
+                //if (fid2 <= _tri_offset[j]){
 				mid2 = j == 0 ? 0 : j;
 				break;
 			}
 		}
 
-		tem.push_back(tri_pair(mid2, fid2 -1- (mid2 == 0 ? 0 : _tri_offset[mid2 - 1])));
-
+		tem.push_back(tri_pair(mid2, fid2 - (mid2 == 0 ? 0 : _tri_offset[mid2 - 1])));
+        //tem.push_back(tri_pair(mid2, fid2 -1- (mid2 == 0 ? 0 : _tri_offset[mid2 - 1])));
 		contacts.push_back(tem);
 		contact_time.push_back(time_buffer[i]);
 	}

@@ -1,3 +1,24 @@
+add_executable(test_bay test_bay.cc)
+
+
+
+cuda_add_executable(test_coll test_coll.cc)
+target_link_libraries(test_coll
+  coll_rigid
+  marvel-core
+  PointSys
+  ${Boost_LIBRARIES}
+  )
+cuda_add_executable(test_coll_rky test_coll_rky.cc)
+target_link_libraries(test_coll_rky
+  coll_rigid
+  marvel-core
+  PointSys
+  ${Boost_LIBRARIES}
+  )
+
+
+
 add_executable(test_genpoints test_genpoints.cc)
 target_link_libraries(test_genpoints
   marvel-core
@@ -51,3 +72,12 @@ target_link_libraries(blender_meshless
   marvel-core
   ${Boost_LIBRARIES}
   )
+
+cuda_add_executable(blender_meshless_coll blender_coll.cpp)
+target_link_libraries(blender_meshless_coll
+  coll_cloth
+  PointSys
+  marvel-core
+  ${Boost_LIBRARIES}
+  )
+
