@@ -2,8 +2,9 @@
 #define COLL_RESPONSE
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-
+#include <iostream>
 using namespace Eigen;
+using namespace std;
 //only for triangles
 
 enum axis{x, y, z};
@@ -16,12 +17,12 @@ inline bool project_dim(const Eigen::Vector3d& normal, axis& dim1, axis& dim2){
   for(size_t i = 0; i < 3; ++i){
     if(fabs(normal(i)) < 1e-6){
       if(count == 0){
-        dim1 = i;
-        dim2 = (i + 1) % 3;
+        dim1 = static_cast<axis>(i);
+        dim2 = static_cast<axis>((i + 1) % 3);
         ++count;
       }
       else if(count == 1){
-        dim2 = i;
+        dim2 = static_cast<axis>(i);
         ++count;
       }
     }

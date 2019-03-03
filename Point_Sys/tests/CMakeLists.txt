@@ -66,12 +66,13 @@ target_link_libraries(test_tet
 #add_executable(test_autodiff test_autodiff.cc)
 add_executable(test_SparseMatrix test_SparseMatrix.cc)
 
-add_executable(blender_meshless blender_meshless.cpp)
-target_link_libraries(blender_meshless
-  PointSys
-  marvel-core
-  ${Boost_LIBRARIES}
-  )
+# add_executable(blender_meshless blender_meshless.cpp)
+# target_link_libraries(blender_meshless
+#   coll_cloth
+#   PointSys
+#   marvel-core
+#   ${Boost_LIBRARIES}
+#   )
 
 cuda_add_executable(blender_meshless_coll blender_coll.cpp)
 target_link_libraries(blender_meshless_coll

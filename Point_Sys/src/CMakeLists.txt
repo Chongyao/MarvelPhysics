@@ -1,7 +1,8 @@
 file(GLOB header *.h)
 file(GLOB source *.cc *.c)
-add_library(PointSys SHARED ${source})
+cuda_add_library(PointSys SHARED ${source})
 target_link_libraries(PointSys
+  coll_cloth
   # WindingNumber
   tbb
 #  marvel-core
