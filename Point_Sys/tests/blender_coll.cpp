@@ -91,7 +91,11 @@ int main(int argc, char** argv){
 
   MatrixXi surf;
   MatrixXd nods;
-  readOBJ((indir + '/' +mesh_name+".obj").c_str(), nods, surf);
+  if(!readOBJ((indir + '/' +mesh_name+".obj").c_str(), nods, surf)){
+    cout << "model OBJ file wrong" << endl;
+    return 1;    
+  }
+
   cout << "surf: " << surf.rows() << " " << surf.cols() << endl << "nods: " << nods.rows() << " " << nods.cols() << endl;
   
   surf.transposeInPlace();
@@ -169,7 +173,8 @@ int main(int argc, char** argv){
         string one_obstacle = file_iter->path().string();
         MatrixXd one_obta_nods;
         MatrixXi one_obta_surf;
-        readOBJ(one_obstacle.c_str(), one_obta_nods, one_obta_surf);
+        if(!readOBJ(one_obstacle.c_str(), one_obta_nods, one_obta_surf))
+          continue;
         one_obta_surf.transposeInPlace();
         one_obta_nods.transposeInPlace();
         obta_surfs.push_back(std::move(make_shared<MatrixXi>(one_obta_surf)));
@@ -181,14 +186,6 @@ int main(int argc, char** argv){
 
   cout << "obtacles num is " << obta_surfs.size() << endl;
   size_t obta_num = obta_surfs.size();
-  // vector<vector<double>> obta_areas(obta_num);{
-  //   for(auto& obta : obta_areas){
-  //     obta.resize(obta_surfs[i]->cols());
-      
-  //   }
-
-  // }
-  
   size_t num_fake_tris = dim%3 ? dim / 3 + 1: dim / 3 ;
   cout << " face surf tris num is " << num_fake_tris << endl;
   MatrixXi fake_surf(3, num_fake_tris);{
