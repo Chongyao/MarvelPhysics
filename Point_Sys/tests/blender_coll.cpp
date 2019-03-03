@@ -24,9 +24,9 @@
 #include "vtk2surf.h"
 
 
-#include "coll_response.h"
-#include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
-
+// #include "coll_response.h"
+// #include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
+#include "coll_wrapper.h"
 
 using namespace marvel;
 using namespace std;
@@ -36,23 +36,8 @@ using namespace chrono;
 using namespace boost;
 
 
-Matrix3d get_tri_pos(const MatrixXi& tris, const MatrixXd& verts, const size_t& face_id){
-  Matrix3d tri;
-  for(size_t i = 0; i < 3; ++i){
-    size_t vert_id = tris(i, face_id);
-    tri.col(i) = verts.col(vert_id);
-  }
-  return std::move(tri);
-}
-class coll_info{
- public:
-  coll_info(const size_t& point_id, const size_t& mesh_id, const size_t& face_id, const double& time):mesh_id_(mesh_id),face_id_(face_id),time_(time),point_id_(point_id){}
 
-  const size_t point_id_;
-  const size_t mesh_id_;
-  const size_t face_id_;
-  const double time_;
-};
+
 
 int main(int argc, char** argv){
 
@@ -91,7 +76,11 @@ int main(int argc, char** argv){
 
   MatrixXi surf;
   MatrixXd nods;
-  readOBJ((indir + '/' +mesh_name+".obj").c_str(), nods, surf);
+  if(!readOBJ((indir + '/' +mesh_name+".obj").c_str(), nods, surf)){
+    cout << "model OBJ file wrong" << endl;
+    return 1;    
+  }
+
   cout << "surf: " << surf.rows() << " " << surf.cols() << endl << "nods: " << nods.rows() << " " << nods.cols() << endl;
   
   surf.transposeInPlace();
@@ -169,7 +158,8 @@ int main(int argc, char** argv){
         string one_obstacle = file_iter->path().string();
         MatrixXd one_obta_nods;
         MatrixXi one_obta_surf;
-        readOBJ(one_obstacle.c_str(), one_obta_nods, one_obta_surf);
+        if(!readOBJ(one_obstacle.c_str(), one_obta_nods, one_obta_surf))
+          continue;
         one_obta_surf.transposeInPlace();
         one_obta_nods.transposeInPlace();
         obta_surfs.push_back(std::move(make_shared<MatrixXi>(one_obta_surf)));
@@ -179,48 +169,20 @@ int main(int argc, char** argv){
     }    
   }
 
-  cout << "obtacles num is " << obta_surfs.size() << endl;
-  size_t obta_num = obta_surfs.size();
-  // vector<vector<double>> obta_areas(obta_num);{
-  //   for(auto& obta : obta_areas){
-  //     obta.resize(obta_surfs[i]->cols());
-      
-  //   }
 
-  // }
-  
   size_t num_fake_tris = dim%3 ? dim / 3 + 1: dim / 3 ;
   cout << " face surf tris num is " << num_fake_tris << endl;
-  MatrixXi fake_surf(3, num_fake_tris);{
+  std::shared_ptr<MatrixXi> fake_surf_ptr = make_shared<MatrixXi>(3, num_fake_tris);{
     #pragma omp parallel for
     for(size_t i = 0; i < num_fake_tris; ++i){
-      fake_surf(0, i) = i * 3;
-      fake_surf(1, i) = i * 3 + 1 >= dim ? i * 3 - 1 : i * 3 + 1;
-      fake_surf(2, i) = i * 3 + 2 >= dim ? i * 3 - 2 : i * 3 + 2;
+      (*fake_surf_ptr)(0, i) = i * 3;
+      (*fake_surf_ptr)(1, i) = i * 3 + 1 >= dim ? i * 3 - 1 : i * 3 + 1;
+      (*fake_surf_ptr)(2, i) = i * 3 + 2 >= dim ? i * 3 - 2 : i * 3 + 2;
     }
   }
   
+  coll_wrapper COLLISION(obta_surfs, obta_nods, fake_surf_ptr, points);
   
-  auto COLL_ptr = Collision_zcy::getInstance();
-
-  for(size_t i = 0; i < obta_num; ++i){
-    COLL_ptr->Transform_Pair(0, i + 1);
-  }
-  COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), points.data(), points.data(), 0, false);
-  
-  for(size_t i = 0; i < obta_num; ++i){
-    COLL_ptr->Transform_Mesh(obta_nods[i]->cols(), obta_surfs[i]->cols(), obta_surfs[i]->data(), obta_nods[i]->data(), obta_nods[i]->data(), i + 1, false);    
-  }
-
-
-
-
-
-  COLL_ptr->Collid();
-
-  
-
-             
 
 
   
@@ -231,17 +193,16 @@ int main(int argc, char** argv){
   string solver = simulation_para.get<string>("solver");
 
   double delt_t = common.get<double>("time_step");
-  MatrixXd points_pos, new_pos;
-  MatrixXd displace, new_displace;
-  MatrixXd velocity, new_velocity;
+  MatrixXd points_pos;
+  MatrixXd displace;
+  MatrixXd velocity;
   MatrixXd acce;
-  MatrixXd new_acce;
   MatrixXd gra;
   MatrixXd vet_displace;
-  points_pos.setZero(3, dim); new_pos.setZero(3, dim);
-  displace.setZero(3, dim); new_displace.setZero(3, dim);
-  velocity.setZero(3, dim); new_velocity.setZero(3, dim);
-  acce.setZero(3, dim); new_acce.setZero(3, dim);
+  points_pos.setZero(3, dim); 
+  displace.setZero(3, dim); 
+  velocity.setZero(3, dim); 
+  acce.setZero(3, dim); 
   gra.setZero(3, dim);
 
   vet_displace.setZero(3, nods.cols());
@@ -286,85 +247,19 @@ int main(int argc, char** argv){
 
       for(size_t j = 0; j < dim; ++j){
         assert(PS.get_mass(j) > 0);
-        new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
+        acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
       }
     
-      new_velocity += delt_t * new_acce;
-      new_displace += delt_t *new_velocity;
-      new_pos = points + new_displace;
+      velocity += delt_t * acce;
+      displace += delt_t *velocity;
+      points_pos = points + displace;
 
 
 
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
-      COLL_ptr->Transform_Mesh(dim, num_fake_tris, fake_surf.data(), new_pos.data(), points_pos.data(), 0, false);
-      COLL_ptr->Collid();
-      auto pairs = COLL_ptr->getContactPairs();
-      auto times = COLL_ptr->getContactTimes();
-      
-      if(pairs.size() != 0){
-        // map<size_t , pair<size_t, size_t>> candidates;
-        // map<size_t, double> get_time;
-        auto coll_comp = [](const coll_info& one, const coll_info& other)->bool{
-          if(one.point_id_ != other.point_id_){
-            return one.point_id_ < other.point_id_;                        
-          }
-          else if(one.mesh_id_ != other.mesh_id_){
-            return one.mesh_id_ < other.mesh_id_;
-            }
-          else {
-            return(one.face_id_ < other.face_id_);             
-          }
 
-
-        };
-        auto candidates = set<coll_info, decltype(coll_comp)>(coll_comp) ;
-        
-        for(size_t j = 0; j < pairs.size(); ++j){
-          unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{
-
-            pairs[j][0].get(mesh_id1, face_id1);
-            pairs[j][1].get(mesh_id2, face_id2);
-            // cout << ">>>>>>>>>>>>>>>>collid<<<<<<<<<<<<<<<"<<endl;
-
-            if(mesh_id1 == mesh_id2)
-              continue;
-            if(mesh_id2 == 0){
-              mesh_id2 = mesh_id1;
-              mesh_id1 = 0;
-
-              auto exchange = face_id2;
-              face_id2 = face_id1;
-              face_id1 = exchange;
-            }
-          }//mesh_id,face_id...
-          cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2 << endl;
-
-          for(size_t tri_dim = 0; tri_dim < 3; ++tri_dim){
-            coll_info one_info(fake_surf(tri_dim, face_id1), mesh_id2, face_id2, times[j]);
-            candidates.insert(one_info);
-          }
-        }//loop for pairs
-
-        for(auto iter = candidates.begin(); iter != candidates.end(); ++iter){
-          size_t vert_id = iter->point_id_, obta_id = iter->mesh_id_, coll_plane_id = iter->face_id_;
-          cout << "vert_id is " << vert_id << " " << obta_id << " " << coll_plane_id << endl;
-          auto plane_nods = get_tri_pos(*(obta_surfs[obta_id - 1]), *(obta_nods[obta_id - 1]), coll_plane_id);
-
-          point_response(plane_nods.data(), iter->time_,
-                         points_pos.col(vert_id).data(), new_pos.col(vert_id).data(),
-                         velocity.col(vert_id).data(), new_velocity.col(vert_id).data());
-      
-        }
-#pragma omp parallel for
-        for(size_t j = 0; j < dim; ++j){
-          assert(new_pos(2, j) >= 0.3);
-        }
-        
-
-        
-      }//IF COLLIDE
-
-      //TODO:make it a new class
+      COLLISION.Collide(obta_surfs, obta_nods, velocity, points_pos);
+      displace = points_pos - points;      
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
 
 
@@ -374,9 +269,6 @@ int main(int argc, char** argv){
     
       previous_step_Val = dat_str.Val_;
       
-      acce = new_acce;
-      velocity = new_velocity;
-      displace = new_pos - points;
       
       if(i%iters_perframe == 0){
         auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
