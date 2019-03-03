@@ -5,7 +5,7 @@
 #include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
 #include <memory>
 #include <Eigen/Core>
-
+namespace marvel{
 
 class coll_info{
  public:
@@ -19,7 +19,7 @@ class coll_info{
 
 class coll_wrapper{
 
-
+ public:
   coll_wrapper(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
                const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
                const std::shared_ptr<Eigen::MatrixXi>& core_surf_ptr,
@@ -39,5 +39,5 @@ class coll_wrapper{
   const size_t core_num_tris;
 };
 
-
+}//namespace marvel
 #endif

@@ -3,7 +3,7 @@
 
 using namespace std;
 using namespace Eigen;
-
+namespace marvel{
 Matrix3d get_tri_pos(const MatrixXi& tris, const MatrixXd& verts, const size_t& face_id){
   Matrix3d tri;
   for(size_t i = 0; i < 3; ++i){
@@ -122,3 +122,4 @@ int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& o
   
 }
 
+}//namespace marvel

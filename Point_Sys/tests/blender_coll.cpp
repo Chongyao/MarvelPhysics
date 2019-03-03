@@ -24,9 +24,9 @@
 #include "vtk2surf.h"
 
 
-#include "coll_response.h"
-#include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
-
+// #include "coll_response.h"
+// #include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
+#include "coll_wrapper.h"
 
 using namespace marvel;
 using namespace std;
@@ -172,7 +172,7 @@ int main(int argc, char** argv){
 
   size_t num_fake_tris = dim%3 ? dim / 3 + 1: dim / 3 ;
   cout << " face surf tris num is " << num_fake_tris << endl;
-  std::shared_ptr<MatrixXi> fake_surf_ptr(3, num_fake_tris);{
+  std::shared_ptr<MatrixXi> fake_surf_ptr = make_shared<MatrixXi>(3, num_fake_tris);{
     #pragma omp parallel for
     for(size_t i = 0; i < num_fake_tris; ++i){
       (*fake_surf_ptr)(0, i) = i * 3;
