@@ -306,18 +306,12 @@ int main(int argc, char** argv){
         // map<size_t, double> get_time;
         auto coll_comp = [](const coll_info& one, const coll_info& other)->bool{
           if(one.point_id_ != other.point_id_){
-
             return one.point_id_ < other.point_id_;                        
           }
           else if(one.mesh_id_ != other.mesh_id_){
-            cout << "same point" << endl;
-            cout << one.mesh_id_ << " " << other.mesh_id_ << endl;
             return one.mesh_id_ < other.mesh_id_;
             }
-          
           else {
-            cout << "same mesh" << endl;
-            cout << one.face_id_ << " "  << other.face_id_<< endl;
             return(one.face_id_ < other.face_id_);             
           }
 
@@ -346,23 +340,16 @@ int main(int argc, char** argv){
           cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2 << endl;
 
           for(size_t tri_dim = 0; tri_dim < 3; ++tri_dim){
-            // candidates.insert({fake_surf(tri_dim, face_id1), {mesh_id2, face_id2}});
-            // get_time.insert({fake_surf(tri_dim), times[j]});
-            cout << " candidates size is " << candidates.size() << endl;
             coll_info one_info(fake_surf(tri_dim, face_id1), mesh_id2, face_id2, times[j]);
             candidates.insert(one_info);
           }
         }//loop for pairs
 
         for(auto iter = candidates.begin(); iter != candidates.end(); ++iter){
-          // size_t vert_id =  iter->first,
-          //     obta_id = iter->second.first, coll_plane_id = iter->second.second;
           size_t vert_id = iter->point_id_, obta_id = iter->mesh_id_, coll_plane_id = iter->face_id_;
           cout << "vert_id is " << vert_id << " " << obta_id << " " << coll_plane_id << endl;
           auto plane_nods = get_tri_pos(*(obta_surfs[obta_id - 1]), *(obta_nods[obta_id - 1]), coll_plane_id);
-          // point_response(plane_nods.data(), get_time[vert_id],
-          //                points_pos.col(vert_id).data(), new_pos.col(vert_id).data(),
-          //                velocity.col(vert_id).data(), new_velocity.col(vert_id).data());
+
           point_response(plane_nods.data(), iter->time_,
                          points_pos.col(vert_id).data(), new_pos.col(vert_id).data(),
                          velocity.col(vert_id).data(), new_velocity.col(vert_id).data());

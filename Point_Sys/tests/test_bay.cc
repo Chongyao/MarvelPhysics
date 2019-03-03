@@ -4,6 +4,30 @@
 using namespace std;
 using namespace Eigen;
 
+enum axis{x, y, z};
+bool check_inside(const axis& dim1, const axis& dim2, const Eigen::Vector3d& point, const Eigen::MatrixXd& obstacle, const double& area){
+  
+  const double s = ( (point(dim1) - obstacle(dim1, 2)) * (obstacle(dim2, 0) - obstacle(dim2, 2))
+                 - (point(dim2) - obstacle(dim2, 2)) * (obstacle(dim1, 0) - obstacle(dim1, 2)) ) /
+             ( (obstacle(dim1, 1) - obstacle(dim1, 2)) * (obstacle(dim2, 0) - obstacle(dim2, 2))
+           -(obstacle(dim2, 1) - obstacle(dim2, 2)) * (obstacle(dim1, 0) - obstacle(dim1, 2)) );
+  const double t = ( (point(dim1) - obstacle(dim1, 2)) * (obstacle(dim2, 1) - obstacle(dim2, 2))
+             - (point(dim2) - obstacle(dim2, 2)) * (obstacle(dim1, 1) - obstacle(dim1, 2)) ) /
+      ((obstacle(dim1, 0) - obstacle(dim1, 2)) * (obstacle(dim2, 1) - obstacle(dim2, 2))
+       - (obstacle(dim2, 0) - obstacle(dim2, 2)) * (obstacle(dim1, 1) - obstacle(dim1, 2)));
+  
+  cout<< " check through : " << s << " " << t << " " << 1 - s - t << endl;
+  if(s != s){
+    cout << "nan" << endl << dim1 << dim2 << endl << point << endl << endl << obstacle;
+    cout << " jerer" << endl;
+    assert(s == s);
+  }
+
+  // cout << obstacle << endl;
+  return ( s > 0 && s < 1 && t > 0 && t < 1 && (1 - s - t) > 0 && (1 - s - t) < 1 );
+        
+  
+}
 bool check_inside(const Eigen::Vector3d& point, const Eigen::MatrixXd& obstacle, const double& area){
   // double s = (obstacle(1, 0)*obstacle(0, 2) - obstacle(0, 0)*obstacle(1, 2) + (obstacle(1, 2) - obstacle(1, 0))*point(0) + (obstacle(0, 0) - obstacle(0, 2))*point(1)) / (2*area);
   // double t = (obstacle(0, 0)*obstacle(1, 1) - obstacle(1, 0)*obstacle(0, 1) + (obstacle(1, 0) - obstacle(1, 1))*point(0) + (obstacle(0, 1) - obstacle(0, 0))*point(1)) / (2*area);

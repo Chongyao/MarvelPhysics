@@ -20,13 +20,12 @@ inline bool project_dim(const Eigen::Vector3d& normal, axis& dim1, axis& dim2){
         dim2 = (i + 1) % 3;
         ++count;
       }
-      if(count == 1){
+      else if(count == 1){
         dim2 = i;
         ++count;
       }
     }
   }
-
   if(count > 2)
     return false;
   else
@@ -47,9 +46,8 @@ bool check_inside(const axis& dim1, const axis& dim2, const Eigen::Vector3d& poi
   
   cout<< " check through : " << s << " " << t << " " << 1 - s - t << endl;
   if(s != s){
-    cout << "nan" << endl << point << endl << endl << obstacle;
+    cout << "nan" << endl << dim1 << dim2 << endl<< point << endl << endl << obstacle;
     cout << " jerer" << endl;
-    
     assert(s == s);
   }
 
@@ -62,18 +60,20 @@ bool check_inside(const axis& dim1, const axis& dim2, const Eigen::Vector3d& poi
 Vector3d get_cross_point(const Eigen::Vector3d& before, const Eigen::Vector3d& after,
                          const Eigen::Vector3d& norm, const double& d, bool& is_through){
   const Vector3d line = after - before;
+  
+  //may divede zero but OK;
   const double offset = ( -d - norm(0) * before(0) - norm(1) * before(1) - norm(2) * before(2) )
       / ( norm(0) * line(0) + norm(1) * line(1) + norm(2) * line(2) );
   
   // cout << offset << endl;
-  if(offset > 1 || offset < 0){
-    is_through = false;
-    return after;
+  if(offset <= 1 && offset >= 0){
+    is_through = true;
+    return (before + offset * line);
   }
   else{
-    is_through = true;
+    is_through = false;
     // cout << "cross point is " << before + offset * line << endl;
-    return (before + offset * line);
+    return after;
   }
       
 }
