@@ -1,2 +1,2 @@
 add_subdirectory(CollisionDetect-cloth)
-add_subdirectory(CollisionDetect-rigid)
+# add_subdirectory(CollisionDetect-rigid)

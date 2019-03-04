@@ -409,7 +409,7 @@ void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vect
 	static bvh *bvhC = NULL;
 	static front_list fIntra;
 	static std::vector<mesh *> meshes;
-
+        cout << " mesh size "<< meshes.size() << endl;
 	static vector<int> _tri_offset;
 
 	//printf("1\n");
@@ -441,10 +441,6 @@ void body_collide_gpu(vector<mesh_pair> mpair, vector<CollisionDate> bodys, vect
 
 	updateMesh2GPU(meshes);
 
-#ifdef FOR_DEBUG
-	vec3f *pts = meshes[0]->getVtxs() + 3126;
-	printf("XXXXXXXXXXXX3126: %lf, %lf, %lf\n", pts->x, pts->y, pts->z);
-#endif
 
 	count = getSelfCollisionsGPU(buffer, time_buffer);
 	TIMING_END("end checking")

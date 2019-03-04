@@ -224,6 +224,16 @@ int main(int argc, char** argv){
       // cout << "acce is " << endl << acce.block(0, 0, 3, 8) << endl;
 
       points_pos = points + displace;
+
+#if 0
+      if(i == 798)
+        writeOBJ("mesh_old.obj", points_pos.transpose(), fake_surf_ptr->transpose());
+      
+      auto mesh_test_name = "mesh_test_old_" + to_string(i) + ".obj";
+      writeOBJ(mesh_test_name, points_pos.transpose(), fake_surf_ptr->transpose());
+#endif
+
+      
 #pragma omp parallel for
       for(size_t j = 0; j < dim; ++j){
         if(points_pos(2, j) < 0.3)
@@ -242,20 +252,21 @@ int main(int argc, char** argv){
       pos_cons.Hes(displace.data(),dat_str);
          
 
-      
-
-
       for(size_t j = 0; j < dim; ++j){
-        assert(PS.get_mass(j) > 0);
         acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
       }
     
       velocity += delt_t * acce;
       displace += delt_t *velocity;
       points_pos = points + displace;
-
-
-
+#if 0
+      if(i == 798)
+        writeOBJ("mesh_new.obj", points_pos.transpose(), fake_surf_ptr->transpose());
+      
+      mesh_test_name = "mesh_test_new_" + to_string(i) + ".obj";
+      writeOBJ(mesh_test_name, points_pos.transpose(), fake_surf_ptr->transpose());
+      
+#endif
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
 
       COLLISION.Collide(obta_surfs, obta_nods, velocity, points_pos);
@@ -275,11 +286,11 @@ int main(int argc, char** argv){
         auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
         MatrixXd points_now = points + displace;
         point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-        point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
-        point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
-        point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
-        point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
-
+        // point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
+        // point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
+        // point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
+        // point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
+        
         vet_displace = displace.block(0, 0, 3, nods.cols());
         writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
         ++frame_id;
@@ -287,6 +298,9 @@ int main(int argc, char** argv){
       }
 
       dat_str.set_zero();
+
+
+      
     }
   }
   else{
@@ -391,6 +405,7 @@ int main(int argc, char** argv){
        << double(duration.count()) * microseconds::period::num / microseconds::period::den 
        << "秒" << endl;
 
+  return 0;
   //done
 }
 

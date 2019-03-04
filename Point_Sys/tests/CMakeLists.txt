@@ -1,17 +1,22 @@
 add_executable(test_bay test_bay.cc)
-
-
+cuda_add_executable(test_coll_1 test_coll1.cc)
+target_link_libraries(test_coll_1
+  coll_cloth
+  marvel-core
+  PointSys
+  ${Boost_LIBRARIES}
+  )
 
 cuda_add_executable(test_coll test_coll.cc)
 target_link_libraries(test_coll
-  coll_rigid
+  coll_cloth
   marvel-core
   PointSys
   ${Boost_LIBRARIES}
   )
 cuda_add_executable(test_coll_rky test_coll_rky.cc)
 target_link_libraries(test_coll_rky
-  coll_rigid
+  coll_cloth
   marvel-core
   PointSys
   ${Boost_LIBRARIES}

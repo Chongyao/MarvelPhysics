@@ -59,16 +59,17 @@ bool check_inside(const axis& dim1, const axis& dim2, const Eigen::Vector3d& poi
 }
     
 Vector3d get_cross_point(const Eigen::Vector3d& before, const Eigen::Vector3d& after,
-                         const Eigen::Vector3d& norm, const double& d, bool& is_through){
+                         const Eigen::Vector3d& norm, const double& d, bool& is_through, double offset_ = 0){
   const Vector3d line = after - before;
   
   //may divede zero but OK;
   const double offset = ( -d - norm(0) * before(0) - norm(1) * before(1) - norm(2) * before(2) )
       / ( norm(0) * line(0) + norm(1) * line(1) + norm(2) * line(2) );
-  
+
   // cout << offset << endl;
   if(offset <= 1 && offset >= 0){
     is_through = true;
+    offset_ = offset * 0.999;
     return (before + offset * line);
   }
   else{
@@ -149,7 +150,7 @@ bool point_response(const double* const obstacle,
 
 
 
-  // cout << "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
+
 
   
   double area;
@@ -170,21 +171,25 @@ bool point_response(const double* const obstacle,
   
 
   bool is_through= false;
-  auto cross_point = get_cross_point(pre_pos_, next_pos_, plane_normal, para_d, is_through);
+  double offset_ = 0;
+  auto cross_point = get_cross_point(pre_pos_, next_pos_, plane_normal, para_d, is_through, offset_);
   if(!is_through)
     return false;
 
   axis dim1, dim2;
   if(project_dim(plane_normal, dim1, dim2) && check_inside(dim1, dim2, cross_point, obstacle_, area)){
     cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl;
-    res_pos_ = cross_point;
-    res_velo_ = pre_velo_ * (1 - time) + time * next_velo_;
+    cout << "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
+    // res_pos_ = cross_point ;
+    res_pos_ = pre_pos_ + offset_ * (next_pos_ - pre_pos_);
+    // res_velo_ = pre_velo_ * (1 - time) + time * next_velo_;
+    res_velo_ = next_velo_;
     Vector3d projection = res_velo_.dot(plane_normal) * plane_normal;
     res_velo_ = (res_velo_ - projection) * (1 - friction) - projection * res;
 
     next_pos_ = res_pos_;
     next_velo_ = res_velo_;
-    cout << "after  response" <<endl<< res_pos_ << endl ;
+    cout << "after  response" <<endl<< res_pos_ << endl << res_velo_ << endl; ;
     return true;        
   }
   else
