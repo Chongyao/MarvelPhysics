@@ -10,7 +10,7 @@ file(GLOB source *.cc *.c)
 #     set(CU_JACOBI_LIBRARY "")
 # endif(CUDA_FOUND)
 
-add_library(marvel-core SHARED ${source})
+cuda_add_library(marvel-core SHARED ${source})
 target_link_libraries(marvel-core	
   
 )

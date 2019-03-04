@@ -45,7 +45,7 @@ coll_wrapper::coll_wrapper(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& 
 
 int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
                       const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
-                      const MatrixXd& new_core_velo, const MatrixXd& new_core_nods){
+                       MatrixXd& new_core_velo,  MatrixXd& new_core_nods){
   COLL_ptr->Transform_Mesh(core_num_nods, core_num_tris, core_tris_ptr->data(), new_core_nods.data(), pre_core_nods.data(), 0, false);
   COLL_ptr->Collid();
   
@@ -79,8 +79,11 @@ int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& o
         pairs[j][1].get(mesh_id2, face_id2);
         // cout << ">>>>>>>>>>>>>>>>collid<<<<<<<<<<<<<<<"<<endl;
 
+
         if(mesh_id1 == mesh_id2)
           continue;
+        else
+          cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2 << endl;
         if(mesh_id2 == 0){
           mesh_id2 = mesh_id1;
           mesh_id1 = 0;
@@ -90,7 +93,7 @@ int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& o
           face_id1 = exchange;
         }
       }//mesh_id,face_id...
-      cout << mesh_id1 << " " << mesh_id2 << " " << face_id1 << " " << face_id2 << endl;
+
 
       for(size_t tri_dim = 0; tri_dim < 3; ++tri_dim){
         size_t point_id  = (*core_tris_ptr)(tri_dim, face_id1);
@@ -118,6 +121,16 @@ int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& o
     }
 #pragma omp parallel for
     for(size_t j = 0; j < core_num_nods; ++j){
+      if(new_core_nods(2, j) < 0.3){
+        cout << "Vert is " << j << endl;
+        cout << "new pos" << endl;
+        cout << new_core_nods.col(j) << endl ;
+        cout << "old pos" <<endl;
+        cout << pre_core_nods.col(j) << endl ;
+        
+
+        cout << *obta_surfs[0] << endl << endl << *obta_nods[0] << endl;
+      }
       assert(new_core_nods(2, j) >= 0.3);
     }
         
