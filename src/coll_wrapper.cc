@@ -12,7 +12,13 @@ Matrix3d get_tri_pos(const MatrixXi& tris, const MatrixXd& verts, const size_t& 
   }
   return std::move(tri);
 }
-
+coll_wrapper::coll_wrapper(const std::vector<std::shared_ptr<Eigen::MatrixXi>>&obta_surfs,
+               const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
+               const std::shared_ptr<Eigen::MatrixXi>& core_surf_ptr,
+               const double* core_nods, const size_t& num_nods){
+    Map<const MatrixXd> core_nods_map(core_nods, 3, num_nods);
+    coll_wrapper(obta_surfs, obta_nods, core_surf_ptr, core_nods_map);
+  }
 coll_wrapper::coll_wrapper(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
                            const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
                            const std::shared_ptr<Eigen::MatrixXi>& core_surf_ptr,
@@ -40,6 +46,15 @@ coll_wrapper::coll_wrapper(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& 
   }
   
   COLL_ptr->Collid();
+}
+
+
+int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
+                          const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
+                          double* new_core_velo,  double* new_core_nods){
+  Map<MatrixXd> new_core_velo_map(new_core_velo, 3, core_num_nods);
+  Map<MatrixXd> new_core_nods_map(new_core_nods, 3, core_num_nods);
+  return Collide(obta_surfs, obta_nods, new_core_velo_map, new_core_nods_map);
 }
 
 
