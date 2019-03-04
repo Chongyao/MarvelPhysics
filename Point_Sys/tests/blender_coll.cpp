@@ -67,7 +67,7 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>IMPORT MESH<<<<<<<<<<<<<<<<<<" << endl;
   const string mesh_name = blender.get<string>("surf");
-  const string indir = "../input";
+  const string indir = "../input/" + mesh_name;
   const string outdir = "../output/" + mesh_name;
   //mkdir
   boost::filesystem::path outpath(outdir);
@@ -234,12 +234,12 @@ int main(int argc, char** argv){
 #endif
 
       
-#pragma omp parallel for
-      for(size_t j = 0; j < dim; ++j){
-        if(points_pos(2, j) < 0.3)
-          cout << "wrong point  " << j << endl << points_pos.col(j) << endl;
-        assert(points_pos(2, j) >= 0.3);
-      }
+// #pragma omp parallel for
+//       for(size_t j = 0; j < dim; ++j){
+//         if(points_pos(2, j) < 0.3)
+//           cout << "wrong point  " << j << endl << points_pos.col(j) << endl;
+//         assert(points_pos(2, j) >= 0.3);
+//       }
       GE.Val(displace.data(), dat_str);
       GE.Gra(displace.data(), dat_str);
 
