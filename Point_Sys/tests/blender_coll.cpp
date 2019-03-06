@@ -154,6 +154,7 @@ int main(int argc, char** argv){
     filesystem::path obstacles_path(indir + "/" + "obstacles");
     filesystem::directory_iterator end_iter;
     for(filesystem::directory_iterator file_iter(obstacles_path); file_iter != end_iter; ++file_iter){
+      cout << file_iter->path() << endl;
       if(filesystem::is_regular_file(file_iter->path())){
         string one_obstacle = file_iter->path().string();
         MatrixXd one_obta_nods;
