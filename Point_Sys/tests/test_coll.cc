@@ -85,10 +85,10 @@ int main(int argc, char** argv){
   auto COLL_ptr = Collision_zcy::getInstance();
   COLL_ptr->Transform_Pair(0, 1);
   
-
-  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
                              surf.data(), nods.data(), nods.data(), 0);
+  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
+
 
 
   COLL_ptr->Collid();
@@ -123,7 +123,7 @@ int main(int argc, char** argv){
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
-    // assert(pairs.size() == 0);
+    assert(pairs.size() == 0);
     vector<size_t> if_response(num_nods, false);
     map<size_t , pair<size_t, size_t>> candidates;
     map<size_t, double> get_time;
@@ -178,7 +178,7 @@ int main(int argc, char** argv){
   }
 
   
-
+  return 0;
 
   
 }

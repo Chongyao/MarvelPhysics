@@ -2,7 +2,7 @@
 #define COLL_WRAPPER_H
 
 #include "coll_response.h"
-#include <Collision/CollisionDetect-cloth/src/Collision_zcy.h>
+#include <Collision/CollisionDetect-rigid/src/Collision_eigen.h>
 #include <memory>
 #include <Eigen/Core>
 namespace marvel{
