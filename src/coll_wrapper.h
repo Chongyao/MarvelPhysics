@@ -24,18 +24,19 @@ class coll_wrapper{
                const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
                const std::shared_ptr<Eigen::MatrixXi>& core_surf_ptr,
                const Eigen::MatrixXd& core_nods);
-  // coll_wrapper(const std::vector<std::shared_ptr<Eigen::MatrixXi>>&obta_surfs,
-  //              const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
-  //              const std::shared_ptr<Eigen::MatrixXi>& core_surf_ptr,
-  //              const double* core_nods);
+  coll_wrapper(const std::vector<std::shared_ptr<Eigen::MatrixXi>>&obta_surfs,
+               const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
+               const std::shared_ptr<Eigen::MatrixXi>& core_surf_ptr,
+               const double* core_nods, const size_t& num_nods);
+
 
   int Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
               const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
                Eigen::MatrixXd& new_core_velo,  Eigen::MatrixXd& new_core_nods);
 
-  // int Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
-  //             const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
-  //              double* new_core_velo,  double* new_core_nods);  
+  int Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
+              const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
+               double* new_core_velo,  double* new_core_nods);  
   
   
  private:
