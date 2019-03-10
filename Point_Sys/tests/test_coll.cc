@@ -11,8 +11,9 @@
 #include <boost/filesystem.hpp>
 #include <chrono>
 #include <limits>
-#include <Collision/CollisionDetect-rigid/src/Collision_eigen.h>
+
 #include "coll_response.h"
+#include "coll_wrapper.h"
 using namespace marvel;
 using namespace std;
 using namespace Eigen;
@@ -86,8 +87,8 @@ int main(int argc, char** argv){
   COLL_ptr->Transform_Pair(0, 1);
   
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), nods.data(), nods.data(), 0);
-  COLL_ptr->Transform_Mesh(3, 1, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
+                           (unsigned *)surf.data(), nods.data(), nods.data(), 0);
+  COLL_ptr->Transform_Mesh(3, 1, (unsigned*)plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
 
 
 
@@ -116,14 +117,14 @@ int main(int argc, char** argv){
     cout << new_velo << endl;
 
     COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), new_nods.data(), nods.data(), 0);
+                             (unsigned*)surf.data(), new_nods.data(), nods.data(), 0);
     
     
     COLL_ptr->Collid();
     auto pairs = COLL_ptr->getContactPairs();
     auto times = COLL_ptr->getContactTimes();
     cout <<" times size is " <<  times.size() << endl;
-    assert(pairs.size() == 0);
+    // assert(pairs.size() == 0);
     vector<size_t> if_response(num_nods, false);
     map<size_t , pair<size_t, size_t>> candidates;
     map<size_t, double> get_time;

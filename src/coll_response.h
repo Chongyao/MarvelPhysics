@@ -8,7 +8,7 @@ using namespace std;
 //only for triangles
 
 enum axis{x, y, z};
-
+const double w_coll = 1;
 inline bool project_dim(const Eigen::Vector3d& normal, axis& dim1, axis& dim2){
   dim1 = x;
   dim2 = y;
@@ -79,57 +79,9 @@ Vector3d get_cross_point(const Eigen::Vector3d& before, const Eigen::Vector3d& a
   }
       
 }
-#if 0
-int response(const double* const obstacle,
-             const double time, 
-             const double* const pre_pos, const double* const next_pos,
-             const double* const pre_velo, const double* const next_velo,
-             double* const res_pos, double* const res_velo,
-             const double& friction = 0, const double& res = 0.5){
-  Map<const MatrixXd> obstacle_(obstacle, 3, 3);
-  Map<const MatrixXd> pre_pos_(pre_pos, 3, 3);
-  Map<const MatrixXd> next_pos_(next_pos, 3, 3);
-  Map<const MatrixXd> next_velo_(next_velo, 3, 3);
-  Map<const MatrixXd> pre_velo_(pre_velo,3, 3);
-  Map<MatrixXd> res_pos_(res_pos, 3, 3);
-  res_pos_ = next_pos_;
-  Map<MatrixXd> res_velo_(res_velo, 3, 3);
-  res_velo_ = next_velo_;
 
 
 
-  // cout << "before response" << endl << "pre pos : " <<endl << pre_pos_ << endl << "after_pos :" <<endl<< next_pos_ <<endl<< "pre velo :" << endl << pre_velo_ << endl << "after velo : " << endl << next_velo_ << endl;
-  // cout << "beore  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
-  
-  double area;
-  Vector3d plane_normal;{
-    Vector3d one_edge = obstacle_.col(1) - obstacle_.col(0);
-    Vector3d other_edge = obstacle_.col(2) - obstacle_.col(0);
-    plane_normal = one_edge.cross(other_edge);
-    double norm  = plane_normal.norm();
-    area = norm / 2;
-    if(norm > 1e-6)
-      plane_normal = plane_normal / norm;
-    else
-      plane_normal = Vector3d::Zero();
-  }
-  
-  const double para_d = -plane_normal.dot(obstacle_.col(0)) ;
-
-  for(size_t i = 0; i < 3; ++i){
-    bool is_through= false;
-    auto cross_point = get_cross_point(pre_pos_.col(i), next_pos_.col(i), plane_normal, para_d, is_through);
-    if(is_through && check_inside(cross_point, obstacle_, area)){
-      res_pos_.col(i) = cross_point;
-      res_velo_.col(i) = pre_velo_.col(i) * (1 - time) + time * next_velo_.col(i);
-      Vector3d projection = res_velo_.col(i).dot(plane_normal) * plane_normal;
-      res_velo_.col(i) = (res_velo_.col(i) - projection) * (1 - friction) - projection * res;
-    }
-  }
-  // cout << "after  response" <<endl<< res_pos_ << endl << endl << res_velo_ << endl;
-  return 0;
-}
-#endif
 bool point_response(const double* const obstacle,
              const double time, 
              const double* const pre_pos, double* const next_pos,
@@ -145,10 +97,6 @@ bool point_response(const double* const obstacle,
   
   Vector3d res_pos_ = next_pos_;
   Vector3d res_velo_ = next_velo_;
-
-
-
-
 
 
 
@@ -197,6 +145,98 @@ bool point_response(const double* const obstacle,
 
 
 
+}
+
+
+bool imp_response(const double* const obstacle,const double time, 
+                  const double* const pre_pos, double* const next_pos,
+                  double* response_force,
+                  const double& friction = 0, const double& res = 1){
+  Map<const Matrix3d> obstacle_(obstacle);
+  Map<const Vector3d> pre_pos_(pre_pos);
+  Map<Vector3d> next_pos_(next_pos);
+
+  Map<Vector3d> force(response_force);
+
+  double area;
+  //TODO:can pre_store to speed up
+  Vector3d plane_normal;{
+    Vector3d one_edge = obstacle_.col(1) - obstacle_.col(0);
+    Vector3d other_edge = obstacle_.col(2) - obstacle_.col(0);
+    plane_normal = one_edge.cross(other_edge);
+    double norm  = plane_normal.norm();
+    area = norm / 2;
+    if(norm > 1e-6)
+      plane_normal = plane_normal / norm;
+    else
+      plane_normal = Vector3d::Zero();
+  }
+  
+  const double para_d = -plane_normal.dot(obstacle_.col(0)) ;
+  
+  bool is_through= false;
+  double offset_ = 0;
+  auto cross_point = get_cross_point(pre_pos_, next_pos_, plane_normal, para_d, is_through, offset_);
+  if(!is_through)
+    return false;
+
+  axis dim1, dim2;
+  if(project_dim(plane_normal, dim1, dim2) && check_inside(dim1, dim2, cross_point, obstacle_, area)){
+    next_pos_ = cross_point;
+    force = plane_normal * (1 - offset_) * w_coll;
+    return true;
+  }
+  else
+    return false;
+}
+
+bool imp_response2(const double* const obstacle,const double time, 
+                  const double* const pre_pos, double* const next_pos,
+                   const double* const pre_velo, double* const next_velo,
+                  double* response_force,
+                  const double& friction = 0, const double& res = 1){
+  Map<const Matrix3d> obstacle_(obstacle);
+  Map<const Vector3d> pre_pos_(pre_pos);
+  Map<Vector3d> next_velo_(next_velo);
+  Map<const Vector3d> pre_velo_(pre_velo);
+  Map<Vector3d> next_pos_(next_pos);
+
+  Map<Vector3d> force(response_force);
+
+  double area;
+  //TODO:can pre_store to speed up
+  Vector3d plane_normal;{
+    Vector3d one_edge = obstacle_.col(1) - obstacle_.col(0);
+    Vector3d other_edge = obstacle_.col(2) - obstacle_.col(0);
+    plane_normal = one_edge.cross(other_edge);
+    double norm  = plane_normal.norm();
+    area = norm / 2;
+    if(norm > 1e-6)
+      plane_normal = plane_normal / norm;
+    else
+      plane_normal = Vector3d::Zero();
+  }
+  
+  const double para_d = -plane_normal.dot(obstacle_.col(0)) ;
+  
+  bool is_through= false;
+  double offset_ = 0;
+  auto cross_point = get_cross_point(pre_pos_, next_pos_, plane_normal, para_d, is_through, offset_);
+  if(!is_through)
+    return false;
+
+  axis dim1, dim2;
+  if(project_dim(plane_normal, dim1, dim2) && check_inside(dim1, dim2, cross_point, obstacle_, area)){
+    next_pos_ = cross_point;
+    Vector3d projection = next_velo_.dot(plane_normal) * plane_normal;
+    next_velo_ = (next_velo_ - projection) * (1 - friction) - projection * res;
+    
+    force = (next_velo_ -  pre_velo_) * w_coll / (1 - time) * offset_;
+    
+    return true;
+  }
+  else
+    return false;
 }
 
 

@@ -1,6 +1,6 @@
 #ifndef COLL_WRAPPER_H
 #define COLL_WRAPPER_H
-
+#include "Point_Sys/src/data_stream.h"
 #include "coll_response.h"
 #include <Collision/CollisionDetect-rigid/src/Collision_eigen.h>
 #include <memory>
@@ -36,7 +36,18 @@ class coll_wrapper{
 
   int Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
               const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
-               double* new_core_velo,  double* new_core_nods);  
+               double* new_core_velo,  double* new_core_nods);
+
+
+  // int Collide_imp(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
+  //                 const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
+  //                 Eigen::MatrixXd& new_core_nods, energy_dat& dat_str,
+  //                 const Eigen::VectorXd& mass);
+  int Collide_imp(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
+                  const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
+                  Eigen::MatrixXd& new_core_nods, Eigen::MatrixXd& new_core_velo,
+                  energy_dat& dat_str,
+                  const VectorXd& mass);
   
   
  private:

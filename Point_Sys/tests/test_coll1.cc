@@ -63,8 +63,8 @@ int main(int argc, char** argv){
 
   
   COLL_ptr->Transform_Mesh(num_nods, num_surf,
-                             surf.data(), nods_new.data(), nods.data(), 0);
-  COLL_ptr->Transform_Mesh(4, 2, plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
+                           (unsigned*)surf.data(), nods_new.data(), nods.data(), 0);
+  COLL_ptr->Transform_Mesh(4, 2, (unsigned*)plane_surf.data(), plane_nods.data(), plane_nods.data(), 1);
   
   COLL_ptr->Collid();
   auto pairs = COLL_ptr->getContactPairs();
