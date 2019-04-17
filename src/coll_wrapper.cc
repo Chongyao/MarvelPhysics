@@ -67,7 +67,7 @@ coll_wrapper::coll_wrapper(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& 
   COLL_ptr->Collid();
 }
 
-
+#if 0
 int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
                           const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
                           double* new_core_velo,  double* new_core_nods){
@@ -336,7 +336,7 @@ int coll_wrapper::Collide_imp(const std::vector<std::shared_ptr<Eigen::MatrixXi>
 
 }
 
-
+#endif
 
 
 }//namespace marvel
