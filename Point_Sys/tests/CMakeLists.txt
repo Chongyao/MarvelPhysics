@@ -81,9 +81,10 @@ add_executable(test_SparseMatrix test_SparseMatrix.cc)
 
 cuda_add_executable(blender_meshless_coll blender_coll.cpp)
 target_link_libraries(blender_meshless_coll
+  marvel-core
   coll_rigid
   PointSys
-  marvel-core
+
   ${Boost_LIBRARIES}
   )
 

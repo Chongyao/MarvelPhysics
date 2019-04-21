@@ -34,9 +34,9 @@ class coll_wrapper{
               const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
                Eigen::MatrixXd& new_core_velo,  Eigen::MatrixXd& new_core_nods);
 
-  int Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
-              const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
-               double* new_core_velo,  double* new_core_nods);
+  // int Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
+  //             const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
+  //              double* new_core_velo,  double* new_core_nods);
 
 
   // int Collide_imp(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,

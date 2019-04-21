@@ -1,5 +1,5 @@
 file(GLOB header *.h)
-file(GLOB source *.cc *.c)
+file(GLOB source *.cc *.c *.cpp)
 
 # set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 # message("this is cmkae current source dir ${CMAKE_CURRENT_SOURCE_DIR}  ")
@@ -11,6 +11,7 @@ file(GLOB source *.cc *.c)
 # endif(CUDA_FOUND)
 
 cuda_add_library(marvel-core SHARED ${source})
-target_link_libraries(marvel-core	
+# target_link_libraries(marvel-core	
   
-)
+# )
+
