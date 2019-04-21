@@ -141,23 +141,24 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
   Map<const Matrix<double, Dynamic, Dynamic> > _disp(disp, 3, dim_);
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
-    Matrix3d one_du;
+    Matrix3d one_du = Matrix3d::Ones();
     Matrix3d b = Matrix3d::Zero();
     for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
       Vector3d xij = points_.col(friends_[i][iter_j]) - points_.col(i);
       for(size_t k = 0; k < 3; ++k){
-        b.col(k).noalias() += (_disp(k, friends_[i][iter_j]) - _disp(k, i))*weig_[i][iter_j]*xij;
+        b.col(k) += (_disp(k, friends_[i][iter_j]) - _disp(k, i))*weig_[i][iter_j]*xij;
       }
     }
-    
+
+
     //clac inverse of sys_mat by SVD
-    
     Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     
     for(size_t k = 0; k < 3; ++k){
-      one_du.row(k).noalias() = (inv_A * b.col(k));
-      one_du.transposeInPlace();
+      one_du.row(k) = inv_A * b.col(k);
     }
+    one_du.transposeInPlace();
+
 
     Matrix3d F = one_du + Matrix3d::Identity();
     dat_str.save_ele_def_gra(i, F);
@@ -235,7 +236,6 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     //assemble Fe and Fv
     Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     
-
     Matrix3d pre_F = -vol_i_(i)*(2*def_gra*stress + kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
     
     
@@ -276,61 +276,74 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   // TripletList.reserve()
 
   //TODO:consider sysmetric
+
+  omp_set_num_threads(4);  
 #pragma omp parallel for
-  for(size_t i = 0; i < dim_; ++i){  
+  for(size_t i = 0; i < dim_; ++i){
+    // cout << "dim is " << i << endl;
     Matrix3d Kpq = Matrix3d::Zero();
+    Matrix3d Kpq_vol = Matrix3d::Zero();    
     Matrix3d one_line;
-  
-  
+    Matrix3d def_mult_dsig;
+
+    Matrix3d dsigma_duk;
+    Vector3d dp, dq, xij, xik;
+
+
+    
+    Matrix3d left_deri_det_matrix;
+    Matrix3d right_deri;
+    Vector3d next_line;
+    Vector3d next_next_line;
+    
 
     Map<const Matrix3d> stress(dat_str.stress_.col(i).data());
     Map<const Matrix3d> def_gra(dat_str.def_gra_.col(i).data());
     Map<const Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     Map<const Matrix3d> vol_cross(dat_str.vol_cross_.col(i).data());
     double def_gra_det = def_gra.determinant();
+
     
     for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
-      auto xij = points_.col(friends_[i][iter_j]) - points_.col(i);
-      Vector3d dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
+
+      xij = points_.col(friends_[i][iter_j]) - points_.col(i);
+       dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
       
       for(size_t iter_k = 0; iter_k < friends_[i].size(); ++iter_k){
-        auto xik = points_.col(friends_[i][iter_k]) - points_.col(i);
-        Vector3d dq = ( friends_[i][iter_k]== i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik * weig_[i][iter_k];
+        xik = points_.col(friends_[i][iter_k]) - points_.col(i);
+        dq = ( friends_[i][iter_k]== i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik * weig_[i][iter_k];
 
         //elastic hessian
         for(size_t l = 0; l < 3; ++l){
           one_line.setZero(3, 3);
           one_line.row(l) = dq.transpose();
-          Matrix3d dsigma_duk =
-              cons_law(def_gra.row(l).transpose()*(dq.transpose()) + dq*def_gra.row(l), Young_, Poission_);
-          
 
-          Kpq.col(l).noalias() = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
+          dsigma_duk =
+              cons_law(def_gra.row(l).transpose()*(dq.transpose()) + dq*def_gra.row(l), Young_, Poission_);
+          // def_mult_dsig.noalias() = def_gra * dsigma_duk;
+          // def_mult_dsig.row(l) += dq.transpose();
+          Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
+          // Kpq.col(l) = 2*vol_i_(i)*def_mult_dsig*dp;
         }
 
-        
         //volume conserving forcing
         for(size_t l = 0; l < 3; ++l){
-          Matrix3d left_deri_det_matrix = def_gra;
+          left_deri_det_matrix = def_gra;
           left_deri_det_matrix.row(l) = dq.transpose();
           double left_deri = left_deri_det_matrix.determinant();
-          Matrix3d right_deri = Matrix3d::Zero();{
-            Vector3d next_line = def_gra.row( (1 + 1) % 3 ).transpose();
-            Vector3d next_next_line = def_gra.row( (1 + 2) % 3 ).transpose();
-            right_deri.row( (l + 1) % 3 ) = (next_next_line.cross(dq)).transpose();
 
+
+          right_deri = Matrix3d::Zero();{
+            next_line = def_gra.row( (1 + 1) % 3 ).transpose();
+            next_next_line = def_gra.row( (1 + 2) % 3 ).transpose();
+            right_deri.row( (l + 1) % 3 ) = (next_next_line.cross(dq)).transpose();
             right_deri.row( (l + 2) % 3 ) = (dq.cross(next_line)).transpose();
 
           }
 
-
-
-          Kpq.col(l).noalias() += 2 * kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
-
-          
+          Kpq_vol.col(l) =  kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
           
         }
-
 
 
 
@@ -338,12 +351,13 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
         {
         for(size_t m = 0; m < 3; ++m){
           for(size_t n = 0; n < 3; ++n){
-            if (Kpq(m, n) != 0){
+            if (Kpq(m, n))
               dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
-              //              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
-             
               
-            }
+            
+            if(Kpq_vol(m,n))
+              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
+
           }
         }          
         }//push back values
@@ -352,6 +366,8 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
       }//for loop: q friends_[i].size()
     }//for_loop: p friends_[i].size()
   }//for_loop: i dim
+
+  return 0;
 
 }//point_sys::Hessian
 
