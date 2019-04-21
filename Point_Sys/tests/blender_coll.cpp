@@ -352,15 +352,28 @@ int main(int argc, char** argv){
         b_CG = M * (delt_t * velo_t + disp_t - disp_t_plus) + delt_t * delt_t * _F;  
     
       
-        cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
-        ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-        cg.setMaxIterations(3*dim);
-        cg.setTolerance(1e-8);
-        cg.compute(A_CG);
-        disp_t_plus += cg.solve(b_CG);
+        // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
+        // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
+        // cg.setMaxIterations(3*dim);
+        // cg.setTolerance(1e-8);
+        // cg.compute(A_CG);
+        // disp_t_plus += cg.solve(b_CG);
+        // dat_str.set_zero();
+        // cout << "#iterations:     " << cg.iterations() << endl;
+        // cout << "estimated error: " << cg.error()      << endl;
+        
+        cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+        SimplicialLLT<SparseMatrix<double>> llt;
+        llt.compute(A_CG);
+        VectorXd all_one = VectorXd::Ones(b_CG.size());
+        while(llt.info() != Eigen::Success){
+          cout <<"lltinfo "<< llt.info() << endl;
+          A_CG += all_one.asDiagonal();
+          llt.compute(A_CG);
+          all_one *= 2;
+        }
+        disp_t_plus += llt.solve(b_CG);
         dat_str.set_zero();
-        cout << "#iterations:     " << cg.iterations() << endl;
-        cout << "estimated error: " << cg.error()      << endl;
 
       }
     
