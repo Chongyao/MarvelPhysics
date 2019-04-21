@@ -123,109 +123,96 @@ int main(int argc, char** argv){
   gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
   
   
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
+  double delt_t = pt.get<double>("time_step");
+  momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
+  
+
+
+
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
   energy_dat dat_str (dim);
 
-  double delt_t = pt.get<double>("time_step");
+
   MatrixXd displace;
-  MatrixXd velocity;
-  MatrixXd acce;
-  MatrixXd new_acce;
-  MatrixXd gra;
   MatrixXd vet_displace;
   displace.setZero(3, dim);
-  velocity.setZero(3, dim);
-  acce.setZero(3, dim);
-  gra.setZero(3, dim);
-  new_acce.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
   PS.pre_compute(dat_str);
   size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
 
-  SparseMatrix<double> A_CG(dim * 3, dim * 3);
-  VectorXd b_CG(dim * 3);
-  SparseMatrix<double> M = PS.get_Mass_Matrix();
 
-  MatrixXd displace_dyna(3, dim - cons.size());
+  double d1dtdt = 1 / delt_t /delt_t, d1dt = 1 / delt_t;
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
-    cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
-    // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
+    // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
 
     //newtown iter
-    auto displace_plus = displace;
-    Map<VectorXd> disp_t_plus(displace_plus.data(), 3*dim);
-    Map<VectorXd> disp_t(displace.data(), 3*dim);
-    Map<VectorXd> velo_t(velocity.data(), 3*dim);
-    Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
-
+    Map<VectorXd> displace_plus(displace.data(), 3*dim);
 
     for(size_t newton_i = 0; newton_i < 20; ++newton_i){
-      cout << "newton iter " << newton_i << endl;
+      cout << "newton iter is "<< newton_i << endl;
+      MO.Val(displace_plus.data(), dat_str);
+      MO.Gra(displace_plus.data(), dat_str);
+      MO.Hes(displace_plus.data(), dat_str);
       
-      
-
       PS.Val(displace_plus.data(), dat_str);
       PS.Gra(displace_plus.data(), dat_str);
       PS.Hessian(displace_plus.data(), dat_str);
 
+
       GE.Val(displace_plus.data(), dat_str);
       GE.Gra(displace_plus.data(), dat_str);
 
-      // pos_cons.Gra(displace_plus.data(), dat_str);
-      // pos_cons.Hes(displace_plus.data(),dat_str);
+      pos_cons.Gra(displace_plus.data(), dat_str);
+      pos_cons.Hes(displace_plus.data(),dat_str);
 
 
-      //test  convergence
-      auto res = M * ((disp_t_plus - disp_t) / delt_t - velo_t) - delt_t * _F;
-      // cout << res.head(20);
+      Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
       double res_value = res.array().square().sum();
       if(res_value < 1e-10){
         cout << "[INFO]Newton res " <<endl << res_value << endl;;
         cout << "[INFO]>>>>>>>>>>>>>>>>>>>ALL Energy Val<<<<<<<<<<<<<<<<<<" << endl;
         cout << dat_str.Val_ << endl;
-        cout << "[INFO]>>>>>>>>>>>>>>>>>>>GRA<<<<<<<<<<<<<<<<<<" << endl;
-        cout << dat_str.gra_.array().square().sum() << endl;
-        cout << endl<<endl;
         dat_str.set_zero();
         break;
       }
       
       
-
-    
       //implicit time integral
-    
-      A_CG.setZero();
       dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-    
-    
-      A_CG = M + delt_t*delt_t*dat_str.hes_;
-      b_CG = M * (delt_t * velo_t + disp_t - disp_t_plus) + delt_t * delt_t * _F;  
-    
              
-      cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
       SimplicialLLT<SparseMatrix<double>> llt;
-      llt.compute(A_CG);
-      VectorXd all_one = VectorXd::Ones(b_CG.size());
+      llt.compute(dat_str.hes_);
+      VectorXd all_one = VectorXd::Ones(3 * dim);
       while(llt.info() != Eigen::Success){
         cout <<"lltinfo "<< llt.info() << endl;
-        A_CG += all_one.asDiagonal();
-        llt.compute(A_CG);
+        dat_str.hes_ += all_one.asDiagonal();
+        llt.compute(dat_str.hes_);
         all_one *= 2;
       }
-      disp_t_plus += llt.solve(b_CG);
-      dat_str.set_zero();
-      cout<< "after gradient norm " << dat_str.gra_.norm() << endl; 
+      displace_plus += llt.solve(-res);
 
+
+      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
+      // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
+      // cg.setMaxIterations(3*dim);
+      // cg.setTolerance(1e-8);
+      // cg.compute(A_CG);
+      // disp_t_plus += cg.solve(b_CG);
+
+
+      
+      dat_str.set_zero();
     }
     
+    MO.update_location_and_velocity(displace_plus.data());
 
-    velocity = (displace_plus - displace)/delt_t;
-    displace = displace_plus;
 
     auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
     auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";

@@ -236,7 +236,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     //assemble Fe and Fv
     Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     
-    Matrix3d pre_F = -vol_i_(i)*(2*def_gra*stress + kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
+    Matrix3d pre_F = vol_i_(i)*(2*def_gra*stress + kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
     
     
     //add to gra_
@@ -247,8 +247,8 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
       double w = weig_[i][iter_j];
       xij = (points_.col(friends_[i][iter_j]) - points_.col(i));
-      di.noalias() += -w*xij;
-      force_j.noalias() = w*pre_F*xij;
+      di += -w*xij;
+      force_j = w*pre_F*xij;
  #pragma omp critical
       {
       dat_str.save_ele_gra(friends_[i][iter_j], force_j);      
@@ -256,7 +256,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
 
     }
     
-    force_i.noalias() = pre_F*di;
+    force_i = pre_F*di;
 #pragma omp critical 
     {
     dat_str.save_ele_gra(i, force_i);      

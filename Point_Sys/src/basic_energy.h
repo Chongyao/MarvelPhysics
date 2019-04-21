@@ -6,6 +6,7 @@ namespace marvel{
 class position_constraint{
  public:
   position_constraint(const double &w, const std::vector<size_t> &cons, const size_t dim);
+  int Val(const double *disp, energy_dat &dat_str);  
   int Gra(const double *disp, energy_dat &dat_str);
   int Hes(const double *disp, energy_dat &dat_str);
  private:
@@ -41,6 +42,27 @@ class collision{
   const double ground_pos_;
   const size_t num_surf_point_;
   const size_t dim_;
+  
+};
+
+
+class momentum{
+ public:
+  momentum(const size_t &dim, const Eigen::SparseMatrix<double>& mass_sparse, const double& dt);
+  int Val(const double *disp, energy_dat &dat_str) const ;
+  int Gra(const double *disp, energy_dat &dat_str) const ;
+  int Hes(const double *disp, energy_dat &dat_str) const ;
+  int update_location_and_velocity(const double *new_dispk_ptr);
+
+ private:
+  Eigen::VectorXd vk_, dispk_;
+  const size_t dim_;
+  const Eigen::SparseMatrix<double>& mass_sparse_;
+  const double dt_;
+  const double d1dt_;
+  const double d1dtdt_;
+
+  
   
 };
 

@@ -5,12 +5,53 @@ using namespace std;
 using namespace Eigen;
 
 namespace marvel{
+/******************************************momentum*******************************/
+momentum::momentum(const size_t &dim, const Eigen::SparseMatrix<double>& mass_sparse, const double& dt):mass_sparse_(mass_sparse), dim_(dim), dispk_(VectorXd::Zero(3 * dim)), vk_(VectorXd::Zero(3 *dim)), dt_(dt), d1dt_(1 / dt), d1dtdt_(1 / dt /dt){}
+int momentum::Val(const double *disp, energy_dat &dat_str) const{
+  Map<const VectorXd> _disp(disp, 3 * dim_);
+  const VectorXd acce = (_disp  - dispk_) * d1dt_ - vk_;
+  dat_str.Val_ += 0.5 * acce.dot(mass_sparse_ * acce);
+  return 0;
+}
+
+int momentum::Gra(const double *disp, energy_dat &dat_str) const{
+  Map<const VectorXd> _disp(disp, 3 * dim_);
+  Map<VectorXd> gra(dat_str.gra_.data(), 3 * dim_);
+  const VectorXd acce = (_disp  - dispk_) * d1dtdt_  - vk_ * d1dt_;
+  gra += mass_sparse_ * acce;
+
+  return 0;
+}
+
+int momentum::Hes(const double *disp, energy_dat &dat_str) const{
+  for(size_t i = 0; i < 3 *dim_; ++i){
+    dat_str.hes_trips.push_back(Triplet<double>(i, i, d1dtdt_ * mass_sparse_.coeff(i, i)));
+  }
+  return 0;
+}
+
+int momentum::update_location_and_velocity(const double *new_dispk_ptr) {
+  Map<const VectorXd> new_dispk(new_dispk_ptr, 3 * dim_);
+  vk_ = (new_dispk - dispk_) * d1dt_;
+  dispk_ = new_dispk;
+  return 0;
+}
+
+
+
+/******************************************momentum*******************************/
 /******************************************position_constraint*******************************/
 position_constraint::position_constraint(const double &w, const vector<size_t> &cons, const size_t dim):w_(w), cons_(cons), dim_(dim){}
+int position_constraint::Val(const double *disp, energy_dat &dat_str){
+  Map<const MatrixXd> _disp(disp, 3, dim_);
+  for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c)
+    dat_str.Val_ += w_ * _disp.col(*iter_c).dot(_disp.col(*iter_c));
+  return 0;
+}
 int position_constraint::Gra(const double *disp, energy_dat &dat_str){
   Map<const MatrixXd> _disp(disp, 3, dim_);
   for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c)
-    dat_str.save_ele_gra(*iter_c, -2.0 * w_ * _disp.col(*iter_c));
+    dat_str.save_ele_gra(*iter_c, 2.0 * w_ * _disp.col(*iter_c));
   return 0;
 }
 
@@ -42,7 +83,7 @@ int gravity_energy::Gra(const double *disp, energy_dat &dat_str){
   g.setZero(3, dim_);
   //do not add mass!!!1
   // g.row(which_axis) = VectorXd::Constant(dim_, -gravity_ * w_g_).transpose();
-  g.row(which_axis) = VectorXd::Constant(dim_, -gravity_ * w_g_).cwiseProduct(mass_).transpose();
+  g.row(which_axis) = VectorXd::Constant(dim_, gravity_ * w_g_).cwiseProduct(mass_).transpose();
   Map<MatrixXd> Gra(dat_str.gra_.data(), 3, dim_);
   Gra += g;
   return 0;
@@ -86,7 +127,7 @@ int collision::Gra(const double *init_points, const double *disp, energy_dat &da
     if (( position_now - ground_pos_) < 0){
 
 
-      dat_str.gra_(which_axis, i) += -2 * w_coll_ * (position_now - ground_pos_);  
+      dat_str.gra_(which_axis, i) += 2 * w_coll_ * (position_now - ground_pos_);  
     }
 
   }
