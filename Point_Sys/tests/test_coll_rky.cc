@@ -44,7 +44,7 @@ int main(int argc, char** argv){
   vector<double> cube_nods_new = {
     0.510297,0.441397,0.520889,
     0.0849433,0.752562,0.300636,
-    -0.873071,0.441254,0.29936
+    -0.873071,0.441254,0.3 - 1e-15
   };
   vector<double> cube_nods_pre = cube_nods;
   // const auto num_surf = 12;

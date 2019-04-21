@@ -1,3 +1,10 @@
+
+#define EIGEN_USE_BLAS
+#define NDEBUG
+// #define EIGEN_USE_LAPACKE
+// #define EIGEN_USE_LAPACKE_STRICT
+
+
 #include <string>
 #include <iostream>
 #include <chrono>
@@ -224,23 +231,9 @@ int main(int argc, char** argv){
       // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 7) << endl;
       // cout << "acce is " << endl << acce.block(0, 0, 3, 8) << endl;
 
-      points_pos = points + displace;
-
-#if 0
-      if(i == 798)
-        writeOBJ("mesh_old.obj", points_pos.transpose(), fake_surf_ptr->transpose());
-      
-      auto mesh_test_name = "mesh_test_old_" + to_string(i) + ".obj";
-      writeOBJ(mesh_test_name, points_pos.transpose(), fake_surf_ptr->transpose());
-#endif
 
       
-// #pragma omp parallel for
-//       for(size_t j = 0; j < dim; ++j){
-//         if(points_pos(2, j) < 0.3)
-//           cout << "wrong point  " << j << endl << points_pos.col(j) << endl;
-//         assert(points_pos(2, j) >= 0.3);
-//       }
+
       GE.Val(displace.data(), dat_str);
       GE.Gra(displace.data(), dat_str);
 
@@ -252,28 +245,20 @@ int main(int argc, char** argv){
       pos_cons.Gra(displace.data(), dat_str);
       pos_cons.Hes(displace.data(),dat_str);
          
-
+     #pragma omp parallel for
       for(size_t j = 0; j < dim; ++j){
         acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
       }
     
-      velocity += delt_t * acce;
-      displace += delt_t *velocity;
+      velocity.noalias() += delt_t * acce;
+      displace.noalias() += delt_t *velocity;
       points_pos = points + displace;
-#if 0
-      if(i == 798)
-        writeOBJ("mesh_new.obj", points_pos.transpose(), fake_surf_ptr->transpose());
-      
-      mesh_test_name = "mesh_test_new_" + to_string(i) + ".obj";
-      writeOBJ(mesh_test_name, points_pos.transpose(), fake_surf_ptr->transpose());
-      
-#endif
+
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
 
       COLLISION.Collide(obta_surfs, obta_nods, velocity, points_pos);
       displace = points_pos - points;      
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
-
 
       
       if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
@@ -287,10 +272,6 @@ int main(int argc, char** argv){
         auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
         MatrixXd points_now = points + displace;
         point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-        // point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
-        // point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
-        // point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
-        // point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
         
         vet_displace = displace.block(0, 0, 3, nods.cols());
         writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
@@ -313,19 +294,24 @@ int main(int argc, char** argv){
       cout << "iter is "<<endl<< i << endl;
       cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
       // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
-
+      
       //newtown iter
       auto displace_plus = displace;
       Map<VectorXd> disp_t_plus(displace_plus.data(), 3*dim);
       Map<VectorXd> disp_t(displace.data(), 3*dim);
       Map<VectorXd> velo_t(velocity.data(), 3*dim);
       Map<VectorXd> _F(dat_str.gra_.data(), 3*dim);
-
-
+      
+      auto velocity_now = velocity;
       for(size_t newton_i = 0; newton_i < 999; ++newton_i){
         cout << "newton iter " << newton_i << endl;
-      
-
+        
+        
+        // points_pos = points + displace_plus;
+        // velocity_now = (displace_plus - displace) / delt_t;
+        // //TODO: Mass Vector can be stroed before
+        // COLLISION.Collide_imp(obta_surfs, obta_nods, points_pos,velocity_now, dat_str, PS.get_Mass_VectorXd());
+        // cout << dat_str.gra_ << endl;
     
         PS.Val(displace_plus.data(), dat_str);
         PS.Gra(displace_plus.data(), dat_str);
@@ -341,7 +327,7 @@ int main(int argc, char** argv){
         // COLL.Gra(points.data(), displace_plus.data(), dat_str, PS.get_Mass_VectorXd());
         // COLL.Hes(displace_plus.data(), dat_str);
               
-
+        
         //test  convergence
         auto res = M * ((disp_t_plus - disp_t) / delt_t - velo_t) - delt_t * _F;
 
@@ -356,9 +342,6 @@ int main(int argc, char** argv){
           break;
         }
       
-      
-
-    
         //implicit time integral
     
         A_CG.setZero();
@@ -369,14 +352,28 @@ int main(int argc, char** argv){
         b_CG = M * (delt_t * velo_t + disp_t - disp_t_plus) + delt_t * delt_t * _F;  
     
       
-        cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;          ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-        cg.setMaxIterations(3*dim);
-        cg.setTolerance(1e-8);
-        cg.compute(A_CG);
-        disp_t_plus += cg.solve(b_CG);
+        // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
+        // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
+        // cg.setMaxIterations(3*dim);
+        // cg.setTolerance(1e-8);
+        // cg.compute(A_CG);
+        // disp_t_plus += cg.solve(b_CG);
+        // dat_str.set_zero();
+        // cout << "#iterations:     " << cg.iterations() << endl;
+        // cout << "estimated error: " << cg.error()      << endl;
+        
+        cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+        SimplicialLLT<SparseMatrix<double>> llt;
+        llt.compute(A_CG);
+        VectorXd all_one = VectorXd::Ones(b_CG.size());
+        while(llt.info() != Eigen::Success){
+          cout <<"lltinfo "<< llt.info() << endl;
+          A_CG += all_one.asDiagonal();
+          llt.compute(A_CG);
+          all_one *= 2;
+        }
+        disp_t_plus += llt.solve(b_CG);
         dat_str.set_zero();
-        cout << "#iterations:     " << cg.iterations() << endl;
-        cout << "estimated error: " << cg.error()      << endl;
 
       }
     
@@ -388,10 +385,6 @@ int main(int argc, char** argv){
         auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
         MatrixXd points_now = points + displace;
         point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-        point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
-        point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
-        point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
-        point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
 
         vet_displace = displace.block(0, 0, 3, nods.cols());
         writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());

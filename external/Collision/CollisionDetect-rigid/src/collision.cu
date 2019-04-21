@@ -131,7 +131,7 @@ void updateMesh2GPU(void *nodes,void *prenode)
 	cudaMemcpy(theCloth._dx0, prenode, sizeof(REAL3)*theCloth.numVert, cudaMemcpyHostToDevice);
 	cudaMemcpy(theCloth._dx, nodes, sizeof(REAL3)*theCloth.numVert, cudaMemcpyHostToDevice);
 	
-	theCloth.computeWSdata(0, false);
+	theCloth.computeWSdata(0, true);
 }
 
 //=======================================================
@@ -886,7 +886,7 @@ void g_mesh::computeWSdata(REAL thickness, bool ccd)
 		int num = numFace;
 		BLK_PAR(num);
 		kernel_face_ws << <B, T >> > (
-			_df, _dx, _dx, _dfBx, ccd, thickness, num);
+			_df, _dx, _dx0, _dfBx, ccd, thickness, num);
 		getLastCudaError("kernel_face_ws");
 	}
 }

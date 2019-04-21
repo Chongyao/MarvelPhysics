@@ -9,7 +9,7 @@ target_link_libraries(test_coll_1
 
 cuda_add_executable(test_coll test_coll.cc)
 target_link_libraries(test_coll
-  coll_cloth
+  coll_rigid
   marvel-core
   PointSys
   ${Boost_LIBRARIES}
@@ -81,7 +81,7 @@ add_executable(test_SparseMatrix test_SparseMatrix.cc)
 
 cuda_add_executable(blender_meshless_coll blender_coll.cpp)
 target_link_libraries(blender_meshless_coll
-  coll_cloth
+  coll_rigid
   PointSys
   marvel-core
   ${Boost_LIBRARIES}

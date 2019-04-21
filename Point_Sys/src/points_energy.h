@@ -28,7 +28,7 @@ class point_sys{
   double get_mass(const size_t &i) const;
   int Hessian(const double*disp, energy_dat &dat_str);
   const Eigen::SparseMatrix<double>& get_Mass_Matrix();
-  const Eigen::VectorXd& get_Mass_VectorXd();
+  const Eigen::VectorXd get_Mass_VectorXd();
   // int Gra(const double *x, double *gra) const;
   // int Val(const double *x, double *val) const;
   // int Gra(const double *x, double *gra) const;

@@ -215,7 +215,7 @@ void bvh::construct(std::vector<mesh*> &ms,int m_id)
 	s_current = _nodes + 3;
 
 	if (_num == 1)
-		_nodes[0]._child = 0;
+		_nodes[0]._child = tri_offset;
 	else {
 		_nodes[0]._child = -1;
 
