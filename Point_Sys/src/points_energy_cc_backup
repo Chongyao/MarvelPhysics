@@ -8,6 +8,7 @@
 #include <Eigen/LU>
 #include <Eigen/Geometry>
 
+#include <unordered_map>
 using namespace std;
 using namespace Eigen;
 
@@ -17,6 +18,19 @@ using namespace Eigen;
 
 
 namespace marvel{
+
+struct pair_hash{
+  template<class T1, class T2>
+  size_t operator () (const std::pair<T1,T2> &p) const {
+        auto h1 = std::hash<T1>{}(p.first);
+        auto h2 = std::hash<T2>{}(p.second);
+        // Mainly for demonstration purposes, i.e. works but is overly simple
+        // In the real world, use sth. like boost.hash_combine
+        return h1 ^ h2;  
+    }
+  
+};
+
 
 Matrix3d safe_inv(const MatrixXd& sys_mat){
   //TODO: use better solver considering the sysmertic
@@ -270,10 +284,12 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
 
 int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
-  vector<Triplet<double>> TripletList;
+  // vector<Triplet<double>> TripletList;
+  
+  // unordered_map<pair<size_t,size_t>, double, pair_hash> mytriplet;
 
   //TODO: estimate entries
-  // TripletList.reserve()
+  dat_str.hes_trips.reserve(99999);
 
   //TODO:consider sysmetric
 
@@ -305,7 +321,10 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
     vector<Matrix3d> ela_col(3);
     vector<Matrix3d> vol_col(3);
+    
+    
 
+      
     for(size_t iter_k = 0; iter_k < friends_[i].size(); ++iter_k){
       xik = points_.col(friends_[i][iter_k]) - points_.col(i);
       dq = ( friends_[i][iter_k]== i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik * weig_[i][iter_k];
@@ -384,19 +403,15 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
       }//for loop: p friends_[i].size()
     }//for_loop: q friends_[i].size()
-
-
-    
   }//for_loop: i dim
-
+  // cout << "complete ela hessian" << endl;
   return 0;
 
 }//point_sys::Hessian
 
-
 int point_sys::calc_Mass_matrix(){
   vector<Triplet<double>> mass_triplets(3 * dim_);
-// #pragma omp parallel for
+  // #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < 3; ++j){
       mass_triplets[i*3 + j] = Triplet<double>(i * 3 + j, i * 3 + j, mass_i_(i));

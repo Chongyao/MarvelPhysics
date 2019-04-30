@@ -120,8 +120,7 @@ int main(int argc, char** argv){
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
-  const auto mass_vector = PS.get_Mass_VectorXd();
-  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, mass_vector, 'y');
+  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
   
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
@@ -129,9 +128,8 @@ int main(int argc, char** argv){
   momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
   
 
-  
-  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>Collision<<<<<<<<<<<<<<<<<<" << endl;
-  // collision COLL(pt.get<double>("w_coll"), 'y', pt.get<double>("coll_pos"), static_cast<size_t>(nods.cols()), dim);
+
+
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
@@ -143,16 +141,16 @@ int main(int argc, char** argv){
   displace.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
+
   PS.pre_compute(dat_str);
   size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
   VectorXd solution = VectorXd::Zero(3 * dim);
   VectorXd displace_search = VectorXd::Zero(3 * dim);
+
   double d1dtdt = 1 / delt_t /delt_t, d1dt = 1 / delt_t;
+
   Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
-
-
   MatrixXd points_now;
-  
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
@@ -160,10 +158,10 @@ int main(int argc, char** argv){
 
     //newtown iter
     Map<VectorXd> displace_plus(displace.data(), 3*dim);
+
     for(size_t newton_i = 0; newton_i < 20; ++newton_i){
       dat_str.set_zero();
-
-      
+      cout << "newton iter is "<< newton_i << endl;
       
       MO.Val(displace_plus.data(), dat_str);
       MO.Gra(displace_plus.data(), dat_str);
@@ -173,6 +171,7 @@ int main(int argc, char** argv){
       PS.Gra(displace_plus.data(), dat_str);
       PS.Hessian(displace_plus.data(), dat_str);
 
+
       GE.Val(displace_plus.data(), dat_str);
       GE.Gra(displace_plus.data(), dat_str);
       
@@ -180,15 +179,14 @@ int main(int argc, char** argv){
       pos_cons.Gra(displace_plus.data(), dat_str);
       pos_cons.Hes(displace_plus.data(),dat_str);
 
-      // COLL.Val(points.data(), displace_plus.data(), dat_str);
-      // COLL.Gra(points.data(), displace_plus.data(), dat_str, mass_vector);
-      // COLL.Hes(points.data(), displace_plus.data(), dat_str);
 
+      
+      double res_value = res.array().square().sum();
+      cout << "[INFO]Newton res "  << res_value << endl;
+      cout << "[INFO]ALL Energy " <<dat_str.Val_ << endl;
 
-      const double res_value = res.array().square().sum();
-      cout << "[INFO]Newton res " <<endl << res_value << endl;
-      cout << "[INFO] ALL Energy: " << dat_str.Val_ << endl;
-      if(res_value < 1e-2){
+      if(fabs(res_value) < 1e-2){
+        dat_str.set_zero();
         break;
       }
       
@@ -206,6 +204,7 @@ int main(int argc, char** argv){
         llt.compute(dat_str.hes_);
         all_one *= 2;
       }
+      solution += llt.solve(-res);
 
 
       // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
@@ -215,52 +214,87 @@ int main(int argc, char** argv){
       // cg.compute(A_CG);
       // disp_t_plus += cg.solve(b_CG);
 
-
-      solution = llt.solve(-res);
-
-
+      
       // {//Line search
-      //   const double c = 1e-2;
-      //   double alpha = 1 / 0.5;
+      //   const double c1 = 1e-4, c2 = 0.9;
+      //   double alpha_before = 0, alpha_now = 0.1, alpha_star = 0;
 
-      //   double Val_init = dat_str.Val_, down = res.dot(solution), Val_upbound, Val_func;
+      //   double Val_init = dat_str.Val_, down = res.dot(solution), Val_upbound, Val_now, Val_before = dat_str.Val_;
       //   cout << "down is "<< down << endl;
+      //   size_t search_step = 1;
 
-      //   do{
-      //     alpha *= 0.5;
-      //     Val_upbound = Val_init - c * alpha * down;
-      //     displace_search = displace_plus + alpha * solution;
-      //     dat_str.Val_ = 0;
+      //   const auto zoom = [&](const double& alpha_low, const double& alpha_high)->double {
+      //     double alpha_tri = 0.5 * (alpha_low + alpha_high);
+      //     dat_str.set_zero();
           
       //     MO.Val(displace_search.data(), dat_str);
       //     PS.Val(displace_search.data(), dat_str);
       //     GE.Val(displace_search.data(), dat_str);
       //     pos_cons.Val(displace_search.data(), dat_str);
+      //     MO.Gra(displace_search.data(), dat_str);
+      //     PS.Gra(displace_search.data(), dat_str);
+      //     GE.Gra(displace_search.data(), dat_str);
+      //     pos_cons.Gra(displace_search.data(), dat_str);
+          
+      //     if
+      //   };
 
-      //     Val_func = dat_str.Val_;
-      //     cout << "Val_func is " << Val_func << " UP bound is " << Val_upbound << endl;
+      //   do{
+      //     dat_str.set_zero();
+      //     displace_search = displace_plus + alpha_now * solution;
 
-      //   }while(Val_func > Val_upbound);
+      //     //evaluate val(alpha i)
+      //     MO.Val(displace_search.data(), dat_str);
+      //     PS.Val(displace_search.data(), dat_str);
+      //     GE.Val(displace_search.data(), dat_str);
+      //     pos_cons.Val(displace_search.data(), dat_str);
+      //     Val_now = dat_str.Val_;
+
+      //     Val_upbound = Val_init + c1 * alpha_now * down;
+      //     if(Val_now > Val_upbound || (Val_now >= Val_before && search_step > 1)){
+      //       alpha_star = zoom(alpha_before, alpha_now);
+      //       break;
+      //     }
+          
+      //     dat_str.set_zero();
+      //     MO.Gra(displace_search.data(), dat_str);
+      //     PS.Gra(displace_search.data(), dat_str);
+      //     GE.Gra(displace_search.data(), dat_str);
+      //     pos_cons.Gra(displace_search.data(), dat_str);
+      //     double gra_norm = sqrt(res.array().square().sum());
+      //     if(gra_norm <= -c2 * down){
+      //       alpha_star = alpha_now;
+      //       break;
+      //     }
+      //     if(down >= 0){
+      //       alpha_star = zoom(alpha_now, alpha_before);
+      //       break;
+      //     }
+      //     alpha_before = alpha_now;
+      //     alpha_now = 0.5 * (alpha_now + 1);
+      //     ++search_step;
+      //   }while(1);
+        
       //   displace_plus = displace_search;
           
       // }
-      
-      displace_plus += solution;
 
+      displace_plus += solution;
+      
 
     }
     
     MO.update_location_and_velocity(displace_plus.data());
 
 
-    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
+    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
     auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
 
-    points_now = points + displace;
-    vet_displace = displace.block(0, 0, 3, nods.cols());
+    MatrixXd points_now = points + displace;
+
     point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-    writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
-    
+
+
 
 
   }
