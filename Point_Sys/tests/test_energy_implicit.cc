@@ -141,11 +141,16 @@ int main(int argc, char** argv){
   displace.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
+
   PS.pre_compute(dat_str);
   size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
-
+  VectorXd solution = VectorXd::Zero(3 * dim);
+  VectorXd displace_search = VectorXd::Zero(3 * dim);
 
   double d1dtdt = 1 / delt_t /delt_t, d1dt = 1 / delt_t;
+
+  Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
+  MatrixXd points_now;
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     cout << "iter is "<<endl<< i << endl;
@@ -155,7 +160,9 @@ int main(int argc, char** argv){
     Map<VectorXd> displace_plus(displace.data(), 3*dim);
 
     for(size_t newton_i = 0; newton_i < 20; ++newton_i){
+      dat_str.set_zero();
       cout << "newton iter is "<< newton_i << endl;
+      
       MO.Val(displace_plus.data(), dat_str);
       MO.Gra(displace_plus.data(), dat_str);
       MO.Hes(displace_plus.data(), dat_str);
@@ -172,7 +179,7 @@ int main(int argc, char** argv){
       pos_cons.Hes(displace_plus.data(),dat_str);
 
 
-      Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
+
       double res_value = res.array().square().sum();
       if(res_value < 1e-10){
         cout << "[INFO]Newton res " <<endl << res_value << endl;;
@@ -196,7 +203,7 @@ int main(int argc, char** argv){
         llt.compute(dat_str.hes_);
         all_one *= 2;
       }
-      displace_plus += llt.solve(-res);
+      solution += llt.solve(-res);
 
 
       // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
@@ -206,9 +213,36 @@ int main(int argc, char** argv){
       // cg.compute(A_CG);
       // disp_t_plus += cg.solve(b_CG);
 
-
       
-      dat_str.set_zero();
+      // {//Line search
+      //   const double c = 1e-2;
+      //   double alpha = 1 / 0.5;
+
+      //   double Val_init = dat_str.Val_, down = res.dot(solution), Val_upbound, Val_func;
+      //   cout << "down is "<< down << endl;
+
+      //   do{
+      //     alpha *= 0.5;
+      //     Val_upbound = Val_init - c * alpha * down;
+      //     displace_search = displace_plus + alpha * solution;
+      //     dat_str.Val_ = 0;
+          
+      //     MO.Val(displace_search.data(), dat_str);
+      //     PS.Val(displace_search.data(), dat_str);
+      //     GE.Val(displace_search.data(), dat_str);
+      //     pos_cons.Val(displace_search.data(), dat_str);
+
+      //     Val_func = dat_str.Val_;
+      //     cout << "Val_func is " << Val_func << " UP bound is " << Val_upbound << endl;
+
+      //   }while(Val_func > Val_upbound);
+      //   displace_plus = displace_search;
+          
+      // }
+
+      displace_plus += solution;
+      
+
     }
     
     MO.update_location_and_velocity(displace_plus.data());
