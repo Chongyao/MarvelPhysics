@@ -7,12 +7,12 @@
   "Poission":0.45,
   "Young":7000,
   "max_iter":200,
-  "kv":0,
+  "kv":100,
   "time_step":0.01,
   "gravity":9.8,
   "nn_num":10,
   "position_weig":1e10,
-  "w_g":40,
+  "w_g":1,
   "rate":50
 
 }

@@ -273,7 +273,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   vector<Triplet<double>> TripletList;
 
   //TODO: estimate entries
-  // TripletList.reserve()
+  dat_str.hes_trips.reserve(99999);
 
   //TODO:consider sysmetric
 
@@ -303,77 +303,86 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
     Map<const Matrix3d> vol_cross(dat_str.vol_cross_.col(i).data());
     double def_gra_det = def_gra.determinant();
 
+    vector<Matrix3d> ela_col(3);
+    vector<Matrix3d> vol_col(3);
     
-    for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
+    
 
-      xij = points_.col(friends_[i][iter_j]) - points_.col(i);
-       dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
       
-      for(size_t iter_k = 0; iter_k < friends_[i].size(); ++iter_k){
-        xik = points_.col(friends_[i][iter_k]) - points_.col(i);
-        dq = ( friends_[i][iter_k]== i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik * weig_[i][iter_k];
+    for(size_t iter_k = 0; iter_k < friends_[i].size(); ++iter_k){
+      xik = points_.col(friends_[i][iter_k]) - points_.col(i);
+      dq = ( friends_[i][iter_k]== i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik * weig_[i][iter_k];
 
-        //elastic hessian
+      //elastic hessian
+      for(size_t l = 0; l < 3; ++l){
+        one_line.setZero(3, 3);
+        one_line.row(l) = dq.transpose();
+
+        dsigma_duk =
+            cons_law(def_gra.row(l).transpose()*(dq.transpose()) + dq*def_gra.row(l), Young_, Poission_);
+        ela_col[l] = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk);
+
+        // Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
+      }
+
+      //volume conserving forcing
+      for(size_t l = 0; l < 3; ++l){
+        left_deri_det_matrix = def_gra;
+        left_deri_det_matrix.row(l) = dq.transpose();
+        double left_deri = left_deri_det_matrix.determinant();
+
+
+        right_deri = Matrix3d::Zero();{
+          next_line = def_gra.row( (1 + 1) % 3 ).transpose();
+          next_next_line = def_gra.row( (1 + 2) % 3 ).transpose();
+          right_deri.row( (l + 1) % 3 ) = (next_next_line.cross(dq)).transpose();
+          right_deri.row( (l + 2) % 3 ) = (dq.cross(next_line)).transpose();
+
+        }
+        vol_col[l] = kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri);
+        // Kpq_vol.col(l) =  kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
+
+      }
+
+      for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
+
+        xij = points_.col(friends_[i][iter_j]) - points_.col(i);
+        dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
+       
         for(size_t l = 0; l < 3; ++l){
-          one_line.setZero(3, 3);
-          one_line.row(l) = dq.transpose();
-
-          dsigma_duk =
-              cons_law(def_gra.row(l).transpose()*(dq.transpose()) + dq*def_gra.row(l), Young_, Poission_);
-          // def_mult_dsig.noalias() = def_gra * dsigma_duk;
-          // def_mult_dsig.row(l) += dq.transpose();
-          Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
-          // Kpq.col(l) = 2*vol_i_(i)*def_mult_dsig*dp;
+          Kpq.col(l) = ela_col[l] * dp;
+          Kpq_vol.col(l) = vol_col[l] * dp;
+        
         }
 
-        //volume conserving forcing
-        for(size_t l = 0; l < 3; ++l){
-          left_deri_det_matrix = def_gra;
-          left_deri_det_matrix.row(l) = dq.transpose();
-          double left_deri = left_deri_det_matrix.determinant();
-
-
-          right_deri = Matrix3d::Zero();{
-            next_line = def_gra.row( (1 + 1) % 3 ).transpose();
-            next_next_line = def_gra.row( (1 + 2) % 3 ).transpose();
-            right_deri.row( (l + 1) % 3 ) = (next_next_line.cross(dq)).transpose();
-            right_deri.row( (l + 2) % 3 ) = (dq.cross(next_line)).transpose();
-
-          }
-
-          Kpq_vol.col(l) =  kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
-          
-        }
-
-
-
+      
 #pragma omp critical
         {
-        for(size_t m = 0; m < 3; ++m){
-          for(size_t n = 0; n < 3; ++n){
-            if (Kpq(m, n))
-              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
+          for(size_t m = 0; m < 3; ++m){
+            for(size_t n = 0; n < 3; ++n){
+              if (Kpq(m, n))
+                dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
               
             
-            if(Kpq_vol(m,n))
-              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
+              if(Kpq_vol(m,n))
+                dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
 
-          }
-        }          
+            }
+          }          
         }//push back values
         
 
-      }//for loop: q friends_[i].size()
-    }//for_loop: p friends_[i].size()
+      }//for loop: p friends_[i].size()
+    }//for_loop: q friends_[i].size()
   }//for_loop: i dim
-
+  cout << "complete ela hessian" << endl;
   return 0;
 
 }//point_sys::Hessian
 
 int point_sys::calc_Mass_matrix(){
   vector<Triplet<double>> mass_triplets(3 * dim_);
-// #pragma omp parallel for
+  // #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     for(size_t j = 0; j < 3; ++j){
       mass_triplets[i*3 + j] = Triplet<double>(i * 3 + j, i * 3 + j, mass_i_(i));
