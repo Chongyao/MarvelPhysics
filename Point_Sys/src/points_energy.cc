@@ -8,6 +8,7 @@
 #include <Eigen/LU>
 #include <Eigen/Geometry>
 
+#include <unordered_map>
 using namespace std;
 using namespace Eigen;
 
@@ -17,6 +18,19 @@ using namespace Eigen;
 
 
 namespace marvel{
+
+struct pair_hash{
+  template<class T1, class T2>
+  size_t operator () (const std::pair<T1,T2> &p) const {
+        auto h1 = std::hash<T1>{}(p.first);
+        auto h2 = std::hash<T2>{}(p.second);
+        // Mainly for demonstration purposes, i.e. works but is overly simple
+        // In the real world, use sth. like boost.hash_combine
+        return h1 ^ h2;  
+    }
+  
+};
+
 
 Matrix3d safe_inv(const MatrixXd& sys_mat){
   //TODO: use better solver considering the sysmertic
@@ -270,7 +284,9 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
 
 int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
-  vector<Triplet<double>> TripletList;
+  // vector<Triplet<double>> TripletList;
+  
+  // unordered_map<pair<size_t,size_t>, double, pair_hash> mytriplet;
 
   //TODO: estimate entries
   dat_str.hes_trips.reserve(99999);
@@ -354,8 +370,21 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
           Kpq_vol.col(l) = vol_col[l] * dp;
         
         }
+        
 
-      
+        // for(size_t m = 0; m < 3; ++m){
+        //   for(size_t n = 0; n < 3; ++n){
+        //     size_t row = friends_[i][iter_j]*3 + m, col = friends_[i][iter_k]*3 + n;
+        //     const auto res = mytriplet.insert({{row, col}, Kpq(m,n)});
+        //     // if(!res.second){
+        //     //   #pragma omp atomic update
+        //     //   mytriplet[{row, col}] += Kpq(m,n);
+        //     // }
+        //   }
+
+        // }
+
+        
 #pragma omp critical
         {
           for(size_t m = 0; m < 3; ++m){
@@ -375,7 +404,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
       }//for loop: p friends_[i].size()
     }//for_loop: q friends_[i].size()
   }//for_loop: i dim
-  cout << "complete ela hessian" << endl;
+  // cout << "complete ela hessian" << endl;
   return 0;
 
 }//point_sys::Hessian

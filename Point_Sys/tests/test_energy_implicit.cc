@@ -181,10 +181,10 @@ int main(int argc, char** argv){
 
 
       double res_value = res.array().square().sum();
-      if(res_value < 1e-10){
-        cout << "[INFO]Newton res " <<endl << res_value << endl;;
-        cout << "[INFO]>>>>>>>>>>>>>>>>>>>ALL Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-        cout << dat_str.Val_ << endl;
+      cout << "[INFO]Newton res "  << res_value << endl;
+      cout << "[INFO]ALL Energy " <<dat_str.Val_ << endl;
+
+      if(fabs(res_value) < 1e-2){
         dat_str.set_zero();
         break;
       }
@@ -214,31 +214,36 @@ int main(int argc, char** argv){
       // disp_t_plus += cg.solve(b_CG);
 
       
-      // {//Line search
-      //   const double c = 1e-2;
-      //   double alpha = 1 / 0.5;
+      {//Line search
+        const double c = 1e-2;
+        double alpha = 1 / 0.5;
 
-      //   double Val_init = dat_str.Val_, down = res.dot(solution), Val_upbound, Val_func;
-      //   cout << "down is "<< down << endl;
+        double Val_init = dat_str.Val_, down = res.dot(solution), Val_upbound, Val_func;
+        cout << "down is "<< down << endl;
+        size_t search_step = 1;
 
-      //   do{
-      //     alpha *= 0.5;
-      //     Val_upbound = Val_init - c * alpha * down;
-      //     displace_search = displace_plus + alpha * solution;
-      //     dat_str.Val_ = 0;
+        do{
+          // if(alpha < 0.01)
+          //   break;
+          dat_str.set_zero();
           
-      //     MO.Val(displace_search.data(), dat_str);
-      //     PS.Val(displace_search.data(), dat_str);
-      //     GE.Val(displace_search.data(), dat_str);
-      //     pos_cons.Val(displace_search.data(), dat_str);
-
-      //     Val_func = dat_str.Val_;
-      //     cout << "Val_func is " << Val_func << " UP bound is " << Val_upbound << endl;
-
-      //   }while(Val_func > Val_upbound);
-      //   displace_plus = displace_search;
+          alpha *= 0.5;
+          Val_upbound = Val_init - c * alpha * down;
+          displace_search = displace_plus + alpha * solution;
+          dat_str.Val_ = 0;
           
-      // }
+          MO.Val(displace_search.data(), dat_str);
+          PS.Val(displace_search.data(), dat_str);
+          GE.Val(displace_search.data(), dat_str);
+          pos_cons.Val(displace_search.data(), dat_str);
+
+          Val_func = dat_str.Val_;
+          cout << "Val_func is " << Val_func << " UP bound is " << Val_upbound << endl;
+
+        }while(Val_func > Val_upbound);
+        displace_plus = displace_search;
+          
+      }
 
       displace_plus += solution;
       
