@@ -2,6 +2,7 @@
 #define BASIC_ENERGY_H
 #include "data_stream.h"
 #include <vector>
+#include <memory>
 namespace marvel{
 class position_constraint{
  public:
@@ -32,17 +33,18 @@ class gravity_energy{
 //simple collision with ground
 class collision{
  public:
-  collision(const double &w_coll, const char &ground_axis, const double &ground_pos, const size_t &num_surf_point , const size_t &dim);
-  int Val(const double *init_points, const double *disp, energy_dat &dat_str);
-  int Gra(const double *init_points, const double *disp, energy_dat &dat_str, const Eigen::VectorXd& mass);
-  int Hes(const double *init_points, const double *disp, energy_dat &dat_str);
+  collision(const double &w_coll, const char &ground_axis, const double &ground_pos, const size_t &num_surf_point , const size_t &dim, const std::shared_ptr<Eigen::MatrixXd>& init_points_ptr);
+  int Val(const double *disp, energy_dat &dat_str) const;
+  int Gra(const double *disp, energy_dat &dat_str) const;
+  int Hes(const double *disp, energy_dat &dat_str) const;
  private:
   const char ground_axis_;
   const double w_coll_;
   const double ground_pos_;
   const size_t num_surf_point_;
   const size_t dim_;
-  
+  const std::shared_ptr<Eigen::MatrixXd> init_points_ptr_;
+
 };
 
 

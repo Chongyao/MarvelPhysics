@@ -74,7 +74,7 @@ int main(int argc, char** argv){
   MatrixXd test(3, 3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
   cout << points.rows() << " " << points.cols() << endl;
-
+  auto points_ptr = make_shared<MatrixXd>(points);
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
   
@@ -124,7 +124,7 @@ int main(int argc, char** argv){
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  collision COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim);
+  collision COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim, points_ptr);
 
 
   
@@ -193,8 +193,8 @@ int main(int argc, char** argv){
     
 
 
-    COLL.Val(points.data(), displace.data(), dat_str);
-    COLL.Gra(points.data(), displace.data(), dat_str, PS.get_Mass_VectorXd());
+    COLL.Val(displace.data(), dat_str);
+    COLL.Gra(displace.data(), dat_str);
 
     pos_cons.Gra(displace.data(), dat_str);
 #pragma omp parallel for
