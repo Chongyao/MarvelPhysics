@@ -228,7 +228,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
       gra_def_gra.col(j) = cross1.cross(cross2);
     }
     gra_def_gra.transposeInPlace();
-    #pragma omp critical
+#pragma omp critical (vol_cross)
     {
       dat_str.save_ele_vol_cross(i, gra_def_gra);
     }
@@ -249,7 +249,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
       xij = (points_.col(friends_[i][iter_j]) - points_.col(i));
       di += -w*xij;
       force_j = w*pre_F*xij;
- #pragma omp critical
+#pragma omp critical(gra)
       {
       dat_str.save_ele_gra(friends_[i][iter_j], force_j);      
       }
@@ -257,7 +257,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     }
     
     force_i = pre_F*di;
-#pragma omp critical 
+#pragma omp critical(gra)
     {
     dat_str.save_ele_gra(i, force_i);      
     }
@@ -266,19 +266,18 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
 
   return 0;
 }
-
-
+#if 1
 int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
-  vector<Triplet<double>> TripletList;
+
 
   //TODO: estimate entries
-  // TripletList.reserve()
+  // dat_str.hes_trips.reserve(99999);
 
   //TODO:consider sysmetric
 
   omp_set_num_threads(4);  
-#pragma omp parallel for
+// #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     // cout << "dim is " << i << endl;
     Matrix3d Kpq = Matrix3d::Zero();
@@ -341,7 +340,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
       }
 
-      for(size_t iter_j = 0; iter_j < friends_[i].size(); ++iter_j){
+      for(size_t iter_j = 0; iter_j <friends_[i].size(); ++iter_j){
 
         xij = points_.col(friends_[i][iter_j]) - points_.col(i);
         dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
@@ -351,39 +350,172 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
           Kpq_vol.col(l) = vol_col[l] * dp;
         
         }
-        
 
-        // for(size_t m = 0; m < 3; ++m){
-        //   for(size_t n = 0; n < 3; ++n){
-        //     size_t row = friends_[i][iter_j]*3 + m, col = friends_[i][iter_k]*3 + n;
-        //     const auto res = mytriplet.insert({{row, col}, Kpq(m,n)});
-        //     // if(!res.second){
-        //     //   #pragma omp atomic update
-        //     //   mytriplet[{row, col}] += Kpq(m,n);
-        //     // }
-        //   }
 
-        // }
 
-        
+
 #pragma omp critical
         {
           for(size_t m = 0; m < 3; ++m){
             for(size_t n = 0; n < 3; ++n){
-              if (Kpq(m, n))
+              if(Kpq(m, n))
                 dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
-              
-            
-              if(Kpq_vol(m,n))
+              if (Kpq_vol(m,n))
                 dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
-
             }
           }          
         }//push back values
         
-
       }//for loop: p friends_[i].size()
     }//for_loop: q friends_[i].size()
+    
+  }//for_loop: i dim
+
+  return 0;
+
+}//point_sys::Hessian
+#endif
+#if 0
+int point_sys::Hessian(const double*disp, energy_dat &dat_str){
+  
+
+
+  //TODO: estimate entries
+  // dat_str.hes_trips.reserve(99999);
+
+  //TODO:consider sysmetric
+
+  omp_set_num_threads(4);  
+// #pragma omp parallel for
+  for(size_t i = 0; i < dim_; ++i){
+    // cout << "dim is " << i << endl;
+    Matrix3d Kpq = Matrix3d::Zero();
+    Matrix3d Kpq_vol = Matrix3d::Zero();    
+    Matrix3d one_line;
+    Matrix3d def_mult_dsig;
+
+    Matrix3d dsigma_duk;
+    Vector3d dp, dq, xij, xik;
+
+
+    
+    Matrix3d left_deri_det_matrix;
+    Matrix3d right_deri;
+    Vector3d next_line;
+    Vector3d next_next_line;
+    
+
+    Map<const Matrix3d> stress(dat_str.stress_.col(i).data());
+    Map<const Matrix3d> def_gra(dat_str.def_gra_.col(i).data());
+    Map<const Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
+    Map<const Matrix3d> vol_cross(dat_str.vol_cross_.col(i).data());
+    double def_gra_det = def_gra.determinant();
+
+    vector<Matrix3d> ela_col(3);
+    vector<Matrix3d> vol_col(3);
+
+    for(size_t iter_k = 0; iter_k < friends_[i].size(); ++iter_k){
+      xik = points_.col(friends_[i][iter_k]) - points_.col(i);
+      dq = ( friends_[i][iter_k]== i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)): inv_A * xik * weig_[i][iter_k];
+
+      //elastic hessian
+      for(size_t l = 0; l < 3; ++l){
+        one_line.setZero(3, 3);
+        one_line.row(l) = dq.transpose();
+
+        dsigma_duk =
+            cons_law(def_gra.row(l).transpose()*(dq.transpose()) + dq*def_gra.row(l), Young_, Poission_);
+        ela_col[l] = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk);
+
+        // Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
+      }
+
+      //volume conserving forcing
+      for(size_t l = 0; l < 3; ++l){
+        left_deri_det_matrix = def_gra;
+        left_deri_det_matrix.row(l) = dq.transpose();
+        double left_deri = left_deri_det_matrix.determinant();
+
+
+        right_deri = Matrix3d::Zero();{
+          next_line = def_gra.row( (1 + 1) % 3 ).transpose();
+          next_next_line = def_gra.row( (1 + 2) % 3 ).transpose();
+          right_deri.row( (l + 1) % 3 ) = (next_next_line.cross(dq)).transpose();
+          right_deri.row( (l + 2) % 3 ) = (dq.cross(next_line)).transpose();
+
+        }
+        vol_col[l] = kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri);
+        // Kpq_vol.col(l) =  kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
+
+      }
+
+      for(size_t iter_j = 0; iter_j <= iter_k; ++iter_j){
+
+        xij = points_.col(friends_[i][iter_j]) - points_.col(i);
+        dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * dat_str.sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
+       
+        for(size_t l = 0; l < 3; ++l){
+          Kpq.col(l) = ela_col[l] * dp;
+          Kpq_vol.col(l) = vol_col[l] * dp;
+        
+        }
+
+#if 0
+        if(iter_j == 1 && iter_k == 2)
+          cout <<"j == 1 ,k == 2" << endl<< Kpq << endl;
+        else if(iter_j == 2 && iter_k == 1)
+          cout <<"j == 2 ,k == 1" << endl<< Kpq << endl;
+        
+          
+#endif
+
+
+
+        if(iter_j == iter_k){
+#pragma omp critical
+        {
+          for(size_t m = 0; m < 3; ++m){
+            for(size_t n = 0; n < 3; ++n){
+              if(Kpq(m, n))
+                dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
+              if (Kpq_vol(m,n))
+                dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
+            }
+          }          
+        }//push back values
+        }
+        else{
+#pragma omp critical
+        {
+          for(size_t m = 0; m < 3; ++m){
+            for(size_t n = 0; n < 3; ++n){
+              if (Kpq(m, n)){
+              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
+              dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_k]*3 + m, friends_[i][iter_j]*3 + n, Kpq(n, m)));
+              }
+              if(Kpq_vol(m,n)){
+                dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
+                dat_str.hes_trips.push_back(Triplet<double>(friends_[i][iter_k]*3 + m, friends_[i][iter_j]*3 + n, Kpq_vol(n,m)));
+              }
+            }
+          }          
+        }//push back values
+        
+        }
+      }//for loop: p friends_[i].size()
+    }//for_loop: q friends_[i].size()
+    if(i == 0){
+      cout << "i == " << i << endl;
+      SparseMatrix<double> test(3 * dim_, 3 * dim_);
+      test.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
+      for (int k=0; k<test.outerSize(); ++k)
+        for (SparseMatrix<double>::InnerIterator it(test,k); it; ++it)
+        {
+          cout << it.row() << " " << it.col() << " " <<it.value() << endl;;
+        }
+    }
+    else
+      cout << "i == " << i << endl;
 
 
     
@@ -392,6 +524,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   return 0;
 
 }//point_sys::Hessian
+#endif
 
 
 int point_sys::calc_Mass_matrix(){
