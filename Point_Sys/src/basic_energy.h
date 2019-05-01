@@ -7,12 +7,13 @@
 namespace marvel{
 
 
-class position_constraint {
+class position_constraint{
  public:
   position_constraint(const size_t dim, const double &w, const std::vector<size_t> &cons);
   int Val(const double *disp, energy_dat &dat_str) const ;  
   int Gra(const double *disp, energy_dat &dat_str) const ;
-  int Hes(const double *disp, energy_dat &dat_str) const;
+  int Hes(const double *disp, energy_dat &dat_str) const ;
+
  private:
   const size_t dim_;
   const double w_;

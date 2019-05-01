@@ -155,39 +155,42 @@ int main(int argc, char** argv){
   
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
-    cout << "iter is "<<endl<< i << endl;
+    
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>iter "<< i <<" <<<<<<<<<<<<<<<<<<" << endl;
     // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
 
     //newtown iter
     Map<VectorXd> displace_plus(displace.data(), 3*dim);
     for(size_t newton_i = 0; newton_i < 20; ++newton_i){
+      cout << "newton iter is " << newton_i << endl;
       dat_str.set_zero();
 
       PS.Val(displace_plus.data(), dat_str);
       PS.Gra(displace_plus.data(), dat_str);
-      PS.Hessian(displace_plus.data(), dat_str);     
+      auto start = system_clock::now();
+      PS.Hessian(displace_plus.data(), dat_str);
+      auto end = system_clock::now();
+      auto duration = duration_cast<microseconds>(end - start);
+      cout <<  "hessian花费了" 
+           << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+           << "秒" << endl;
 
-      // cout << "PS" << dat_str.gra_ << endl;
+
+
 
       
       MO.Val(displace_plus.data(), dat_str);
       MO.Gra(displace_plus.data(), dat_str);
       MO.Hes(displace_plus.data(), dat_str);
 
-      // cout << "MO" << dat_str.gra_ << endl;
-
       
       GE.Val(displace_plus.data(), dat_str);
       GE.Gra(displace_plus.data(), dat_str);
-
-      // cout << "GE" << dat_str.gra_ << endl;
 
       
       pos_cons.Val(displace_plus.data(), dat_str);
       pos_cons.Gra(displace_plus.data(), dat_str);
       pos_cons.Hes(displace_plus.data(),dat_str);
-
-      // cout << "PC" << dat_str.gra_ << endl;
 
       // COLL.Val(points.data(), displace_plus.data(), dat_str);
       // COLL.Gra(points.data(), displace_plus.data(), dat_str, mass_vector);
@@ -195,9 +198,10 @@ int main(int argc, char** argv){
 
 
       const double res_value = res.array().square().sum();
-      cout << "[INFO]Newton res " <<endl << res_value << endl;
+      cout << "[INFO]Newton res " << res_value << endl;
       cout << "[INFO] ALL Energy: " << dat_str.val_ << endl;
-      if(res_value < 1e-2){
+      if(res_value < 1e-4){
+        cout << endl;
         break;
       }
       
@@ -205,57 +209,127 @@ int main(int argc, char** argv){
       //implicit time integral
       dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
              
-      // // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
-      // SimplicialLLT<SparseMatrix<double>> llt;
-      // llt.compute(dat_str.hes_);
-      // VectorXd all_one = VectorXd::Ones(3 * dim);
-      // while(llt.info() != Eigen::Success){
-      //   cout <<"lltinfo "<< llt.info() << endl;
-      //   dat_str.hes_ += all_one.asDiagonal();
-      //   llt.compute(dat_str.hes_);
-      //   all_one *= 2;
-      // }
-      // solution = llt.solve(-res;)
+      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+      SimplicialLLT<SparseMatrix<double>> llt;
+      llt.compute(dat_str.hes_);
+      VectorXd all_one = VectorXd::Ones(3 * dim);
+      while(llt.info() != Eigen::Success){
+        cout <<"lltinfo "<< llt.info() << endl;
+        dat_str.hes_ += all_one.asDiagonal();
+        llt.compute(dat_str.hes_);
+        all_one *= 2;
+      }
+      solution = llt.solve(-res);
 
-      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
-      ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-      cg.setMaxIterations(3*dim);
-      cg.setTolerance(1e-8);
-      cg.compute(dat_str.hes_);
-      solution = cg.solve(-res);
-
-
+      // // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
+      // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
+      // cg.setMaxIterations(3*dim);
+      // cg.setTolerance(1e-8);
+      // cg.compute(dat_str.hes_);
+      // solution = cg.solve(-res);
 
 
-      // {//Line search
-      //   const double c = 1e-2;
-      //   double alpha = 1 / 0.5;
 
-      //   double Val_init = dat_str.Val_, down = res.dot(solution), Val_upbound, Val_func;
-      //   cout << "down is "<< down << endl;
+      #if 1
+      {//Line search
 
-      //   do{
-      //     alpha *= 0.5;
-      //     Val_upbound = Val_init - c * alpha * down;
-      //     displace_search = displace_plus + alpha * solution;
-      //     dat_str.Val_ = 0;
+        const double c = 1e-4, c2 = 0.9;
+
+        double Val_init = dat_str.val_, down = res.dot(solution), Val_upbound, Val_func, down_new =0;
+        // cout <<endl << endl<<"Val init is " << Val_init << "down is "<< down << endl;
+
+        auto cal_val_gra = [&](const double alp){
+          displace_search = displace_plus + alp * solution;
+          dat_str.set_zero();
+          MO.Val(displace_search.data(), dat_str);
+          PS.Val(displace_search.data(), dat_str);
+          GE.Val(displace_search.data(), dat_str);
+          pos_cons.Val(displace_search.data(), dat_str);
           
-      //     MO.Val(displace_search.data(), dat_str);
-      //     PS.Val(displace_search.data(), dat_str);
-      //     GE.Val(displace_search.data(), dat_str);
-      //     pos_cons.Val(displace_search.data(), dat_str);
+          MO.Gra(displace_search.data(), dat_str);
+          PS.Gra(displace_search.data(), dat_str);
+          GE.Gra(displace_search.data(), dat_str);
+          pos_cons.Gra(displace_search.data(), dat_str);
+        };
+        auto cal_val = [&](const double alp)->double{
+          displace_search = displace_plus + alp * solution;
+          dat_str.set_zero();
+          MO.Val(displace_search.data(), dat_str);
+          PS.Val(displace_search.data(), dat_str);
+          GE.Val(displace_search.data(), dat_str);
+          pos_cons.Val(displace_search.data(), dat_str);
+          return dat_str.val_;
+        };
+        auto cal_gra = [&](){//use little
+          MO.Gra(displace_search.data(), dat_str);
+          PS.Gra(displace_search.data(), dat_str);
+          GE.Gra(displace_search.data(), dat_str);
+          pos_cons.Gra(displace_search.data(), dat_str);
+        };
 
-      //     Val_func = dat_str.Val_;
-      //     cout << "Val_func is " << Val_func << " UP bound is " << Val_upbound << endl;
+        auto zoom = [&](double alpha_low, double alpha_high, double val_low)->double{
+          double alpha_star = alpha_high;
+          size_t count_j = 1;
+          do{
+            double alpha_j = 0.5 * (alpha_low + alpha_high);
+            cout << "alpha j is "<< alpha_j << endl;
+            double val_j = cal_val(alpha_j);
+            if(val_j > Val_init + c * alpha_j * down || val_j > val_low){
+              alpha_high = alpha_j;
+              cout << " here " << endl;
+            }
+              
+            else{
+              cal_gra();
+              double deri = solution.dot(dat_str.gra_);
+              if(fabs(deri) <= -c2 * down){
+                alpha_star = alpha_j;
+                break;
+              }
+              if(deri * (alpha_high - alpha_low) >= 0)
+                alpha_high = alpha_low;
+              alpha_low = alpha_j;
+              val_low = val_j;
+            }
+            ++count_j;
+          }while(count_j < 10);
+          return alpha_star;
+        };
+        double val_now, val_before = Val_init, alpha_now = 1, alpha_before = 0, alpha_fin, alpha_max = 2;
+        size_t count = 1;
+        do{
+          cout << "alpha now is "<< alpha_now << endl;
+          val_now = cal_val(alpha_now);
+          if(val_now > Val_init + c * alpha_now * down || (val_now >= val_before && count > 1)){
+            alpha_fin = zoom(alpha_before, alpha_now, val_before);
+            break;
+          }
+          cal_gra();
+          double deri = solution.dot(dat_str.gra_);          
+          if(fabs(deri) <= -c2 * down){
+            alpha_fin = alpha_now;
+            break;
+          }
+          if(deri >= 0){
+            alpha_fin = zoom(alpha_now, alpha_before, val_now);
+            break;
+          }
+          alpha_before = alpha_now;
+          alpha_now = 0.5 * (alpha_now + alpha_max);
 
-      //   }while(Val_func > Val_upbound);
-      //   displace_plus = displace_search;
-          
-      // }
-      
+          val_before = val_now;
+          ++count;
+        }while(1);
+        cout<< "line search alpha is "<<  alpha_fin<<endl;        
+        displace_plus += alpha_fin * solution;
+
+      }
+
+      #else
       displace_plus += solution;
+      #endif
 
-
+      cout << endl;
     }
     
     MO.update_location_and_velocity(displace_plus.data());

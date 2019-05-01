@@ -211,6 +211,7 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
 
     //save energy
     double energy = 0.5*vol_i_(i)*(stress.array()*strain.array()).sum();
+    energy += 0.5 * kv_ * pow(def_gra.determinant() - 1, 2);
 
 #pragma omp critical
     {

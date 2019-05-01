@@ -16,6 +16,7 @@ int momentum::Val(const double *disp, energy_dat &dat_str) const{
 }
 int momentum::Gra(const double *disp, energy_dat &dat_str) const{
   Map<const VectorXd> _disp(disp, 3 * dim_);
+
   const VectorXd acce = (_disp  - dispk_) * d1dtdt_  - vk_ * d1dt_;
   dat_str.gra_ += mass_sparse_ * acce;
 

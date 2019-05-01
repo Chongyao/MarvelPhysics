@@ -4,7 +4,7 @@ using namespace Eigen;
 using namespace std;
 namespace marvel{
 
-energy_dat::energy_dat(const size_t dim):dat_str<double>::dat_str(dim), dim_(dim),def_gra_(dim), hes_(3*dim_, 3*dim_){
+energy_dat::energy_dat(const size_t dim):dat_str_core<double>::dat_str_core(dim), dim_(dim),def_gra_(dim), hes_(3*dim_, 3*dim_){
 
   zero_mats = vector<Matrix3d>(dim, Matrix3d::Zero());
   inv_A_all_ = zero_mats;
@@ -19,7 +19,7 @@ energy_dat::energy_dat(const size_t dim):dat_str<double>::dat_str(dim), dim_(dim
 // }
 
 int energy_dat::save_val(const double val){
-  dat_str<double>::val_ += val;
+  this->val_ += val;
   return 0;
 }
 
@@ -46,7 +46,7 @@ int energy_dat::save_ele_inv_all(const size_t &ele_id, const MatrixXd &ele_mat){
 
 int energy_dat::save_ele_gra(const size_t &ele_id, const Vector3d &ele_mat){
   for(size_t i = 0; i < 3; ++i){
-    dat_str<double>::gra_(ele_id * 3 + i) += ele_mat(i);
+    this->gra_(ele_id * 3 + i) += ele_mat(i);
   }
   
   return 0;
@@ -68,13 +68,12 @@ int energy_dat::set_zero(){
   stress_ = zero_mats;
   
 
-  dat_str<double>::val_ = 0;
-  dat_str<double>::gra_.setZero(3 * dim_);
+  this->val_ = 0;
+  this->gra_.setZero(3 * dim_);
   std::vector<Triplet<double>> to_swap(0);
-  dat_str<double>::hes_trips.swap(to_swap);
+  this->hes_trips.swap(to_swap);
   
   hes_.setZero();
-
   return 0;
 }
 
