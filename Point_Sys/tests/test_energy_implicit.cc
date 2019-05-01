@@ -116,12 +116,12 @@ int main(int argc, char** argv){
   if ( boost::filesystem::exists(cons_file_path) )
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
   cout << "constrint " << cons.size() << " points" << endl;
-  position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
+  position_constraint pos_cons(dim, pt.get<double>("position_weig"), cons);
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
   const auto mass_vector = PS.get_Mass_VectorXd();
-  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, mass_vector, 'y');
+  gravity_energy GE(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
   
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
@@ -163,22 +163,31 @@ int main(int argc, char** argv){
     for(size_t newton_i = 0; newton_i < 20; ++newton_i){
       dat_str.set_zero();
 
-      
+      PS.Val(displace_plus.data(), dat_str);
+      PS.Gra(displace_plus.data(), dat_str);
+      PS.Hessian(displace_plus.data(), dat_str);     
+
+      // cout << "PS" << dat_str.gra_ << endl;
+
       
       MO.Val(displace_plus.data(), dat_str);
       MO.Gra(displace_plus.data(), dat_str);
       MO.Hes(displace_plus.data(), dat_str);
-      
-      PS.Val(displace_plus.data(), dat_str);
-      PS.Gra(displace_plus.data(), dat_str);
-      PS.Hessian(displace_plus.data(), dat_str);
 
+      // cout << "MO" << dat_str.gra_ << endl;
+
+      
       GE.Val(displace_plus.data(), dat_str);
       GE.Gra(displace_plus.data(), dat_str);
+
+      // cout << "GE" << dat_str.gra_ << endl;
+
       
       pos_cons.Val(displace_plus.data(), dat_str);
       pos_cons.Gra(displace_plus.data(), dat_str);
       pos_cons.Hes(displace_plus.data(),dat_str);
+
+      // cout << "PC" << dat_str.gra_ << endl;
 
       // COLL.Val(points.data(), displace_plus.data(), dat_str);
       // COLL.Gra(points.data(), displace_plus.data(), dat_str, mass_vector);
@@ -187,7 +196,7 @@ int main(int argc, char** argv){
 
       const double res_value = res.array().square().sum();
       cout << "[INFO]Newton res " <<endl << res_value << endl;
-      cout << "[INFO] ALL Energy: " << dat_str.Val_ << endl;
+      cout << "[INFO] ALL Energy: " << dat_str.val_ << endl;
       if(res_value < 1e-2){
         break;
       }
@@ -196,27 +205,26 @@ int main(int argc, char** argv){
       //implicit time integral
       dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
              
-      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
-      SimplicialLLT<SparseMatrix<double>> llt;
-      llt.compute(dat_str.hes_);
-      VectorXd all_one = VectorXd::Ones(3 * dim);
-      while(llt.info() != Eigen::Success){
-        cout <<"lltinfo "<< llt.info() << endl;
-        dat_str.hes_ += all_one.asDiagonal();
-        llt.compute(dat_str.hes_);
-        all_one *= 2;
-      }
-
+      // // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+      // SimplicialLLT<SparseMatrix<double>> llt;
+      // llt.compute(dat_str.hes_);
+      // VectorXd all_one = VectorXd::Ones(3 * dim);
+      // while(llt.info() != Eigen::Success){
+      //   cout <<"lltinfo "<< llt.info() << endl;
+      //   dat_str.hes_ += all_one.asDiagonal();
+      //   llt.compute(dat_str.hes_);
+      //   all_one *= 2;
+      // }
+      // solution = llt.solve(-res;)
 
       // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
-      // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-      // cg.setMaxIterations(3*dim);
-      // cg.setTolerance(1e-8);
-      // cg.compute(A_CG);
-      // disp_t_plus += cg.solve(b_CG);
+      ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
+      cg.setMaxIterations(3*dim);
+      cg.setTolerance(1e-8);
+      cg.compute(dat_str.hes_);
+      solution = cg.solve(-res);
 
 
-      solution = llt.solve(-res);
 
 
       // {//Line search

@@ -135,7 +135,7 @@ int main(int argc, char** argv){
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
-  { auto init_val = dat_str.Val_;
+  { auto init_val = dat_str.val_;
     auto init_gra = dat_str.gra_;
     cout << init_val << endl << endl << endl << endl;
     MatrixXd new_gra(3, dim);
@@ -144,7 +144,7 @@ int main(int argc, char** argv){
       dat_str.set_zero();
       displace(i) += delt_x;
       PS.Val(displace.data(), dat_str);
-      new_gra(i) = dat_str.Val_ - init_val;
+      new_gra(i) = dat_str.val_ - init_val;
       displace(i) -= delt_x;
     }
     new_gra /= delt_x;

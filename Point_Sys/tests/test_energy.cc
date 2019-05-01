@@ -116,7 +116,7 @@ int main(int argc, char** argv){
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
 
   cout << endl;
-  position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
+  position_constraint pos_cons(dim, pt.get<double>("position_weig"), cons);
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
@@ -211,13 +211,13 @@ int main(int argc, char** argv){
     velocity += delt_t * new_acce;
     displace += delt_t *velocity;
 
-    cout << "delt energy :"<< dat_str.Val_ - previous_step_Val << endl;
-    if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
+    cout << "delt energy :"<< dat_str.val_ - previous_step_Val << endl;
+    if (i > 10 && fabs(dat_str.val_ - previous_step_Val) < 1e-6)
       break;
     
-    previous_step_Val = dat_str.Val_;
+    previous_step_Val = dat_str.val_;
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << "total energy: " << dat_str.Val_ << endl;
+    cout << "total energy: " << dat_str.val_ << endl;
 
     acce = new_acce;
 
@@ -228,8 +228,7 @@ int main(int argc, char** argv){
       point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
       point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
       point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
-      point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
-      point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
+
       // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
       cout  << displace.rows() << " " << displace.cols() << "  " << nods.cols() << endl;
       vet_displace = displace.block(0, 0, 3, nods.cols());

@@ -99,7 +99,7 @@ int main(int argc, char** argv){
   // #if 1
   // points = nods;
   // #endif
-  size_t dim = points.cols();
+  const size_t dim = points.cols();
   cout <<"generate points done." << endl;
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
@@ -144,7 +144,7 @@ int main(int argc, char** argv){
   cout << endl;
   #endif
 
-  position_constraint pos_cons(simulation_para.get<double>("position_weig"), cons, dim);
+  position_constraint pos_cons(dim, simulation_para.get<double>("position_weig"), cons);
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   const double gravity = common.get<double>("gravity");
@@ -258,10 +258,10 @@ int main(int argc, char** argv){
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
 
       
-      if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
+      if (i > 10 && fabs(dat_str.val_ - previous_step_Val) < 1e-6)
         break;
     
-      previous_step_Val = dat_str.Val_;
+      previous_step_Val = dat_str.val_;
       
       
       if(i%iters_perframe == 0){

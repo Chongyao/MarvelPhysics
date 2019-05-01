@@ -15,8 +15,9 @@ namespace marvel{
 
 
 // class point_sys: public bigbang::Functional<double>{
+
 class point_sys{
- public:
+public:
   point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const std::vector<std::vector<size_t>> &friends, const Eigen::VectorXd &sup_radi );
   size_t Nx() const ;
 
@@ -34,9 +35,10 @@ class point_sys{
   // int Gra(const double *x, double *gra) const;
   // int Hes(const double *x,  std::vector<Eigen::Triplet<double>> *hes) const;
  private:
+  const size_t dim_;
   const Eigen::MatrixXd points_;
   Eigen::SparseMatrix<double> M_;
-  const size_t dim_;
+
   const double rho_;
   const double Poission_;
   const double Young_;
