@@ -293,7 +293,8 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
 
   //TODO: estimate entries
-  // dat_str.hes_trips.reserve(99999);
+  dat_str.hes_trips.resize(dim_ * friends_[0].size() * friends_[0].size() * 1.5);
+  size_t vec_pos = 0;
 
   //TODO:consider sysmetric
 
@@ -378,7 +379,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
 
 
 
-
+#if 1
 #pragma omp critical
         {
           for(size_t m = 0; m < 3; ++m){
@@ -390,6 +391,10 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
             }
           }          
         }//push back values
+#else
+
+
+#endif
         
       }//for loop: p friends_[i].size()
     }//for_loop: q friends_[i].size()

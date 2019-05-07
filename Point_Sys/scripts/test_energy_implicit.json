@@ -12,7 +12,7 @@
   "gravity":9.8,
   "nn_num":10,
   "position_weig":1e10,
-  "w_g":100,
+  "w_g":400,
   "rate":50
 
 }
