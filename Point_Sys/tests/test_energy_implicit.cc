@@ -208,7 +208,7 @@ int main(int argc, char** argv){
       
       //implicit time integral
       dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-      cout <<  (Map<VectorXd> (dat_str.hes_.valuePtr(), dat_str.hes_.nonZeros()).array() != 0).count() <<" "<< 3 *dim * 3 * dim <<  endl;
+      // cout <<  (Map<VectorXd> (dat_str.hes_.valuePtr(), dat_str.hes_.nonZeros()).array() != 0).count() << 3 *dim * 3 * dim <<  endl;
              
       // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
       SimplicialLLT<SparseMatrix<double>> llt;
