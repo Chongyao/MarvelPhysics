@@ -3,7 +3,7 @@
 
 #include <Eigen/Sparse>
 #include <memory>
-#include "data_str.h"
+#include "data_str_core.h"
 namespace marvel {
 
 template <typename T, size_t dim>
@@ -16,7 +16,7 @@ public:
   virtual int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const = 0;
   virtual int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const = 0;
 };
-#if 0
+#if 1
 template <typename T, size_t dim>
 class energy_t : public Functional<T, dim>
 {
@@ -33,7 +33,7 @@ public:
       return "compatibility exception";
     }
   };
-  energy_t(const std::vector<std::shared_ptr<Functional<T>>> &buffer)
+  energy_t(const std::vector<std::shared_ptr<Functional<T, dim>>> &buffer)
     : buffer_(buffer), dim_(-1) {
     for (auto &e : buffer_) {
       if ( e.get() ) {
@@ -78,7 +78,7 @@ public:
     return 0;
   }
 protected:
-  const std::vector<std::shared_ptr<Functional<T>>> &buffer_;
+  const std::vector<std::shared_ptr<Functional<T,dim>>> &buffer_;
   size_t dim_;
 };
 

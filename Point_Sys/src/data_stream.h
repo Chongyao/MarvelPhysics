@@ -2,7 +2,7 @@
 #define DATA_STREAM_H
 #include <Eigen/Core>
 #include <Eigen/SparseCore>
-#include "data_str.h"
+#include "data_str_core.h"
 #include <memory>
 namespace marvel{
 using VM3 = std::vector<Eigen::Matrix3d>;
@@ -23,12 +23,12 @@ class energy_dat: public dat_str_core<double, 3>{
   int save_ele_vol_cross(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_def_gra(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_inv_all(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
-  int save_ele_gra(const size_t &ele_id, const Eigen::Vector3d &ele_mat);
-  int save_ele_hes(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
+  // int save_ele_gra(const size_t &ele_id, const Eigen::Vector3d &ele_mat);
+  // int save_ele_hes(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_strain(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_stress(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
   int save_ele_pre_F(const size_t &ele_id, const Eigen::MatrixXd &ele_mat);
-  int save_val(const double val);
+  // int save_val(const double val);
   int set_zero();
   //get data by element
 

@@ -94,7 +94,7 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>hes<<<<<<<<<<<<<<<<<<" << endl;
   mydata->set_zero();
-  // mydata->hes_reserve(VectorXi::Constant(dof, 4));
+  mydata->hes_reserve(VectorXi::Constant(dof, 6));
   MatrixXi row_ids(6, dof);
   MatrixXd nz_vals = MatrixXd::Random(6, dof);
   cout << "ground truth is " << nz_vals.sum()<< endl;
@@ -106,7 +106,7 @@ int main(int argc, char** argv){
   }
   //use class dat_str_core
   start = system_clock::now();
-  // #pragma omp parallel for
+  #pragma omp parallel for
   for(size_t i = 0; i < dof; ++i){
     for(size_t j = 0; j < 6; ++j){
       mydata->save_hes(row_ids(j, i), i, nz_vals(j, i));

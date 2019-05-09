@@ -1,5 +1,5 @@
-#include "data_str.h"
-#include <iostream>
+#include "data_str_core.h"
+
 using namespace std;
 using namespace Eigen;
 namespace marvel{
@@ -51,8 +51,11 @@ template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::save_hes(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes){
   for(size_t row = 0; row < dim_; ++row){
     for(size_t col = 0; col < dim_; ++col){
-      #pragma omp atomic
-      hes_.coeffRef(m * dim_ + row, n * dim_ + col) += loc_hes(row, col);
+      if(loc_hes(row, col)){
+        #pragma omp atomic
+        hes_.coeffRef(m * dim_ + row, n * dim_ + col) += loc_hes(row, col);
+      }
+                     
     }
   }
   return 0;
@@ -63,8 +66,6 @@ template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::save_hes(const size_t& row, const size_t& col, const T& value){
   #pragma omp atomic
   hes_.coeffRef(row, col) += value;
-
-  
   return 0;
 }
 

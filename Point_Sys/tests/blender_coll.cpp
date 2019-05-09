@@ -26,7 +26,7 @@
 #include "Point_Sys/src/data_stream.h"
 #include "Point_Sys/src/gen_surf.h"
 #include "io.h"
-#include "Point_Sys/src/basic_energy.cc"
+#include "basic_energy.h"
 
 #include "vtk2surf.h"
 
@@ -124,7 +124,7 @@ int main(int argc, char** argv){
 
 
   
-  point_sys PS(points, common.get<double>("density"), physics_para.get<double>("Young"), physics_para.get<double>("Poission"), volume, simulation_para.get<double>("kv"), friends_all, sup_radi);
+  auto PS = make_shared<point_sys>(points, common.get<double>("density"), physics_para.get<double>("Young"), physics_para.get<double>("Poission"), volume, simulation_para.get<double>("kv"), friends_all, sup_radi);
 
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
