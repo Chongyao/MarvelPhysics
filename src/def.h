@@ -6,15 +6,15 @@
 #include "data_str.h"
 namespace marvel {
 
-template <typename T>
+template <typename T, size_t dim>
 class Functional
 {
 public:
   virtual ~Functional() {}
  // virtual size_t Nx() const = 0;
-  virtual int Val(const T *x, std::shared_ptr<dat_str_core<T>>& data) const = 0;
-  virtual int Gra(const T *x, std::shared_ptr<dat_str_core<T>>& data) const = 0;
-  virtual int Hes(const T *x, std::shared_ptr<dat_str_core<T>>& data) const = 0;
+  virtual int Val(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const = 0;
+  virtual int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const = 0;
+  virtual int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const = 0;
 };
 #if 0
 template <typename T, size_t dim>

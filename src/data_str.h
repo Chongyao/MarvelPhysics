@@ -1,15 +1,39 @@
 #ifndef DATA_STR_H
 #define DATA_STR_H
+#include <Eigen/Dense>
 #include <Eigen/Sparse>
 namespace marvel{
-template <typename T>
+template <typename T, size_t dim_>
 class dat_str_core{
  public:
-  dat_str_core(const size_t dim):val_(0), gra_(Eigen::VectorXd::Zero(3 * dim)), hes_trips(0){}
+  dat_str_core(const size_t& dof);
+
+  int set_zero();
+  //!!!!!!!WARNING!!!!!!!!!:   reserve enough space 
+  int hes_reserve(const Eigen::VectorXi& nnzs);
   
+  int save_val(const T& val);
+  int save_gra(const Eigen::Matrix<T, Eigen::Dynamic, 1>& gra);
+  int save_gra(const size_t& pos, const Eigen::Matrix<T, dim_, 1>& one_gra);
+  int save_hes(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes);
+  int save_hes(const size_t& row, const size_t& col, const T& value);
+
+  const T get_val() const;
+  const Eigen::Matrix<T, Eigen::Dynamic, 1>& get_gra() const;
+  const Eigen::SparseMatrix<T>& get_hes()const;
+
+
+  //TODO:add Perfect Forwardincg
+  
+
+ private:
+  const size_t dof_;
   T val_;
-  Eigen::VectorXd gra_;
-  std::vector<Eigen::Triplet<T>> hes_trips;
+  Eigen::Matrix<T, Eigen::Dynamic, 1> gra_;
+  Eigen::SparseMatrix<T> hes_;
+  // std::vector<Eigen::Triplet<T>> hes_trips;
 };
+
+template class dat_str_core<double, 3>;
 }
 #endif

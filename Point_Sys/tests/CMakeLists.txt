@@ -1,5 +1,9 @@
+add_executable(test_data_str test_data_str.cc)
+target_link_libraries(test_data_str
+  marvel-core
+  coll_rigid
+  )
 add_executable(test_openmp test_openmp.cc)
-
 
 
 add_executable(test_bay test_bay.cc)

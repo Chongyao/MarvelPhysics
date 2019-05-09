@@ -9,7 +9,7 @@ using VM3 = std::vector<Eigen::Matrix3d>;
 using SVM = std::shared_ptr<std::vector<Eigen::Matrix3d>>;
 
 
-class energy_dat: public dat_str_core<double>{
+class energy_dat: public dat_str_core<double, 3>{
  public:
 
   energy_dat(const size_t dim);

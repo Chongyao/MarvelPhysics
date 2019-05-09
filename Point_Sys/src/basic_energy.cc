@@ -11,20 +11,23 @@ momentum::momentum(const size_t dim, const Eigen::SparseMatrix<double>& mass_spa
 int momentum::Val(const double *disp, energy_dat &dat_str) const{
   Map<const VectorXd> _disp(disp, 3 * dim_);
   const VectorXd acce = (_disp  - dispk_) * d1dt_ - vk_;
-  dat_str.val_ += 0.5 * acce.dot(mass_sparse_ * acce);
+  // dat_str.val_ += 0.5 * acce.dot(mass_sparse_ * acce);
+  dat_str.save_val(0.5 * acce.dot(mass_sparse_ * acce));
   return 0;
 }
 int momentum::Gra(const double *disp, energy_dat &dat_str) const{
   Map<const VectorXd> _disp(disp, 3 * dim_);
 
   const VectorXd acce = (_disp  - dispk_) * d1dtdt_  - vk_ * d1dt_;
-  dat_str.gra_ += mass_sparse_ * acce;
+  // dat_str.gra_ += mass_sparse_ * acce;
+  dat_str.save_gra(mass_sparse_ * acce);
 
   return 0;
 }
 int momentum::Hes(const double *disp, energy_dat &dat_str) const{
   for(size_t i = 0; i < 3 *dim_; ++i){
     dat_str.hes_trips.push_back(Triplet<double>(i, i, d1dtdt_ * mass_sparse_.coeff(i, i)));
+    // dat_str->hes_trips.push_back(Triplet<double>(i, i, d1dtdt_ * mass_sparse_.coeff(i, i)));
   }
   return 0;
 }
