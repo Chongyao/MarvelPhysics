@@ -7,14 +7,14 @@ using namespace Eigen;
 namespace marvel{
 /******************************************momentum*******************************/
 template<size_t dim_>
-momentum<dim_>::momentum(const size_t dof, const Eigen::SparseMatrix<double>& mass_sparse, const double& dt):mass_sparse_(mass_sparse), dof_(dof), dispk_(VectorXd::Zero(3 * dof_)), vk_(VectorXd::Zero(3 *dof_)), dt_(dt), d1dt_(1 / dt), d1dtdt_(1 / dt /dt){}
+momentum<dim_>::momentum(const size_t dof, const VectorXd& mass_vec, const double& dt):mass_vec_(mass_vec), dof_(dof), dispk_(VectorXd::Zero(3 * dof_)), vk_(VectorXd::Zero(3 *dof_)), dt_(dt), d1dt_(1 / dt), d1dtdt_(1 / dt /dt){}
 
 template<size_t dim_>
 int momentum<dim_>::Val(const double *x, data_ptr<dim_> &dat_str) const{
   Map<const VectorXd> _x(x, 3 * dof_);
   const VectorXd acce = (_x  - dispk_) * d1dt_ - vk_;
   // dat_str.val_ += 0.5 * acce.dot(mass_sparse_ * acce);
-  dat_str.save_val(0.5 * acce.dot(mass_sparse_ * acce));
+  dat_str.save_val(0.5 * acce.dot(mass_vec_.cwiseProduct(acce)));
   return 0;
 }
 template<size_t dim_>
@@ -23,7 +23,7 @@ int momentum<dim_>::Gra(const double *x, data_ptr<dim_> &dat_str) const{
 
   const VectorXd acce = (_x  - dispk_) * d1dtdt_  - vk_ * d1dt_;
   // dat_str.gra_ += mass_sparse_ * acce;
-  dat_str.save_gra(mass_sparse_ * acce);
+  dat_str.save_gra(mass_vec_.cwiseProduct(acce));
 
   return 0;
 }
@@ -32,7 +32,7 @@ template<size_t dim_>
 int momentum<dim_>::Hes(const double *x, data_ptr<dim_> &dat_str) const{
   for(size_t i = 0; i < 3 *dof_; ++i){
     // dat_str.hes_trips.push_back(Triplet<double>(i, i, d1dtdt_ * mass_sparse_.coeff(i, i)));
-    dat_str.save_hes(i, i, d1dtdt_ * mass_sparse_.coeff(i, i));
+    dat_str.save_hes(i, i, d1dtdt_ * mass_vec_(i));
   }
   return 0;
 }

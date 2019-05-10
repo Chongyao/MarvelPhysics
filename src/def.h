@@ -11,7 +11,7 @@ class Functional
 {
 public:
   virtual ~Functional() {}
- // virtual size_t Nx() const = 0;
+  virtual size_t Nx() const = 0;
   virtual int Val(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const = 0;
   virtual int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const = 0;
   virtual int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const = 0;
@@ -53,26 +53,26 @@ public:
   size_t Nx() const {
     return dim_;
   }
-  int Val(const T *x, T *val) const {
+  int Val(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const {
     for (auto &e : buffer_) {
       if ( e.get() ) {
-        e->Val(x, val);
+        e->Val(x, data);
       }
     }
     return 0;
   }
-  int Gra(const T *x, T *gra) const {
+  int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const {
     for (auto &e : buffer_) {
       if ( e.get() ) {
-        e->Gra(x, gra);
+        e->Gra(x, data);
       }
     }
     return 0;
   }
-  int Hes(const T *x, std::vector<Eigen::Triplet<T>> *hes) const {
+  int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim>>& data) const {
     for (auto &e : buffer_) {
       if ( e.get() ) {
-        e->Hes(x, hes);
+        e->Hes(x, data);
       }
     }
     return 0;

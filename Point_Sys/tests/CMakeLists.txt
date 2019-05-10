@@ -54,6 +54,14 @@ target_link_libraries(test_energy_implicit
   marvel-core
   ${Boost_LIBRARIES}
   )
+
+add_executable(test_new_struct test_new_struct.cc)
+target_link_libraries(test_new_struct
+  PointSys
+  marvel-core
+  ${Boost_LIBRARIES}
+  )
+
 add_executable(test_energy test_energy.cc)
 target_link_libraries(test_energy
   PointSys

@@ -9,15 +9,16 @@
 namespace marvel{
 
 
-using dat_ptr = std::shared_ptr<energy_dat>;
+// using dat_ptr = std::shared_ptr<energy_dat>;
+
+using dat_ptr = std::shared_ptr<dat_str_core<double, 3>>;
 
 
 
 
 
 
-
-class point_sys : Functional<double, 3>{
+class point_sys : public Functional<double, 3>{
 public:
   point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const std::vector<std::vector<size_t>> &friends, const Eigen::VectorXd &sup_radi );
   size_t Nx() const ;
@@ -26,9 +27,11 @@ public:
   int calc_defo_gra(const double *disp, dat_ptr &data) const;
   int Val(const double *x, dat_ptr &data)const;
   int Gra(const double *x, dat_ptr &data) const;
+  int Hes(const double*x, dat_ptr &data) const;
+  
   int gravity(const double *disp, dat_ptr &data, const double &gravity) const;
   double get_mass(const size_t &i) const;
-  int Hes(const double*x, dat_ptr &data);
+
   const Eigen::SparseMatrix<double>& get_Mass_Matrix();
   const Eigen::VectorXd get_Mass_VectorXd();
   // int Gra(const double *x, double *gra) const;

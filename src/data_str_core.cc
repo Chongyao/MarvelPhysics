@@ -5,7 +5,7 @@ using namespace Eigen;
 namespace marvel{
 
 template <typename T, size_t dim_>
-dat_str_core<T, dim_>::dat_str_core(const size_t& dof):dof_(dof), val_(0), gra_(dof), hes_(dof, dof){
+dat_str_core<T, dim_>::dat_str_core(const size_t& dof):dof_(dof), val_(0), gra_(dof), hes_(dof, dof), all_one_(Matrix<T, Dynamic, 1>::Ones(dof)){
   set_zero();
 }
 
@@ -20,6 +20,18 @@ int dat_str_core<T, dim_>::set_zero(){
 template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::hes_reserve(const VectorXi& nnzs){
   hes_.reserve(nnzs);
+  return 0;
+}
+
+template <typename T, size_t dim_>
+int dat_str_core<T, dim_>::hes_compress(){
+  hes_.makeCompressed();
+  return 0;
+}
+
+template <typename T, size_t dim_>
+int dat_str_core<T, dim_>::hes_add_diag(const size_t& time){
+  hes_ += (time * all_one_).asDiagonal();
   return 0;
 }
 

@@ -6,11 +6,14 @@ namespace marvel{
 template <typename T, size_t dim_>
 class dat_str_core{
  public:
+  virtual ~dat_str_core() {}
   dat_str_core(const size_t& dof);
 
   int set_zero();
   //!!!!!!!WARNING!!!!!!!!!:   reserve enough space 
   int hes_reserve(const Eigen::VectorXi& nnzs);
+  int hes_compress();
+  int hes_add_diag(const size_t& time);
   
   int save_val(const T& val);
   int save_gra(const Eigen::Matrix<T, Eigen::Dynamic, 1>& gra);
@@ -31,7 +34,8 @@ class dat_str_core{
   T val_;
   Eigen::Matrix<T, Eigen::Dynamic, 1> gra_;
   Eigen::SparseMatrix<T> hes_;
-  // std::vector<Eigen::Triplet<T>> hes_trips;
+  Eigen::Matrix<T, Eigen::Dynamic, 1> all_one_;
+
 };
 
 template class dat_str_core<double, 3>;

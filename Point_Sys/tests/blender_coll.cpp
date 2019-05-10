@@ -101,9 +101,17 @@ int main(int argc, char** argv){
   // #endif
   const size_t dim = points.cols();
   cout <<"generate points done." << endl;
+
+
+  
+
+
+
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
   spatial_hash SH(points, simulation_para.get<size_t>("nn_num"));
+
+  
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
@@ -121,7 +129,7 @@ int main(int argc, char** argv){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
 
-
+  
 
   
   auto PS = make_shared<point_sys>(points, common.get<double>("density"), physics_para.get<double>("Young"), physics_para.get<double>("Poission"), volume, simulation_para.get<double>("kv"), friends_all, sup_radi);
@@ -187,8 +195,6 @@ int main(int argc, char** argv){
   }
   
   coll_wrapper COLLISION(obta_surfs, obta_nods, fake_surf_ptr, points);
-  
-
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
