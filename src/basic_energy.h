@@ -17,6 +17,7 @@ class position_constraint : public Functional<double, dim_>{
   int Val(const double *x, data_ptr<dim_> &data) const;  
   int Gra(const double *x, data_ptr<dim_> &data) const ;
   int Hes(const double *x, data_ptr<dim_> &data) const ;
+  size_t Nx() const;
 
  private:
   const size_t dof_;
@@ -31,6 +32,7 @@ class gravity_energy : public Functional<double, dim_>{
   int Val(const double *disp, data_ptr<dim_> &data) const ;
   int Gra(const double *disp, data_ptr<dim_> &data) const;
   int Hes(const double *disp, data_ptr<dim_> &data) const;
+  size_t Nx() const;
  private:
   const char axis_;
   const size_t dof_;
@@ -47,6 +49,7 @@ class collision : public Functional<double, dim_>{
   int Val(const double *disp, data_ptr<dim_> &data) const;
   int Gra(const double *disp, data_ptr<dim_> &data) const;
   int Hes(const double *disp, data_ptr<dim_> &data) const;
+  size_t Nx() const;
  private:
   const char ground_axis_;
   const double w_coll_;
@@ -65,7 +68,7 @@ class momentum : public  Functional<double, dim_>{
   int Gra(const double *disp, data_ptr<dim_> &data) const ;
   int Hes(const double *disp, data_ptr<dim_> &data) const ;
   int update_location_and_velocity(const double *new_dispk_ptr);
-
+  size_t Nx() const;
  private:
   Eigen::VectorXd vk_, dispk_;
   const size_t dof_;
@@ -74,9 +77,12 @@ class momentum : public  Functional<double, dim_>{
   const double d1dt_;
   const double d1dtdt_;
 
-  
-  
 };
+
+template class position_constraint<3>;
+template class momentum<3>;
+template class gravity_energy<3>;
+template class collision<3>;
 
 }//namespace marvel
 #endif

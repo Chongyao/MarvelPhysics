@@ -17,7 +17,9 @@ class dat_str_core{
   
   int save_val(const T& val);
   int save_gra(const Eigen::Matrix<T, Eigen::Dynamic, 1>& gra);
-  int save_gra(const size_t& pos, const Eigen::Matrix<T, dim_, 1>& one_gra);
+  int save_gra(const size_t& pos, const Eigen::Matrix<T, dim_, 1>& point_gra);
+  int save_gra(const size_t& pos, const T& one_gra);
+  
   int save_hes(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes);
   int save_hes(const size_t& row, const size_t& col, const T& value);
 

@@ -50,11 +50,19 @@ int dat_str_core<T, dim_>::save_gra(const Eigen::Matrix<T, Eigen::Dynamic, 1>& g
   return 0;
 }
 template <typename T, size_t dim_>
-int dat_str_core<T, dim_>::save_gra(const size_t& pos, const Eigen::Matrix<T, dim_, 1>& one_gra){
+int dat_str_core<T, dim_>::save_gra(const size_t& pos, const Eigen::Matrix<T, dim_, 1>& point_gra){
   for(size_t d = 0; d < dim_; ++d){
     #pragma omp atomic
-    gra_(dim_ * pos + d) += one_gra(d);      
+    gra_(dim_ * pos + d) += point_gra(d);      
   }
+  return 0;
+}
+
+template <typename T, size_t dim_>
+int dat_str_core<T, dim_>::save_gra(const size_t& pos, const T& one_gra){
+  #pragma omp atomic
+  gra_(pos) += one_gra;      
+  
   return 0;
 }
 

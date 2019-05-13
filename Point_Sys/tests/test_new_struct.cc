@@ -138,7 +138,7 @@ int main(int argc, char** argv){
   cout << "constrint " << cons.size() << " points" << endl;
   // position_constraint pos_cons(dim, pt.get<double>("position_weig"), cons);
   
-  ebf[CONS] = dynamic_pointer_cast<Functional<double, 3>>(std::make_shared<point_sys>(dim, pt.get<double>("position_weig"), cons));
+  ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);
     
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
@@ -151,7 +151,7 @@ int main(int argc, char** argv){
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
   double delt_t = pt.get<double>("time_step");
   // momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
-  ebf[MOME] = dynamic_pointer_cast<Functional<double, 3>>(make_shared<momentum<3>>(dim, mass_vector, delt_t));
+  ebf[MOME] = make_shared<momentum<3>>(dim, mass_vector, delt_t);
 
   
   // cout << "[INFO]>>>>>>>>>>>>>>>>>>>Collision<<<<<<<<<<<<<<<<<<" << endl;
