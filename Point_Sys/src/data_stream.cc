@@ -4,12 +4,12 @@ using namespace Eigen;
 using namespace std;
 namespace marvel{
 
-energy_dat::energy_dat(const size_t dim):dat_str_core<double,3>::dat_str_core(dim), dim_(dim),def_gra_(dim), hes_(3*dim_, 3*dim_){
+energy_dat::energy_dat(const size_t dof):dat_str_core<double,3>::dat_str_core(dof),def_gra_(dof), hes_(3*dof, 3*dof){
 
-  zero_mats = vector<Matrix3d>(dim, Matrix3d::Zero());
+  zero_mats = vector<Matrix3d>(dof, Matrix3d::Zero());
   inv_A_all_ = zero_mats;
   set_zero();
-  sigma_w_points_.setZero(3, dim);
+  sigma_w_points_.setZero(3, dof);
 
 
 }

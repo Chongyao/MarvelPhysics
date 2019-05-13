@@ -115,9 +115,14 @@ int main(int argc, char** argv){
     #pragma omp parallel for
     for(size_t i = 0; i < dim; ++i){
       size_t fri_num = friends_all[i].size();
-      nnzs.segment(i * 3, i * 3 + 3) = Vector3i::Ones() * fri_num * 3;
+      nnzs(i * 3) = fri_num * 3;
+      nnzs(i * 3 + 1) = fri_num * 3;
+      nnzs(i * 3 + 2) = fri_num * 3;
     }
   }
+  #if 1
+  nnzs = VectorXi::Ones(dim * 3) *  dim * 3;
+  #endif
 
   
 
@@ -207,7 +212,13 @@ int main(int argc, char** argv){
       dat_str->hes_reserve(nnzs);
       energy->Val(displace_plus.data(), dat_str);
       energy->Gra(displace_plus.data(), dat_str);
+      auto start = system_clock::now();
       energy->Hes(displace_plus.data(), dat_str);
+      auto end = system_clock::now();
+      auto duration = duration_cast<microseconds>(end - start);
+      cout <<  "hessian花费了" 
+           << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+           << "秒" << endl;
 
 
       const double res_value = res.array().square().sum();

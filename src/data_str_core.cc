@@ -5,7 +5,7 @@ using namespace Eigen;
 namespace marvel{
 
 template <typename T, size_t dim_>
-dat_str_core<T, dim_>::dat_str_core(const size_t& dof):dof_(dof), val_(0), gra_(dof), hes_(dof, dof), all_one_(Matrix<T, Dynamic, 1>::Ones(dof)){
+dat_str_core<T, dim_>::dat_str_core(const size_t& dof):dof_(dof), val_(0), gra_(dof * dim_), hes_(dof * dim_, dof * dim_), all_one_(Matrix<T, Dynamic, 1>::Ones(dof * dim_)){
   set_zero();
 }
 
@@ -69,14 +69,20 @@ int dat_str_core<T, dim_>::save_gra(const size_t& pos, const T& one_gra){
 
 template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::save_hes(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes){
+#pragma omp critical
+  {
+  
+
   for(size_t row = 0; row < dim_; ++row){
     for(size_t col = 0; col < dim_; ++col){
       if(loc_hes(row, col)){
-        #pragma omp atomic
+        // #pragma omp atomic
+
         hes_.coeffRef(m * dim_ + row, n * dim_ + col) += loc_hes(row, col);
       }
                      
     }
+  }
   }
   return 0;
 }

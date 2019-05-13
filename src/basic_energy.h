@@ -72,7 +72,7 @@ class momentum : public  Functional<double, dim_>{
  private:
   Eigen::VectorXd vk_, dispk_;
   const size_t dof_;
-  const Eigen::VectorXd& mass_vec_;
+  Eigen::VectorXd mass_vec_;
   const double dt_;
   const double d1dt_;
   const double d1dtdt_;

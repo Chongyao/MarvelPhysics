@@ -12,11 +12,11 @@ using SVM = std::shared_ptr<std::vector<Eigen::Matrix3d>>;
 class energy_dat: public dat_str_core<double, 3>{
  public:
 
-  energy_dat(const size_t dim);
+  energy_dat(const size_t dof);
   // ~energy_dat();
 
-  //data stream
-  const size_t dim_;
+
+
   
   // energy_dat(const energy_dzat &other);
   //save data by element
