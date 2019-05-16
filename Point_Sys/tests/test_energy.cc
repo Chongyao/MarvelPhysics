@@ -17,7 +17,7 @@
 #include "Point_Sys/src/data_stream.h"
 #include "Point_Sys/src/gen_surf.h"
 #include "io.h"
-#include "Point_Sys/src/basic_energy.cc"
+#include "basic_energy.h"
 
 #include "vtk2surf.h"
 
@@ -74,9 +74,15 @@ int main(int argc, char** argv){
   MatrixXd test(3, 3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
   cout << points.rows() << " " << points.cols() << endl;
-
+  auto points_ptr = make_shared<MatrixXd>(points);
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
+
+
+    cout << "[INFO] Assemble energies..." << endl;
+  enum {POTS, CONS, GRAV, MOME};
+  vector<std::shared_ptr<Functional<double, 3>>> ebf(MOME + 1); 
+
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
   spatial_hash SH(points, pt.get<size_t>("nn_num"));
@@ -92,46 +98,44 @@ int main(int argc, char** argv){
 
   //get friends of every point
   vector<vector<size_t>> friends_all(dim);
-// #pragma omp parallel for
+#pragma omp parallel for
   for(size_t i = 0; i < dim; ++i){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
 
-
-
-  
-  point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
-
-  
+  ebf[POTS] = make_shared<point_sys>(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
 
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
-  //add simple constraints
-  //This should read from file. We loop for some points to restrain here.
-  //Constraints vary from different models and situations.
   vector<size_t> cons(0);
   auto cons_file_path = indir + mesh_name +".csv";
   if ( boost::filesystem::exists(cons_file_path) ) 
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
-
-  cout << endl;
-  position_constraint pos_cons(pt.get<double>("position_weig"), cons, dim);
-  
+   ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
-  gravity_energy GE(pt.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'y');
-
+  const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
+  ebf[GRAV] = make_shared<gravity_energy<3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  collision COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim);
+  collision<3> COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim, points_ptr);
 
+  //energy all
+  std::shared_ptr<Functional<double, 3>> energy;
+  try {
+    energy = make_shared<energy_t<double, 3>>(ebf);
+
+  } catch ( std::exception &e ) {
+    cerr << e.what() << endl;
+    exit(EXIT_FAILURE);
+  }
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
-  energy_dat dat_str (dim);
-
+  std::shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<energy_dat>(dim);
+  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);
 
   double delt_t = pt.get<double>("time_step");
   MatrixXd displace;
@@ -147,7 +151,7 @@ int main(int argc, char** argv){
   new_acce.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
-  PS.pre_compute(dat_str);
+
   size_t iters_perframe = floor(1/delt_t/pt.get<size_t>("rate"));
   double dump = pt.get<double>("dump");
   double previous_step_Val = 0;
@@ -157,67 +161,28 @@ int main(int argc, char** argv){
     cerr << "iter is "<<endl<< i << endl;
     cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
     // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
+    energy->Val(displace.data(), dat_str);
+    energy->Gra(displace.data(), dat_str);
 
-    PS.Val(displace.data(), dat_str);
-    PS.Gra(displace.data(), dat_str);
+  
 
-    #if 0
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
-    
-    { 
-      cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra by formula<<<<<<<<<<<<<<<<<<" << endl;
-      cout << dat_str.gra_ << endl;
-      auto init_val = dat_str.Val_;
-      cout << init_val << endl << endl << endl << endl;
-      MatrixXd new_gra(3, dim);
-      double delt_x = 1e-14;
-    
-      for(size_t i = 0; i < points.size(); ++i){
-        dat_str.set_zero();
-        displace(i) += delt_x;
-        PS.Val(displace.data(), dat_str);
-        new_gra(i) = dat_str.Val_ - init_val;
-        displace(i) -= delt_x;
-      }
-      new_gra /= delt_x;
-      cout << -new_gra << endl;
-      PS.Val(displace.data(), dat_str);
-      PS.Gra(displace.data(), dat_str);
-      dat_str.gra_ = -new_gra;
-    }
-    #endif
-    GE.Val(displace.data(), dat_str);
-    GE.Gra(displace.data(), dat_str);
-    cout << dat_str.gra_.array().square().sum() << endl;
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gra norm<<<<<<<<<<<<<<<<<<" << endl;
-    
-
-
-    COLL.Val(points.data(), displace.data(), dat_str);
-    COLL.Gra(points.data(), displace.data(), dat_str, PS.get_Mass_VectorXd());
-
-    pos_cons.Gra(displace.data(), dat_str);
 #pragma omp parallel for
     for(size_t j = 0; j < dim; ++j){
       assert(PS.get_mass(j) > 0);
-      new_acce.col(j) = dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
+      new_acce.col(j) = dat_str->get_gra().col(j)/mass_vector(j) - velocity.col(j)*dump;
     }
-
-
-
-    
 
 
     velocity += delt_t * new_acce;
     displace += delt_t *velocity;
 
-    cout << "delt energy :"<< dat_str.Val_ - previous_step_Val << endl;
-    if (i > 10 && fabs(dat_str.Val_ - previous_step_Val) < 1e-6)
+    cout << "delt energy :"<< dat_str->get_val() - previous_step_Val << endl;
+    if (i > 10 && fabs(dat_str->get_val() - previous_step_Val) < 1e-6)
       break;
     
-    previous_step_Val = dat_str.Val_;
+    previous_step_Val = dat_str->get_val();
     cout << "[INFO]>>>>>>>>>>>>>>>>>>>Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << "total energy: " << dat_str.Val_ << endl;
+    cout << "total energy: " << dat_str->get_val() << endl;
 
     acce = new_acce;
 
@@ -228,8 +193,7 @@ int main(int argc, char** argv){
       point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
       point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
       point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
-      point_scalar_append2vtk(true, point_filename.c_str(), dat_str.ela_val_, dim, "strain_Energy");
-      point_scalar_append2vtk(true, point_filename.c_str(), dat_str.vol_val_, dim, "vol_conservation_Energy");
+
       // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
       cout  << displace.rows() << " " << displace.cols() << "  " << nods.cols() << endl;
       vet_displace = displace.block(0, 0, 3, nods.cols());
@@ -237,7 +201,7 @@ int main(int argc, char** argv){
 
     }
 
-    dat_str.set_zero();
+    dat_str->set_zero();
   }
   auto end = system_clock::now();
   auto duration = duration_cast<microseconds>(end - start);

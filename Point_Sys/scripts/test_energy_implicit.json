@@ -7,7 +7,7 @@
   "Poission":0.45,
   "Young":7000,
   "max_iter":200,
-  "kv":100,
+  "kv":0,
   "time_step":0.01,
   "gravity":9.8,
   "nn_num":10,

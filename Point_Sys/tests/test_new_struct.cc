@@ -33,6 +33,9 @@ using namespace chrono;
 using namespace boost;
 
 int main(int argc, char** argv){
+
+
+  
   
   Eigen::initParallel();
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Eigen parallel<<<<<<<<<<<<<<<<<<" << endl;
@@ -76,15 +79,24 @@ int main(int argc, char** argv){
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
-
+  cout << "[INFO]points num is" << points.cols() << endl;
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>points<<<<<<<<<<<<<<<<<<" << endl;
 
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
+
+
+  cout << "[INFO] Assemble energies..." << endl;
+  enum {POTS, CONS, GRAV, MOME};
+  vector<std::shared_ptr<Functional<double, 3>>> ebf(MOME + 1); 
+  
+
+  
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
   spatial_hash SH(points, pt.get<size_t>("nn_num"));
+  
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
@@ -103,39 +115,77 @@ int main(int argc, char** argv){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
 
-  point_sys PS(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
+  ebf[POTS] = make_shared<point_sys>(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
+
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
-
-  //add simple constraints
-  //This should read from file. We loop for some points to restrain here.
-  //Constraints vary from different models and situations.
   vector<size_t> cons;
   auto cons_file_path = indir + mesh_name +".csv";
   if ( boost::filesystem::exists(cons_file_path) )
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
   cout << "constrint " << cons.size() << " points" << endl;
-  position_constraint pos_cons(dim, pt.get<double>("position_weig"), cons);
+
+  
+  ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);
+    
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
-  const auto mass_vector = PS.get_Mass_VectorXd();
-  gravity_energy GE(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
+  const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
+  ebf[GRAV] = make_shared<gravity_energy<3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
   
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
   double delt_t = pt.get<double>("time_step");
-  momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
-  
+  // momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
+  ebf[MOME] = make_shared<momentum<3>>(dim, mass_vector, delt_t);
 
   
   // cout << "[INFO]>>>>>>>>>>>>>>>>>>>Collision<<<<<<<<<<<<<<<<<<" << endl;
   // collision COLL(pt.get<double>("w_coll"), 'y', pt.get<double>("coll_pos"), static_cast<size_t>(nods.cols()), dim);
+
+  //energy all
+  std::shared_ptr<Functional<double, 3>> energy;
+  try {
+    energy = make_shared<energy_t<double, 3>>(ebf);
+
+  } catch ( std::exception &e ) {
+    cerr << e.what() << endl;
+    exit(EXIT_FAILURE);
+  }
+
+
+
+
+
+
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
-  energy_dat dat_str (dim);
+  std::shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<energy_dat>(dim);
+  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);{
+    VectorXd random_x(3 * dim);{
+      #pragma omp parallel for
+      for(size_t i = 0; i < 3 * dim; ++i){
+        random_x(i) = i * 4.5 + i * i ;
+      }
+    }
+    dat_str->set_zero();
+    const auto& sm1 = dat_str->get_hes();
+    cout<<"the number of nonzeros with comparison: \n"
+        << (Eigen::Map<Eigen::VectorXd> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
+        << endl;
+
+    energy->Val(random_x.data(), dat_str);
+    energy->Gra(random_x.data(), dat_str);
+    energy->Hes(random_x.data(), dat_str);
+    cout<<"the number of nonzeros with comparison: \n"
+        << (Eigen::Map<Eigen::VectorXd> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
+        << endl;
+    dat_str->set_zero();
+
+  }
 
 
   MatrixXd displace;
@@ -143,12 +193,12 @@ int main(int argc, char** argv){
   displace.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
-  PS.pre_compute(dat_str);
+  
   size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
   VectorXd solution = VectorXd::Zero(3 * dim);
   VectorXd displace_search = VectorXd::Zero(3 * dim);
   double d1dtdt = 1 / delt_t /delt_t, d1dt = 1 / delt_t;
-  Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
+  Map<const VectorXd>res(dat_str->get_gra().data(), 3 * dim);
 
 
   MatrixXd points_now;
@@ -163,43 +213,18 @@ int main(int argc, char** argv){
     Map<VectorXd> displace_plus(displace.data(), 3*dim);
     for(size_t newton_i = 0; newton_i < 20; ++newton_i){
       cout << "newton iter is " << newton_i << endl;
-      dat_str.set_zero();
 
-      PS.Val(displace_plus.data(), dat_str);
-      PS.Gra(displace_plus.data(), dat_str);
-      auto start = system_clock::now();
-      PS.Hessian(displace_plus.data(), dat_str);
-      auto end = system_clock::now();
-      auto duration = duration_cast<microseconds>(end - start);
-      cout <<  "hessian花费了" 
-           << double(duration.count()) * microseconds::period::num / microseconds::period::den 
-           << "秒" << endl;
-
-
-
-
-      
-      MO.Val(displace_plus.data(), dat_str);
-      MO.Gra(displace_plus.data(), dat_str);
-      MO.Hes(displace_plus.data(), dat_str);
-
-      
-      GE.Val(displace_plus.data(), dat_str);
-      GE.Gra(displace_plus.data(), dat_str);
-
-      
-      pos_cons.Val(displace_plus.data(), dat_str);
-      pos_cons.Gra(displace_plus.data(), dat_str);
-      pos_cons.Hes(displace_plus.data(),dat_str);
-
-      // COLL.Val(points.data(), displace_plus.data(), dat_str);
-      // COLL.Gra(points.data(), displace_plus.data(), dat_str, mass_vector);
-      // COLL.Hes(points.data(), displace_plus.data(), dat_str);
-
+      dat_str->set_zero();
+      // dat_str->hes_reserve(nnzs);
+      energy->Val(displace_plus.data(), dat_str);
+      energy->Gra(displace_plus.data(), dat_str);
+      energy->Hes(displace_plus.data(), dat_str);
+      dat_str->hes_compress();
 
       const double res_value = res.array().square().sum();
-      cout << "[INFO]Newton res " << res_value << endl;
-      cout << "[INFO] ALL Energy: " << dat_str.val_ << endl;
+      cout << "[INFO]Newton res " <<std::setprecision(9)<< res_value << endl;
+      cout << "[INFO] ALL Energy: " << dat_str->get_val() << endl;
+
       if(res_value < 1e-4){
         cout << endl;
         break;
@@ -207,27 +232,26 @@ int main(int argc, char** argv){
       
       
       //implicit time integral
-      dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-      // cout <<  (Map<VectorXd> (dat_str.hes_.valuePtr(), dat_str.hes_.nonZeros()).array() != 0).count() << 3 *dim * 3 * dim <<  endl;
+
              
       // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+      auto start = system_clock::now();
       SimplicialLLT<SparseMatrix<double>> llt;
-      llt.compute(dat_str.hes_);
-      VectorXd all_one = VectorXd::Ones(3 * dim);
+      llt.compute(dat_str->get_hes());
+      size_t time = 1;
       while(llt.info() != Eigen::Success){
         cout <<"lltinfo "<< llt.info() << endl;
-        dat_str.hes_ += all_one.asDiagonal();
-        llt.compute(dat_str.hes_);
-        all_one *= 2;
+        dat_str->hes_add_diag(time);
+        llt.compute(dat_str->get_hes());
+        time *= 2;
       }
-      solution = llt.solve(-res);
 
-      // // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
-      // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-      // cg.setMaxIterations(3*dim);
-      // cg.setTolerance(1e-8);
-      // cg.compute(dat_str.hes_);
-      // solution = cg.solve(-res);
+      solution = llt.solve(-res);
+      auto end = system_clock::now();
+      auto duration = duration_cast<microseconds>(end - start);
+      cout <<  "solve linear system花费了" 
+           << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+           << "秒" << endl;
 
 
 
@@ -333,7 +357,7 @@ int main(int argc, char** argv){
       cout << endl;
     }
     
-    MO.update_location_and_velocity(displace_plus.data());
+    dynamic_pointer_cast<momentum<3>>(ebf[MOME])->update_location_and_velocity(displace_plus.data());
 
 
     auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";

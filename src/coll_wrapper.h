@@ -17,6 +17,8 @@ class coll_info{
   const double time_;
 };
 
+
+
 class coll_wrapper{
 
  public:
@@ -43,6 +45,7 @@ class coll_wrapper{
   //                 const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
   //                 Eigen::MatrixXd& new_core_nods, energy_dat& dat_str,
   //                 const Eigen::VectorXd& mass);
+
   int Collide_imp(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
                   const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
                   Eigen::MatrixXd& new_core_nods, Eigen::MatrixXd& new_core_velo,
