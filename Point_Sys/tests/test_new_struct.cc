@@ -199,7 +199,7 @@ int main(int argc, char** argv){
   size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
   VectorXd solution = VectorXd::Zero(3 * dim);
   VectorXd displace_search = VectorXd::Zero(3 * dim);
-  double d1dtdt = 1 / delt_t /delt_t, d1dt = 1 / delt_t;
+
   Map<const VectorXd>res(dat_str->get_gra().data(), 3 * dim);
 
 
