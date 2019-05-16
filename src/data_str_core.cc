@@ -146,5 +146,11 @@ template <typename T, size_t dim_>
 const Eigen::SparseMatrix<T>& dat_str_core<T, dim_>::get_hes()const{
   return hes_;
 }
+
+
+template<typename T, size_t dim_>
+const size_t dat_str_core<T, dim_>::get_dof()const{
+  return dof_;
+}
 }//namespace
 

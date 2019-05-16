@@ -31,7 +31,7 @@ class dat_str_core{
   const Eigen::Matrix<T, Eigen::Dynamic, 1>& get_gra() const;
   const Eigen::SparseMatrix<T>& get_hes()const;
 
-
+  const size_t get_dof()const;
   //TODO:add Perfect Forwardincg
   
 

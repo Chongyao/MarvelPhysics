@@ -22,7 +22,7 @@
 #include "Point_Sys/src/gen_surf.h"
 #include "io.h"
 #include "basic_energy.h"
-
+#include "config.h"
 
 
 using namespace marvel;
@@ -36,10 +36,11 @@ int main(int argc, char** argv){
 
 
   
-  
+  __TIME_BEGIN__
   Eigen::initParallel();
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Eigen parallel<<<<<<<<<<<<<<<<<<" << endl;
   cout << "enable parallel in Eigen in " << nbThreads() << " threads" << endl;
+  __TIME_END__("hey")
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>READ JSON FILE<<<<<<<<<<<<<<<<<<" << endl;
   boost::property_tree::ptree pt;{
@@ -183,6 +184,7 @@ int main(int argc, char** argv){
     cout<<"the number of nonzeros with comparison: \n"
         << (Eigen::Map<Eigen::VectorXd> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
         << endl;
+    dat_str->set_zero_after_pre_compute();
     dat_str->set_zero();
 
   }
