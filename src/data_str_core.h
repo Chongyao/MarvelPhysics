@@ -20,9 +20,14 @@ class dat_str_core{
   int save_gra(const size_t& pos, const Eigen::Matrix<T, dim_, 1>& point_gra);
   int save_gra(const size_t& pos, const T& one_gra);
   
+
   int save_hes(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes);
   int save_hes(const size_t& row, const size_t& col, const T& value);
 
+  int set_zero_after_pre_compute();
+  int save_hes_after_pre_compute(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes);
+  int save_hes_after_pre_compute(const size_t& row, const size_t& col, const T& value);
+  
   const T get_val() const;
   const Eigen::Matrix<T, Eigen::Dynamic, 1>& get_gra() const;
   const Eigen::SparseMatrix<T>& get_hes()const;
@@ -37,6 +42,7 @@ class dat_str_core{
   Eigen::Matrix<T, Eigen::Dynamic, 1> gra_;
   Eigen::SparseMatrix<T> hes_;
   Eigen::Matrix<T, Eigen::Dynamic, 1> all_one_;
+  bool if_pre_compute_hes_{false};
 
 };
 

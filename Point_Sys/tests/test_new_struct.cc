@@ -33,6 +33,9 @@ using namespace chrono;
 using namespace boost;
 
 int main(int argc, char** argv){
+
+
+  
   
   Eigen::initParallel();
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Eigen parallel<<<<<<<<<<<<<<<<<<" << endl;
@@ -76,7 +79,7 @@ int main(int argc, char** argv){
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
-
+  cout << "[INFO]points num is" << points.cols() << endl;
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>points<<<<<<<<<<<<<<<<<<" << endl;
 
@@ -93,6 +96,7 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
   spatial_hash SH(points, pt.get<size_t>("nn_num"));
+  
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
@@ -174,10 +178,37 @@ int main(int argc, char** argv){
 
 
 
+
+
+
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
   std::shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<energy_dat>(dim);
+  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);{
+    VectorXd random_x(3 * dim);{
+      #pragma omp parallel for
+      for(size_t i = 0; i < 3 * dim; ++i){
+        random_x(i) = i * 4.5 + i * i ;
+      }
+    }
+    dat_str->set_zero();
+    const auto& sm1 = dat_str->get_hes();
+    cout<<"the number of nonzeros with comparison: \n"
+        << (Eigen::Map<Eigen::VectorXd> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
+        << endl;
+
+    energy->Val(random_x.data(), dat_str);
+    energy->Gra(random_x.data(), dat_str);
+    energy->Hes(random_x.data(), dat_str);
+    cout<<"the number of nonzeros with comparison: \n"
+        << (Eigen::Map<Eigen::VectorXd> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
+        << endl;
+    dat_str->set_zero_after_pre_compute();
+
+
+
+  }
 
 
   MatrixXd displace;
@@ -185,8 +216,6 @@ int main(int argc, char** argv){
   displace.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
-  dynamic_pointer_cast<point_sys>(ebf[POTS])->
-      pre_compute(dat_str);
   
   size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
   VectorXd solution = VectorXd::Zero(3 * dim);
@@ -209,21 +238,16 @@ int main(int argc, char** argv){
       cout << "newton iter is " << newton_i << endl;
 
       dat_str->set_zero();
-      dat_str->hes_reserve(nnzs);
+      // dat_str->hes_reserve(nnzs);
       energy->Val(displace_plus.data(), dat_str);
       energy->Gra(displace_plus.data(), dat_str);
-      auto start = system_clock::now();
       energy->Hes(displace_plus.data(), dat_str);
-      auto end = system_clock::now();
-      auto duration = duration_cast<microseconds>(end - start);
-      cout <<  "hessian花费了" 
-           << double(duration.count()) * microseconds::period::num / microseconds::period::den 
-           << "秒" << endl;
-
+      
 
       const double res_value = res.array().square().sum();
-      cout << "[INFO]Newton res " << res_value << endl;
+      cout << "[INFO]Newton res " <<std::setprecision(9)<< res_value << endl;
       cout << "[INFO] ALL Energy: " << dat_str->get_val() << endl;
+
       if(res_value < 1e-4){
         cout << endl;
         break;
@@ -243,14 +267,13 @@ int main(int argc, char** argv){
         llt.compute(dat_str->get_hes());
         time *= 2;
       }
+      auto start = system_clock::now();
       solution = llt.solve(-res);
-
-      // // cout << "[INFO]>>>>>>>>>>>>>>>>>>>A_CG<<<<<<<<<<<<<<<<<<" << endl;
-      // ConjugateGradient<SparseMatrix<double>, Lower|Upper> cg;
-      // cg.setMaxIterations(3*dim);
-      // cg.setTolerance(1e-8);
-      // cg.compute(dat_str.hes_);
-      // solution = cg.solve(-res);
+      auto end = system_clock::now();
+      auto duration = duration_cast<microseconds>(end - start);
+      cout <<  "solve linear system花费了" 
+           << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+           << "秒" << endl;
 
 
 

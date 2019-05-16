@@ -46,6 +46,7 @@ int momentum<dim_>::Gra(const double *x, data_ptr<dim_> &data) const{
 
 template<size_t dim_>
 int momentum<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
+  #pragma omp parallel for
   for(size_t i = 0; i < dim_ *dof_; ++i){
     // data.hes_trips.push_back(Triplet<double>(i, i, d1dtdt_ * mass_sparse_.coeff(i, i)));
     data->save_hes(i, i, d1dtdt_ * mass_vec_(i));

@@ -13,7 +13,10 @@ template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::set_zero(){
   val_ = 0;
   gra_.setZero();
-  hes_.setZero();
+  if(if_pre_compute_hes_)
+    this->set_zero_after_pre_compute();
+  else
+    hes_.setZero();
   return 0;
 }
 
@@ -44,6 +47,7 @@ int dat_str_core<T, dim_>::save_val(const T& val){
   return 0;
 }
 
+//>>>>>>>>>>>>>>>>>>save gra<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,
 template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::save_gra(const Eigen::Matrix<T, Eigen::Dynamic, 1>& gra){
   gra_ += gra;
@@ -66,34 +70,92 @@ int dat_str_core<T, dim_>::save_gra(const size_t& pos, const T& one_gra){
   return 0;
 }
 
+//>>>>>>>>>>>>>>>>>>save gra<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+//>>>>>>>>>>>>>>>>>>save hes<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+template<typename T, size_t dim_>
+int dat_str_core<T, dim_>::set_zero_after_pre_compute(){
+  if_pre_compute_hes_ = true;
+  hes_.makeCompressed();
+  for (int k=0; k<hes_.outerSize(); ++k)
+    for (SparseMatrix<double>::InnerIterator it(hes_,k); it; ++it)
+    {
+      it.valueRef() = 0;
+    }
+  return 0;
+}
 
 template <typename T, size_t dim_>
-int dat_str_core<T, dim_>::save_hes(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes){
-#pragma omp critical
-  {
+int dat_str_core<T, dim_>::save_hes_after_pre_compute(const size_t& row, const size_t& col, const T& value){
   
+  #pragma omp atomic
+  hes_.coeffRef(row, col) += value;  
+
+  return 0;
+}
+template <typename T, size_t dim_>
+int dat_str_core<T, dim_>::save_hes_after_pre_compute(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes){
 
   for(size_t row = 0; row < dim_; ++row){
     for(size_t col = 0; col < dim_; ++col){
       if(loc_hes(row, col)){
-        // #pragma omp atomic
-
+        #pragma omp atomic
         hes_.coeffRef(m * dim_ + row, n * dim_ + col) += loc_hes(row, col);
       }
                      
     }
   }
-  }
+
+
   return 0;
 }
 
+
+
+template <typename T, size_t dim_>
+int dat_str_core<T, dim_>::save_hes(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes){
+  if(!if_pre_compute_hes_){
+    #pragma omp critical
+    {
+      for(size_t col = 0; col < dim_; ++col){
+        for(size_t row = 0; row < dim_; ++row){
+          if(loc_hes(row, col)){
+            hes_.coeffRef(m * dim_ + row, n * dim_ + col) += loc_hes(row, col);
+          }
+                     
+        }
+      }
+    }
+  }
+  else{
+    for(size_t col = 0; col < dim_; ++col){
+      for(size_t row = 0; row < dim_; ++row){
+        if(loc_hes(row, col)){
+          #pragma omp atomic
+          hes_.coeffRef(m * dim_ + row, n * dim_ + col) += loc_hes(row, col);
+        }
+                     
+      }
+    }
+  }
+  return 0;
+}
     
 template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::save_hes(const size_t& row, const size_t& col, const T& value){
-  #pragma omp atomic
-  hes_.coeffRef(row, col) += value;
+  if(!if_pre_compute_hes_){
+    #pragma omp critical
+    hes_.coeffRef(row, col) += value;      
+  }
+  else{
+    #pragma omp atomic
+    hes_.coeffRef(row, col) += value;          
+  }
+
+
   return 0;
 }
+//>>>>>>>>>>>>>>>>>>save hes<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 template <typename T, size_t dim_>
 const T dat_str_core<T, dim_>::get_val() const{

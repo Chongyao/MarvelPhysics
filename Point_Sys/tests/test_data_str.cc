@@ -1,5 +1,5 @@
 #define EIGEN_USE_BLAS
-#include "data_str.h"
+#include "data_str_core.h"
 
 #include <chrono>
 #include <random>
@@ -16,13 +16,13 @@ using namespace chrono;
 int main(int argc, char** argv){
   Eigen::initParallel();
   srand (time(NULL));
-  const size_t dof = 200000 * 3;
+  const size_t dof = 2000000 * 3;
   
-  auto mydata = make_shared<dat_str_core<double, 3>>(dof);
+  auto mydata = make_shared<dat_str_core<double, 3>>(dof / 3);
   
   //>>>>>>>>>>>test val
   double sum_val = 0;
-  size_t min = 0, max = 4;
+  size_t min = 0, max = 2;
   vector<double> vals(dof);
   
   #pragma omp parallel for
@@ -112,7 +112,7 @@ int main(int argc, char** argv){
       mydata->save_hes(row_ids(j, i), i, nz_vals(j, i));
     }
   }
-
+  
   end = system_clock::now();
   duration = duration_cast<microseconds>(end - start);
   cout <<  "save hes by class花费了" 
@@ -120,12 +120,33 @@ int main(int argc, char** argv){
        << "秒" << endl;
   cout << "hes sum in class is " << (mydata->get_hes()).sum() << endl;
 
+
+  //set zero
+  mydata->set_zero_after_pre_compute();
+  cout << "after set zero " << (mydata->get_hes()).sum() << endl;
+    start = system_clock::now();
+  #pragma omp parallel for
+  for(size_t i = 0; i < dof; ++i){
+    for(size_t j = 0; j < 6; ++j){
+      mydata->save_hes_after_pre_compute(row_ids(j, i), i, nz_vals(j, i));
+    }
+  }
+  
+  end = system_clock::now();
+  duration = duration_cast<microseconds>(end - start);
+  cout <<  "save hes by class after precompute花费了" 
+       << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+       << "秒" << endl;
+  cout << "hes sum in class is " << (mydata->get_hes()).sum() << endl;
+
+  
+  
   //use triplets
   vector<Triplet<double>> trips;
   SparseMatrix<double> HES(dof, dof);
   trips.reserve(6 * dof);
   start = system_clock::now();
-  for(size_t i = 0; i < dof; ++i){
+  for(size_t i = 0; i <dof; ++i){
     for(size_t j = 0; j < 6; ++j){
       trips.push_back(Triplet<double>(row_ids(j,i), i, nz_vals(j, i)));
     }
@@ -133,10 +154,10 @@ int main(int argc, char** argv){
   HES.setFromTriplets(trips.begin(), trips.end());
   end = system_clock::now();
   duration = duration_cast<microseconds>(end - start);
-  cout <<  "save hes by class花费了" 
+  cout <<  "save hes by triplets花费了" 
        << double(duration.count()) * microseconds::period::num / microseconds::period::den 
        << "秒" << endl;
-  cout << "hes sum in class is " << HES.sum() << endl;
+  cout << "hes sum in triplets is " << HES.sum() << endl;
   
   return 0;
 }

@@ -1,5 +1,8 @@
 #include <math.h>
 #include <iostream>
+#include <memory>
+#include <chrono>
+
 
 #include "points_energy.h"
 #include "get_nn.h"
@@ -8,8 +11,10 @@
 #include <Eigen/LU>
 #include <Eigen/Geometry>
 
+
 using namespace std;
 using namespace Eigen;
+using namespace chrono;
 
 
 
@@ -223,7 +228,7 @@ int point_sys::Val(const double *x, dat_ptr &data)const {
 
   }
 
-
+  cout <<"ela val is "<< data->get_val() << endl;
 
  
 }
@@ -279,31 +284,25 @@ int point_sys::Gra(const double *x, dat_ptr &data) const{
 
   return 0;
 }
+
+//This is origin version
 #if 1
 
 int point_sys::Hes(const double*x, dat_ptr &data) const{
   
-
-
-  //TODO: estimate entries
-  // data->hes_trips.resize(dim_ * friends_[0].size() * friends_[0].size() * 1.5);
-  size_t vec_pos = 0;
-
-  //TODO:consider sysmetric
-
+  auto start = system_clock::now();
   omp_set_num_threads(4);  
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     // cout << "dim is " << i << endl;
     Matrix3d Kpq = Matrix3d::Zero();
-    Matrix3d Kpq_vol = Matrix3d::Zero();    
+    Matrix3d Kpq_vol = Matrix3d::Zero();
+    Matrix3d K_local = Matrix3d::Zero();
     Matrix3d one_line;
     Matrix3d def_mult_dsig;
 
     Matrix3d dsigma_duk;
     Vector3d dp, dq, xij, xik;
-
-
     
     Matrix3d left_deri_det_matrix;
     Matrix3d right_deri;
@@ -337,7 +336,7 @@ int point_sys::Hes(const double*x, dat_ptr &data) const{
             cons_law(def_gra.row(l).transpose()*(dq.transpose()) + dq*def_gra.row(l), Young_, Poission_);
         ela_col[l] = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk);
 
-        // Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
+
       }
 
       //volume conserving forcing
@@ -355,12 +354,10 @@ int point_sys::Hes(const double*x, dat_ptr &data) const{
 
         }
         vol_col[l] = kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri);
-        // Kpq_vol.col(l) =  kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
-
       }
 
-      for(size_t iter_j = 0; iter_j <friends_[i].size(); ++iter_j){
-
+      for(size_t iter_j = 0; iter_j <= iter_k; ++iter_j){
+ 
         xij = points_.col(friends_[i][iter_j]) - points_.col(i);
         dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * dynamic_pointer_cast<energy_dat>(data)->sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
        
@@ -369,180 +366,26 @@ int point_sys::Hes(const double*x, dat_ptr &data) const{
           Kpq_vol.col(l) = vol_col[l] * dp;
         
         }
+        
+        K_local = Kpq + Kpq_vol;
 
+        
+        data->save_hes(friends_[i][iter_j], friends_[i][iter_k], K_local);
+        if(iter_k != iter_j)
+          data->save_hes(friends_[i][iter_k], friends_[i][iter_j], K_local.transpose());
 
-
-#if 0
-#pragma omp critical
-        {
-          for(size_t m = 0; m < 3; ++m){
-            for(size_t n = 0; n < 3; ++n){
-              if(Kpq(m, n))
-                data->hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
-              if (Kpq_vol(m,n))
-                data->hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
-            }
-          }          
-        }//push back values
-#else
-        data->save_hes(friends_[i][iter_j], friends_[i][iter_k], Kpq);
-        data->save_hes(friends_[i][iter_j], friends_[i][iter_k], Kpq_vol);
-#endif
         
       }//for loop: p friends_[i].size()
     }//for_loop: q friends_[i].size()
     
   }//for_loop: i dim
 
-  return 0;
+  auto end = system_clock::now();
+  auto duration = duration_cast<microseconds>(end - start);
+  cout <<  "hessian花费了" 
+       << double(duration.count()) * microseconds::period::num / microseconds::period::den 
+       << "秒" << endl;
 
-}//point_sys::Hessian
-#endif
-#if 0
-int point_sys::Hessian(const double*x, dat_ptr &data){
-  
-
-
-  //TODO: estimate entries
-  // data->hes_trips.reserve(99999);
-
-  //TODO:consider sysmetric
-
-  omp_set_num_threads(4);  
-// #pragma omp parallel for
-  for(size_t i = 0; i < dim_; ++i){
-    // cout << "dim is " << i << endl;
-    Matrix3d Kpq = Matrix3d::Zero();
-    Matrix3d Kpq_vol = Matrix3d::Zero();    
-    Matrix3d one_line;
-    Matrix3d def_mult_dsig;
-
-    Matrix3d dsigma_duk;
-    Vector3d dp, dq, xij, xik;
-
-
-    
-    Matrix3d left_deri_det_matrix;
-    Matrix3d right_deri;
-    Vector3d next_line;
-    Vector3d next_next_line;
-    
-
-    Map<const Matrix3d> stress(data->stress_.col(i).data());
-    Map<const Matrix3d> def_gra(data->def_gra_.col(i).data());
-    Map<const Matrix3d> inv_A(data->inv_A_all_.col(i).data());
-    Map<const Matrix3d> vol_cross(data->vol_cross_.col(i).data());
-    double def_gra_det = def_gra.determinant();
-
-    vector<Matrix3d> ela_col(3);
-    vector<Matrix3d> vol_col(3);
-
-    for(size_t iter_k = 0; iter_k < friends_[i].size(); ++iter_k){
-      xik = points_.col(friends_[i][iter_k]) - points_.col(i);
-      dq = ( friends_[i][iter_k]== i) ? Vector3d(inv_A * data->sigma_w_points_.col(i)): inv_A * xik * weig_[i][iter_k];
-
-      //elastic hessian
-      for(size_t l = 0; l < 3; ++l){
-        one_line.setZero(3, 3);
-        one_line.row(l) = dq.transpose();
-
-        dsigma_duk =
-            cons_law(def_gra.row(l).transpose()*(dq.transpose()) + dq*def_gra.row(l), Young_, Poission_);
-        ela_col[l] = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk);
-
-        // Kpq.col(l) = 2*vol_i_(i)*(one_line*stress + def_gra*dsigma_duk)*dp;
-      }
-
-      //volume conserving forcing
-      for(size_t l = 0; l < 3; ++l){
-        left_deri_det_matrix = def_gra;
-        left_deri_det_matrix.row(l) = dq.transpose();
-        double left_deri = left_deri_det_matrix.determinant();
-
-
-        right_deri = Matrix3d::Zero();{
-          next_line = def_gra.row( (1 + 1) % 3 ).transpose();
-          next_next_line = def_gra.row( (1 + 2) % 3 ).transpose();
-          right_deri.row( (l + 1) % 3 ) = (next_next_line.cross(dq)).transpose();
-          right_deri.row( (l + 2) % 3 ) = (dq.cross(next_line)).transpose();
-
-        }
-        vol_col[l] = kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri);
-        // Kpq_vol.col(l) =  kv_ * vol_i_(i) * (left_deri * vol_cross + (def_gra_det - 1) * right_deri) * dp;
-
-      }
-
-      for(size_t iter_j = 0; iter_j <= iter_k; ++iter_j){
-
-        xij = points_.col(friends_[i][iter_j]) - points_.col(i);
-        dp = (friends_[i][iter_j] == i) ? Vector3d(inv_A * data->sigma_w_points_.col(i)) : inv_A * xij * weig_[i][iter_j];
-       
-        for(size_t l = 0; l < 3; ++l){
-          Kpq.col(l) = ela_col[l] * dp;
-          Kpq_vol.col(l) = vol_col[l] * dp;
-        
-        }
-
-#if 0
-        if(iter_j == 1 && iter_k == 2)
-          cout <<"j == 1 ,k == 2" << endl<< Kpq << endl;
-        else if(iter_j == 2 && iter_k == 1)
-          cout <<"j == 2 ,k == 1" << endl<< Kpq << endl;
-        
-          
-#endif
-
-
-
-        if(iter_j == iter_k){
-#pragma omp critical
-        {
-          for(size_t m = 0; m < 3; ++m){
-            for(size_t n = 0; n < 3; ++n){
-              if(Kpq(m, n))
-                data->hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
-              if (Kpq_vol(m,n))
-                data->hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
-            }
-          }          
-        }//push back values
-        }
-        else{
-#pragma omp critical
-        {
-          for(size_t m = 0; m < 3; ++m){
-            for(size_t n = 0; n < 3; ++n){
-              if (Kpq(m, n)){
-              data->hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq(m,n)));
-              data->hes_trips.push_back(Triplet<double>(friends_[i][iter_k]*3 + m, friends_[i][iter_j]*3 + n, Kpq(n, m)));
-              }
-              if(Kpq_vol(m,n)){
-                data->hes_trips.push_back(Triplet<double>(friends_[i][iter_j]*3 + m, friends_[i][iter_k]*3 + n, Kpq_vol(m,n)));
-                data->hes_trips.push_back(Triplet<double>(friends_[i][iter_k]*3 + m, friends_[i][iter_j]*3 + n, Kpq_vol(n,m)));
-              }
-            }
-          }          
-        }//push back values
-        
-        }
-      }//for loop: p friends_[i].size()
-    }//for_loop: q friends_[i].size()
-    if(i == 0){
-      cout << "i == " << i << endl;
-      SparseMatrix<double> test(3 * dim_, 3 * dim_);
-      test.setFromTriplets(data->hes_trips.begin(), data->hes_trips.end());
-      for (int k=0; k<test.outerSize(); ++k)
-        for (SparseMatrix<double>::InnerIterator it(test,k); it; ++it)
-        {
-          cout << it.row() << " " << it.col() << " " <<it.value() << endl;;
-        }
-    }
-    else
-      cout << "i == " << i << endl;
-
-
-    
-  }//for_loop: i dim
 
   return 0;
 
