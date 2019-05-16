@@ -26,7 +26,7 @@
 #include "Point_Sys/src/data_stream.h"
 #include "Point_Sys/src/gen_surf.h"
 #include "io.h"
-#include "Point_Sys/src/basic_energy.cc"
+#include "basic_energy.h"
 
 #include "vtk2surf.h"
 
@@ -96,63 +96,53 @@ int main(int argc, char** argv){
   MatrixXd test(3, 3);
   gen_points(nods, surf, simulation_para.get<size_t>("num_in_axis"), points, true);
   cout << points.rows() << " " << points.cols() << endl;
-  // #if 1
-  // points = nods;
-  // #endif
+
   const size_t dim = points.cols();
   cout <<"generate points done." << endl;
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
-  spatial_hash SH(points, simulation_para.get<size_t>("nn_num"));
+  
+  cout << "[INFO] Assemble energies..." << endl;
+  enum {POTS, CONS,  GRAV, MOME};
+  vector<std::shared_ptr<Functional<double, 3>>> ebf(MOME + 1); 
+
 
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>POINTS ENERGY<<<<<<<<<<<<<<<<<<" << endl;
+  cout << "[INFO]Build spatial " << endl;
+  spatial_hash SH(points, simulation_para.get<size_t>("nn_num"));
+  cout << "[INFO]Build Point System" << endl;
   //calc volume 
   const double volume = clo_surf_vol(nods, surf);
   //calc support radii
   VectorXd sup_radi = SH.get_sup_radi();
-  
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup_radi<<<<<<<<<<<<<<<<<<" << endl;
-
+  cout << "[INFO]sup_radi" << endl;
   //get friends of every point
   vector<vector<size_t>> friends_all(dim);
-  // #pragma omp parallel for
+  #pragma omp parallel for
   for(size_t i = 0; i < dim; ++i){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
 
+  ebf[POTS] = make_shared<point_sys>(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
-
-  
-  point_sys PS(points, common.get<double>("density"), physics_para.get<double>("Young"), physics_para.get<double>("Poission"), volume, simulation_para.get<double>("kv"), friends_all, sup_radi);
 
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
-  //add simple constraints
-  //This should read from file. We loop for some points to restrain here.
-  //Constraints vary from different models and situations.
+
   vector<size_t> cons(0);
   auto cons_file_path = indir + "/" +  mesh_name +".csv";
-
   if ( boost::filesystem::exists(cons_file_path) )
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
   cout << "constrint " << cons.size() << " points" << endl;
-  #if 1
-  for(auto con : cons){
-    cout << con << " ";
-  }
-  cout << endl;
-  #endif
-
-  position_constraint pos_cons(dim, simulation_para.get<double>("position_weig"), cons);
-
+  ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   const double gravity = common.get<double>("gravity");
-  gravity_energy GE(simulation_para.get<double>("w_g"), gravity, dim, PS.get_Mass_VectorXd(), 'z');
+  const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
+  ebf[GRAV] = make_shared<gravity_energy<3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  // collision COLL(simulation_para.get<double>("w_coll"),'y', simulation_para.get<double>("g_pos"), nods.cols(), dim);
   vector<std::shared_ptr<MatrixXi> > obta_surfs;
   vector<std::shared_ptr<MatrixXd>> obta_nods;{
     filesystem::path obstacles_path(indir + "/" + "obstacles");
@@ -186,14 +176,21 @@ int main(int argc, char** argv){
     }
   }
   
-  coll_wrapper COLLISION(obta_surfs, obta_nods, fake_surf_ptr, points);
-  
+  // ebf[COLL] = make_shared<coll_wrapper>(obta_surfs, obta_nods, fake_surf_ptr, points);
 
 
-  
+
+  std::shared_ptr<Functional<double, 3>> energy;
+  try {
+    energy = make_shared<energy_t<double, 3>>(ebf);
+
+  } catch ( std::exception &e ) {
+    cerr << e.what() << endl;
+    exit(EXIT_FAILURE);
+  }
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
-  energy_dat dat_str (dim);
+  std::shared_ptr<energy_dat> dat_str = make_shared<energy_dat>(dim);
 
   string solver = simulation_para.get<string>("solver");
 
@@ -212,7 +209,8 @@ int main(int argc, char** argv){
 
   vet_displace.setZero(3, nods.cols());
 
-  PS.pre_compute(dat_str);
+
+  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);
   size_t iters_perframe = static_cast<size_t>(round(1.0/delt_t/common.get<size_t>("frame_rate")));
   size_t max_iter  = static_cast<size_t>(ceil(common.get<double>("total_time") / delt_t));
   cout << "max iter is " << max_iter << endl;
@@ -223,13 +221,9 @@ int main(int argc, char** argv){
   size_t frame_id = 0;
   if(solver == "explicit"){
     for(size_t i = 0; i < max_iter; ++i){
-      cerr << "iter is "<<endl<< i << endl;
-      // cout << "displace is " << endl<< displace.block(0, 0, 3, 7) << endl;
-      // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 7) << endl;
-      // cout << "acce is " << endl << acce.block(0, 0, 3, 8) << endl;
+      #if 0
+      cout << "iter is "<<endl<< i << endl;
 
-
-      
 
       GE.Val(displace.data(), dat_str);
       GE.Gra(displace.data(), dat_str);
@@ -281,9 +275,11 @@ int main(int argc, char** argv){
 
       
     }
+    #endif
   }
   else{//TODO:need to be rewrite
-
+    
+    
   }
   auto end = system_clock::now();
   auto duration = duration_cast<microseconds>(end - start);

@@ -121,7 +121,8 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>displace<<<<<<<<<<<<<<<<<<" << endl;
   cout << displace << endl;
-  energy_dat dat_str (dim);
+  std::shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<energy_dat>(dim);
+
 
   PS.pre_compute(dat_str);
 
@@ -129,22 +130,22 @@ int main(int argc, char** argv){
   PS.Val(displace.data(), dat_str);
   PS.Gra(displace.data(), dat_str);
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>gra<<<<<<<<<<<<<<<<<<" << endl;
-  cout << dat_str.gra_ << endl << endl;
+  cout << dat_str->get_gra() << endl << endl;
 
   //check gra by difference
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>difference check<<<<<<<<<<<<<<<<<<" << endl;
-  { auto init_val = dat_str.val_;
-    auto init_gra = dat_str.gra_;
+  { auto init_val = dat_str->get_val();
+    auto init_gra = dat_str->get_gra();
     cout << init_val << endl << endl << endl << endl;
     MatrixXd new_gra(3, dim);
     double delt_x = 1e-10;
     for(size_t i = 0; i < points.size(); ++i){
-      dat_str.set_zero();
+      dat_str->set_zero();
       displace(i) += delt_x;
       PS.Val(displace.data(), dat_str);
-      new_gra(i) = dat_str.val_ - init_val;
+      new_gra(i) = dat_str->get_val() - init_val;
       displace(i) -= delt_x;
     }
     new_gra /= delt_x;
@@ -156,11 +157,13 @@ int main(int argc, char** argv){
   
   PS.Val(displace.data(), dat_str);
   PS.Gra(displace.data(), dat_str);
-  auto gra_now = dat_str.gra_;  
-  PS.Hessian(displace.data(), dat_str);
-  dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-  cout << MatrixXd(dat_str.hes_) << endl;
-  MatrixXd init_hes = MatrixXd(dat_str.hes_);
+  auto gra_now = dat_str->get_gra();  
+  PS.Hes(displace.data(), dat_str);
+  
+  // dat_str->get_hes().setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
+  
+  cout << MatrixXd(dat_str->get_hes()) << endl;
+  MatrixXd init_hes = MatrixXd(dat_str->get_hes());
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>numeric difference hes<<<<<<<<<<<<<<<<<<" << endl;
   //check Hessian by difference
@@ -170,11 +173,11 @@ int main(int argc, char** argv){
     
     MatrixXd hes_dif(3 * dim, 3 * dim);
     for(size_t i = 0; i < points.size(); ++i){
-      dat_str.set_zero();
+      dat_str->set_zero();
       displace(i) += delt_x;
       PS.Val(displace.data(), dat_str);
       PS.Gra(displace.data(), dat_str);
-      MatrixXd one_hes = (dat_str.gra_ - gra_now) / delt_x;
+      MatrixXd one_hes = (dat_str->get_gra() - gra_now) / delt_x;
       hes_dif.col(i) = Map<VectorXd>(one_hes.data(), 3*dim);
       displace(i) -= delt_x;
     }
@@ -191,10 +194,10 @@ int main(int argc, char** argv){
 
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Hessian<<<<<<<<<<<<<<<<<<" << endl;
-  cout << MatrixXd(dat_str.hes_);
+  cout << MatrixXd(dat_str->get_hes());
   
   
-  // displace += dat_str.gra_;
+  // displace += dat_str->get_gra();
   
 
   // dat_str.set_zero();

@@ -105,7 +105,6 @@ int main(int argc, char** argv){
        << double(duration.count()) * microseconds::period::num / microseconds::period::den 
        << "秒" << endl;
   cout << "sum without block is " << sum_without_block << endl;  
-
   // for(const auto& v : test_vec){
   //   cout << v << endl;
   // }
