@@ -25,8 +25,7 @@ class dat_str_core{
   int save_hes(const size_t& row, const size_t& col, const T& value);
 
   int set_zero_after_pre_compute();
-  int save_hes_after_pre_compute(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes);
-  int save_hes_after_pre_compute(const size_t& row, const size_t& col, const T& value);
+
   
   const T get_val() const;
   const Eigen::Matrix<T, Eigen::Dynamic, 1>& get_gra() const;

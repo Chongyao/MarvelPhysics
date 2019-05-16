@@ -115,37 +115,17 @@ int main(int argc, char** argv){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
 
-  VectorXi nnzs(dim * 3);{
-    #pragma omp parallel for
-    for(size_t i = 0; i < dim; ++i){
-      size_t fri_num = friends_all[i].size();
-      nnzs(i * 3) = fri_num * 3;
-      nnzs(i * 3 + 1) = fri_num * 3;
-      nnzs(i * 3 + 2) = fri_num * 3;
-    }
-  }
-  #if 1
-  nnzs = VectorXi::Ones(dim * 3) *  dim * 3;
-  #endif
-
-  
-
-
   ebf[POTS] = make_shared<point_sys>(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
 
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
-
-  //add simple constraints
-  //This should read from file. We loop for some points to restrain here.
-  //Constraints vary from different models and situations.
   vector<size_t> cons;
   auto cons_file_path = indir + mesh_name +".csv";
   if ( boost::filesystem::exists(cons_file_path) )
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
   cout << "constrint " << cons.size() << " points" << endl;
-  // position_constraint pos_cons(dim, pt.get<double>("position_weig"), cons);
+
   
   ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);
     
@@ -153,7 +133,6 @@ int main(int argc, char** argv){
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
   const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
-  // gravity_energy GE(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
   ebf[GRAV] = make_shared<gravity_energy<3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
   
   
@@ -204,9 +183,7 @@ int main(int argc, char** argv){
     cout<<"the number of nonzeros with comparison: \n"
         << (Eigen::Map<Eigen::VectorXd> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
         << endl;
-    dat_str->set_zero_after_pre_compute();
-
-
+    dat_str->set_zero();
 
   }
 
@@ -242,7 +219,7 @@ int main(int argc, char** argv){
       energy->Val(displace_plus.data(), dat_str);
       energy->Gra(displace_plus.data(), dat_str);
       energy->Hes(displace_plus.data(), dat_str);
-      
+      dat_str->hes_compress();
 
       const double res_value = res.array().square().sum();
       cout << "[INFO]Newton res " <<std::setprecision(9)<< res_value << endl;
@@ -258,6 +235,7 @@ int main(int argc, char** argv){
 
              
       // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
+      auto start = system_clock::now();
       SimplicialLLT<SparseMatrix<double>> llt;
       llt.compute(dat_str->get_hes());
       size_t time = 1;
@@ -267,7 +245,7 @@ int main(int argc, char** argv){
         llt.compute(dat_str->get_hes());
         time *= 2;
       }
-      auto start = system_clock::now();
+
       solution = llt.solve(-res);
       auto end = system_clock::now();
       auto duration = duration_cast<microseconds>(end - start);

@@ -104,6 +104,11 @@ int main(int argc, char** argv){
       row_ids(j, i) = min + (rand() % static_cast<int>(max - min + 1));
     }
   }
+
+  //WARNING: TODO: add precompute
+
+
+  
   //use class dat_str_core
   start = system_clock::now();
   #pragma omp parallel for
@@ -128,7 +133,7 @@ int main(int argc, char** argv){
   #pragma omp parallel for
   for(size_t i = 0; i < dof; ++i){
     for(size_t j = 0; j < 6; ++j){
-      mydata->save_hes_after_pre_compute(row_ids(j, i), i, nz_vals(j, i));
+      mydata->save_hes(row_ids(j, i), i, nz_vals(j, i));
     }
   }
   

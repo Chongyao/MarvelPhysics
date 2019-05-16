@@ -48,12 +48,12 @@ target_link_libraries(test_genpoints
 #   jtf-mesh)
 
 
-add_executable(test_energy_implicit test_energy_implicit.cc)
-target_link_libraries(test_energy_implicit
-  PointSys
-  marvel-core
-  ${Boost_LIBRARIES}
-  )
+# add_executable(test_energy_implicit test_energy_implicit.cc)
+# target_link_libraries(test_energy_implicit
+#   PointSys
+#   marvel-core
+#   ${Boost_LIBRARIES}
+#   )
 
 add_executable(test_new_struct test_new_struct.cc)
 target_link_libraries(test_new_struct
@@ -95,12 +95,12 @@ add_executable(test_SparseMatrix test_SparseMatrix.cc)
 #   ${Boost_LIBRARIES}
 #   )
 
-cuda_add_executable(blender_meshless_coll blender_coll.cpp)
-target_link_libraries(blender_meshless_coll
-  marvel-core
-  coll_rigid
-  PointSys
+# cuda_add_executable(blender_meshless_coll blender_coll.cpp)
+# target_link_libraries(blender_meshless_coll
+#   marvel-core
+#   coll_rigid
+#   PointSys
 
-  ${Boost_LIBRARIES}
-  )
+#   ${Boost_LIBRARIES}
+#   )
 

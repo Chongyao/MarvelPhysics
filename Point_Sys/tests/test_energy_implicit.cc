@@ -21,7 +21,7 @@
 #include "Point_Sys/src/data_stream.h"
 #include "Point_Sys/src/gen_surf.h"
 #include "io.h"
-#include "Point_Sys/src/basic_energy.h"
+#include "basic_energy.h"
 
 
 
