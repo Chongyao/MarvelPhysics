@@ -38,16 +38,17 @@ template<typename T, size_t dim_>
 int newton_iter<T, dim_>::solve(T* x){
   
   Map<Matrix<T, Dynamic, 1>>X(x, dim_ * dof_);
-  Map<const Matrix<T, Dynamic, 1>>res (dat_str_->get_gra().data(), 3 * dim_);
+  const Matrix<T, Dynamic, 1>& res = dat_str_->get_gra();
   SimplicialLLT<SparseMatrix<T>> llt;
-  // auto solution = Matrix<T, Dynamic, 1>::Zero(dim_ * dof_);
+  Matrix<T, -1, 1> solution;
+
   
   for(size_t newton_i = 0; newton_i < max_iter_; ++newton_i){
     cout << "[INFO]>>>>>>>>>>>>newton iter is " << newton_i << endl;
     dat_str_->set_zero();
     energy_->Val(x, dat_str_);
     energy_->Gra(x, dat_str_);
-    
+   
     __TIME_BEGIN__
     energy_->Hes(x, dat_str_);
     __TIME_END__("[INFO]Assemble hessian");
@@ -63,7 +64,7 @@ int newton_iter<T, dim_>::solve(T* x){
     }
 
     //Solve linear system By Cholesky
-    // __TIME_BEGIN__
+    __TIME_BEGIN__
     llt.compute(dat_str_->get_hes());
     size_t time = 1;
     while(llt.info() != Eigen::Success){
@@ -72,11 +73,14 @@ int newton_iter<T, dim_>::solve(T* x){
       llt.compute(dat_str_->get_hes());
       time *= 2;
     }
-    auto solution = llt.solve(-res);
-    // __TIME_END__("[INFO]: Solve linear system by Cholesky");
+
+    // const auto  solution = llt.solve(-dat_str_->get_gra());
+    solution = llt.solve(-res).eval();
+    __TIME_END__("[INFO]: Solve linear system by Cholesky");
+
     
     if(if_line_search_)
-      X += line_search<T, dim_>(dat_str_->get_val(), static_cast<T>(res.dot(solution)), energy_, dat_str_, X, solution) * solution;
+      X += line_search<T, dim_>(dat_str_->get_val(), static_cast<T>(res.dot(solution)), energy_, dat_str_, x, solution.data()) * solution;
     else
       X +=  solution;
 

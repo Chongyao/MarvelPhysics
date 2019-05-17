@@ -10,7 +10,7 @@ template<typename T, size_t dim_>
 T line_search(const T& val_init, const T& down,
               const std::shared_ptr<Functional<T, dim_>>& energy,
               std::shared_ptr<dat_str_core<T, dim_>>& data,
-              const Eigen::Matrix<T, -1, 1>& xk, const Eigen::Matrix<T, -1, 1>& pk);
+              const T* const xk, const T* const  pk);
 
 // extern template  double line_search(const double& val_init, const double& down,
 //               const std::shared_ptr<Functional<double, 3>>& energy,
