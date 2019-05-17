@@ -168,7 +168,7 @@ int main(int argc, char** argv){
 
 #pragma omp parallel for
     for(size_t j = 0; j < dim; ++j){
-      assert(PS.get_mass(j) > 0);
+      // assert(PS.get_mass(j) > 0);
       new_acce.col(j) = dat_str->get_gra().col(j)/mass_vector(j) - velocity.col(j)*dump;
     }
 

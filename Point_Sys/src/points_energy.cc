@@ -228,7 +228,7 @@ int point_sys::Val(const double *x, dat_ptr &data)const {
 
   }
 
-  cout <<"ela val is "<< data->get_val() << endl;
+
 
  
 }

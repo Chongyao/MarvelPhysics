@@ -1,14 +1,17 @@
 #include "line_search.h"
 #include <iostream>
+
 using namespace std;
 using namespace Eigen;
 namespace marvel{
 
 template<typename T, size_t dim_>
-double line_search(const double& val_init, const double& down,
-                   const shared_ptr<energy_t<T, dim_>>& energy,
-                   const shared_ptr<dat_str_core<T, dim_>>& data,
-                   const VectorXd& xk, const VectorXd& pk){
+T line_search(const T& val_init, const T& down,
+              const std::shared_ptr<Functional<T, dim_>>& energy,
+              std::shared_ptr<dat_str_core<T, dim_>>& data,
+              const T* const _xk, const T* const _pk){
+  Map<const Matrix<T, -1, 1>> xk(_xk, dim_ * data->get_dof());
+  Map<const Matrix<T, -1, 1>> pk(_pk, dim_ * data->get_dof());
   
   cout << "[INFO] linesearch:" << endl;
   const double c = 1e-4, c2 = 0.9;
@@ -93,6 +96,11 @@ double line_search(const double& val_init, const double& down,
   return alpha_fin;
 
 }
+// template  double line_search(const double& val_init, const double& down,
+//                              const std::shared_ptr<Functional<double, 3>>& energy,
+//                              std::shared_ptr<dat_str_core<double, 3>>& data,
+//                              const Eigen::Matrix<double, -1, 1>& xk, const Eigen::Matrix<double, -1, 1>& pk);
+
 
 }
 
