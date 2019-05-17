@@ -8,8 +8,9 @@ namespace marvel{
 template<typename T, size_t dim_>
 class newton_iter{
  public:
-  newton_iter(std::shared_ptr<dat_str_core<T, dim_>> data,
-              std::shared_ptr<energy_t<T, dim_>> energy,
+  
+  newton_iter(std::shared_ptr<dat_str_core<T, dim_>>& dat_str,
+              std::shared_ptr<Functional<T, dim_>>& energy,
               const T time_step = 0.01, const size_t max_iter = 20, const T tol = 1e-4, const bool if_pre_compute_hes = false, const bool if_line_search = true);
   int solve(T* x);
  private:
@@ -20,9 +21,12 @@ class newton_iter{
 
   const bool if_line_search_;
 
-  std::shared_ptr<dat_str_core<T, dim_>> data_;
-  std::shared_ptr<energy_t<T, dim_>> energy_;
-}
+  std::shared_ptr<dat_str_core<T, dim_>> dat_str_;
+  std::shared_ptr<Functional<T, dim_>> energy_;
+};
+
+template class newton_iter<double, 3>;
+
   
 }
 #endif

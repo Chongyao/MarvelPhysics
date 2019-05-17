@@ -23,7 +23,7 @@
 #include "io.h"
 #include "basic_energy.h"
 #include "config.h"
-
+#include "implicit_euler.h"
 
 using namespace marvel;
 using namespace std;
@@ -90,7 +90,8 @@ int main(int argc, char** argv){
 
   cout << "[INFO] Assemble energies..." << endl;
   enum {POTS, CONS, GRAV, MOME};
-  vector<std::shared_ptr<Functional<double, 3>>> ebf(MOME + 1); 
+  vector<std::shared_ptr<Functional<double, 3>>> ebf(MOME + 1);
+  std::shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<energy_dat>(dim);
   
 
   
@@ -117,7 +118,7 @@ int main(int argc, char** argv){
   }
 
   ebf[POTS] = make_shared<point_sys>(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
-
+  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
@@ -156,55 +157,20 @@ int main(int argc, char** argv){
     exit(EXIT_FAILURE);
   }
 
-
-
-
-
-
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
-  std::shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<energy_dat>(dim);
-  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);{
-    VectorXd random_x(3 * dim);{
-      #pragma omp parallel for
-      for(size_t i = 0; i < 3 * dim; ++i){
-        random_x(i) = i * 4.5 + i * i ;
-      }
-    }
-    dat_str->set_zero();
-    const auto& sm1 = dat_str->get_hes();
-    cout<<"the number of nonzeros with comparison: \n"
-        << (Eigen::Map<Eigen::VectorXd> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
-        << endl;
-
-    energy->Val(random_x.data(), dat_str);
-    energy->Gra(random_x.data(), dat_str);
-    energy->Hes(random_x.data(), dat_str);
-    cout<<"the number of nonzeros with comparison: \n"
-        << (Eigen::Map<Eigen::VectorXd> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
-        << endl;
-    dat_str->set_zero_after_pre_compute();
-    dat_str->set_zero();
-
-  }
 
 
   MatrixXd displace;
   MatrixXd vet_displace;
+  MatrixXd points_now;
   displace.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
   
   size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
-  VectorXd solution = VectorXd::Zero(3 * dim);
-  VectorXd displace_search = VectorXd::Zero(3 * dim);
-
-  Map<const VectorXd>res(dat_str->get_gra().data(), 3 * dim);
-
-
-  MatrixXd points_now;
-  
+  newton_iter<double, 3> imp_euler(dat_str, energy, delt_t);
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     
@@ -212,156 +178,10 @@ int main(int argc, char** argv){
     // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
 
     //newtown iter
-    Map<VectorXd> displace_plus(displace.data(), 3*dim);
-    for(size_t newton_i = 0; newton_i < 20; ++newton_i){
-      cout << "newton iter is " << newton_i << endl;
-
-      dat_str->set_zero();
-      // dat_str->hes_reserve(nnzs);
-      energy->Val(displace_plus.data(), dat_str);
-      energy->Gra(displace_plus.data(), dat_str);
-      energy->Hes(displace_plus.data(), dat_str);
-      dat_str->hes_compress();
-
-      const double res_value = res.array().square().sum();
-      cout << "[INFO]Newton res " <<std::setprecision(9)<< res_value << endl;
-      cout << "[INFO] ALL Energy: " << dat_str->get_val() << endl;
-
-      if(res_value < 1e-4){
-        cout << endl;
-        break;
-      }
-      
-      
-      //implicit time integral
-
-             
-      // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
-      auto start = system_clock::now();
-      SimplicialLLT<SparseMatrix<double>> llt;
-      llt.compute(dat_str->get_hes());
-      size_t time = 1;
-      while(llt.info() != Eigen::Success){
-        cout <<"lltinfo "<< llt.info() << endl;
-        dat_str->hes_add_diag(time);
-        llt.compute(dat_str->get_hes());
-        time *= 2;
-      }
-
-      solution = llt.solve(-res);
-      auto end = system_clock::now();
-      auto duration = duration_cast<microseconds>(end - start);
-      cout <<  "solve linear system花费了" 
-           << double(duration.count()) * microseconds::period::num / microseconds::period::den 
-           << "秒" << endl;
-
-
-
-      #if 0
-      {//Line search
-
-        const double c = 1e-4, c2 = 0.9;
-
-        double Val_init = dat_str.val_, down = res.dot(solution), Val_upbound, Val_func, down_new =0;
-        // cout <<endl << endl<<"Val init is " << Val_init << "down is "<< down << endl;
-
-        auto cal_val_gra = [&](const double alp){
-          displace_search = displace_plus + alp * solution;
-          dat_str.set_zero();
-          MO.Val(displace_search.data(), dat_str);
-          PS.Val(displace_search.data(), dat_str);
-          GE.Val(displace_search.data(), dat_str);
-          pos_cons.Val(displace_search.data(), dat_str);
-          
-          MO.Gra(displace_search.data(), dat_str);
-          PS.Gra(displace_search.data(), dat_str);
-          GE.Gra(displace_search.data(), dat_str);
-          pos_cons.Gra(displace_search.data(), dat_str);
-        };
-        auto cal_val = [&](const double alp)->double{
-          displace_search = displace_plus + alp * solution;
-          dat_str.set_zero();
-          MO.Val(displace_search.data(), dat_str);
-          PS.Val(displace_search.data(), dat_str);
-          GE.Val(displace_search.data(), dat_str);
-          pos_cons.Val(displace_search.data(), dat_str);
-          return dat_str.val_;
-        };
-        auto cal_gra = [&](){//use little
-          MO.Gra(displace_search.data(), dat_str);
-          PS.Gra(displace_search.data(), dat_str);
-          GE.Gra(displace_search.data(), dat_str);
-          pos_cons.Gra(displace_search.data(), dat_str);
-        };
-
-        auto zoom = [&](double alpha_low, double alpha_high, double val_low)->double{
-          double alpha_star = alpha_high;
-          size_t count_j = 1;
-          do{
-            double alpha_j = 0.5 * (alpha_low + alpha_high);
-            cout << "alpha j is "<< alpha_j << endl;
-            double val_j = cal_val(alpha_j);
-            if(val_j > Val_init + c * alpha_j * down || val_j > val_low){
-              alpha_high = alpha_j;
-              cout << " here " << endl;
-            }
-              
-            else{
-              cal_gra();
-              double deri = solution.dot(dat_str.gra_);
-              if(fabs(deri) <= -c2 * down){
-                alpha_star = alpha_j;
-                break;
-              }
-              if(deri * (alpha_high - alpha_low) >= 0)
-                alpha_high = alpha_low;
-              alpha_low = alpha_j;
-              val_low = val_j;
-            }
-            ++count_j;
-          }while(count_j < 10);
-          return alpha_star;
-        };
-        double val_now, val_before = Val_init, alpha_now = 1, alpha_before = 0, alpha_fin, alpha_max = 2;
-        size_t count = 1;
-        do{
-          cout << "alpha now is "<< alpha_now << endl;
-          val_now = cal_val(alpha_now);
-          if(val_now > Val_init + c * alpha_now * down || (val_now >= val_before && count > 1)){
-            alpha_fin = zoom(alpha_before, alpha_now, val_before);
-            break;
-          }
-          cal_gra();
-          double deri = solution.dot(dat_str.gra_);          
-          if(fabs(deri) <= -c2 * down){
-            alpha_fin = alpha_now;
-            break;
-          }
-          if(deri >= 0){
-            alpha_fin = zoom(alpha_now, alpha_before, val_now);
-            break;
-          }
-          alpha_before = alpha_now;
-          alpha_now = 0.5 * (alpha_now + alpha_max);
-
-          val_before = val_now;
-          ++count;
-        }while(1);
-        cout<< "line search alpha is "<<  alpha_fin<<endl;        
-        displace_plus += alpha_fin * solution;
-
-      }
-
-      #else
-      displace_plus += solution;
-      #endif
-
-      cout << endl;
-    }
+    imp_euler.solve(displace.data());
     
-    dynamic_pointer_cast<momentum<3>>(ebf[MOME])->update_location_and_velocity(displace_plus.data());
-
-
+    
+    dynamic_pointer_cast<momentum<3>>(ebf[MOME])->update_location_and_velocity(displace.data());
     auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
     auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
 
