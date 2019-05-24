@@ -2,17 +2,17 @@
   "indir":"../../Point_Sys/data/",
   "outdir":"../../Point_Sys/result/",
   "surf":"Cube",  
-  "num_in_axis":7,
+  "num_in_axis":8,
   "rho":5,
   "Poission":0.45,
   "Young":7000,
   "max_iter":200,
-  "kv":300,
-  "time_step":0.001,
+  "kv":0,
+  "time_step":0.01,
   "gravity":9.8,
   "nn_num":10,
-  "position_weig":1e20,
-  "w_g":10000,
+  "position_weig":1e10,
+  "w_g":50,
   "rate":50
 
 }

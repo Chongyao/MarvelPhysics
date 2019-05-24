@@ -6,6 +6,10 @@
 #include <libigl/include/igl/writeOBJ.h>
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <Eigen/SparseCore>
+#include <Eigen/SparseCholesky>
+#include<Eigen/SparseLU>
+
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
@@ -18,10 +22,8 @@
 #include "Point_Sys/src/gen_surf.h"
 #include "io.h"
 #include "basic_energy.h"
-
-#include "vtk2surf.h"
-
-
+#include "config.h"
+#include "implicit_euler.h"
 
 using namespace marvel;
 using namespace std;
@@ -31,10 +33,15 @@ using namespace chrono;
 using namespace boost;
 
 int main(int argc, char** argv){
+
+
   
+  __TIME_BEGIN__
   Eigen::initParallel();
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Eigen parallel<<<<<<<<<<<<<<<<<<" << endl;
   cout << "enable parallel in Eigen in " << nbThreads() << " threads" << endl;
+  __TIME_END__("hey")
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>READ JSON FILE<<<<<<<<<<<<<<<<<<" << endl;
   boost::property_tree::ptree pt;{
     const string jsonfile_path = argv[1];
@@ -67,25 +74,31 @@ int main(int argc, char** argv){
   
   surf.transposeInPlace();
   nods.transposeInPlace();
-  
-  cout << "nods is " << endl << nods.block(0, 0, 3, 8) <<endl;
+
+
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
   gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
-  cout << points.rows() << " " << points.cols() << endl;
-  auto points_ptr = make_shared<MatrixXd>(points);
+  cout << "[INFO]points num is" << points.cols() << endl;
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>points<<<<<<<<<<<<<<<<<<" << endl;
+
   size_t dim = points.cols();
   cout <<"generate points done." << endl;
 
 
-    cout << "[INFO] Assemble energies..." << endl;
+  cout << "[INFO] Assemble energies..." << endl;
   enum {POTS, CONS, GRAV, MOME};
-  vector<std::shared_ptr<Functional<double, 3>>> ebf(MOME + 1); 
+  vector<std::shared_ptr<Functional<double, 3>>> ebf(MOME + 1);
+  std::shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<energy_dat>(dim);
+  
 
+  
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build spatial hash<<<<<<<<<<<<<<<<<<" << endl;
   spatial_hash SH(points, pt.get<size_t>("nn_num"));
+  
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Build Point System<<<<<<<<<<<<<<<<<<" << endl;
@@ -96,6 +109,7 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>sup_radi<<<<<<<<<<<<<<<<<<" << endl;
 
+  
   //get friends of every point
   vector<vector<size_t>> friends_all(dim);
 #pragma omp parallel for
@@ -104,22 +118,34 @@ int main(int argc, char** argv){
   }
 
   ebf[POTS] = make_shared<point_sys>(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
+  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);
 
-
-
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Simple Constraint Points<<<<<<<<<<<<<<<<<<" << endl;
-  vector<size_t> cons(0);
+  vector<size_t> cons;
   auto cons_file_path = indir + mesh_name +".csv";
-  if ( boost::filesystem::exists(cons_file_path) ) 
+  if ( boost::filesystem::exists(cons_file_path) )
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
-   ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);  
+  cout << "constrint " << cons.size() << " points" << endl;
+
+  
+  ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);
+    
+
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
   const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
   ebf[GRAV] = make_shared<gravity_energy<3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
   
-  cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  collision<3> COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim, points_ptr);
+  
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
+  double delt_t = pt.get<double>("time_step");
+  // momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
+  ebf[MOME] = make_shared<momentum<3>>(dim, mass_vector, delt_t);
+
+  
+  // cout << "[INFO]>>>>>>>>>>>>>>>>>>>Collision<<<<<<<<<<<<<<<<<<" << endl;
+  // collision COLL(pt.get<double>("w_coll"), 'y', pt.get<double>("coll_pos"), static_cast<size_t>(nods.cols()), dim);
 
   //energy all
   std::shared_ptr<Functional<double, 3>> energy;
@@ -134,84 +160,45 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
-  std::shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<energy_dat>(dim);
-  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);
 
-  double delt_t = pt.get<double>("time_step");
+
   MatrixXd displace;
-  MatrixXd velocity;
-  MatrixXd acce;
-  MatrixXd new_acce;
-  MatrixXd gra;
   MatrixXd vet_displace;
+  MatrixXd points_now;
   displace.setZero(3, dim);
-  velocity.setZero(3, dim);
-  acce.setZero(3, dim);
-  gra.setZero(3, dim);
-  new_acce.setZero(3, dim);
   vet_displace.setZero(3, nods.cols());
 
-
-  size_t iters_perframe = floor(1/delt_t/pt.get<size_t>("rate"));
-  double dump = pt.get<double>("dump");
-  double previous_step_Val = 0;
-
-  auto start = system_clock::now();
-  for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
-    cerr << "iter is "<<endl<< i << endl;
-    cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
-    // cout << "velocity is "<<endl<< velocity.block(0, 0, 3, 8) << endl;
-    energy->Val(displace.data(), dat_str);
-    energy->Gra(displace.data(), dat_str);
-
   
-
-#pragma omp parallel for
-    for(size_t j = 0; j < dim; ++j){
-      // assert(PS.get_mass(j) > 0);
-      new_acce.col(j) = dat_str->get_gra().col(j)/mass_vector(j) - velocity.col(j)*dump;
-    }
-
-
-    velocity += delt_t * new_acce;
-    displace += delt_t *velocity;
-
-    cout << "delt energy :"<< dat_str->get_val() - previous_step_Val << endl;
-    if (i > 10 && fabs(dat_str->get_val() - previous_step_Val) < 1e-6)
-      break;
+  size_t iters_perframe = floor(1.0/delt_t/pt.get<size_t>("rate"));
+  newton_iter<double, 3> imp_euler(dat_str, energy, delt_t);
+  
+  for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
     
-    previous_step_Val = dat_str->get_val();
-    cout << "[INFO]>>>>>>>>>>>>>>>>>>>Energy Val<<<<<<<<<<<<<<<<<<" << endl;
-    cout << "total energy: " << dat_str->get_val() << endl;
+    cout << "[INFO]>>>>>>>>>>>>>>>>>>>iter "<< i <<" <<<<<<<<<<<<<<<<<<" << endl;
+    // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
 
-    acce = new_acce;
+    //newtown iter
+    imp_euler.solve(displace.data());
+    
+    
+    dynamic_pointer_cast<momentum<3>>(ebf[MOME])->update_location_and_velocity(displace.data());
+    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
+    auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
 
-    if(i%iters_perframe == 0){ 
-      auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".vtk";
-      auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
-      MatrixXd points_now = points + displace;
-      point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
-      point_vector_append2vtk(false, point_filename.c_str(), velocity, dim, "velocity");
-      point_vector_append2vtk(true, point_filename.c_str(), acce, dim, "accelarate");
+    points_now = points + displace;
+    vet_displace = displace.block(0, 0, 3, nods.cols());
+    point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
+    writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
+    
 
-      // vet_displace = DS.update_surf(displace, dat_str.def_gra_);
-      cout  << displace.rows() << " " << displace.cols() << "  " << nods.cols() << endl;
-      vet_displace = displace.block(0, 0, 3, nods.cols());
-      tri_mesh_write_to_vtk(surf_filename.c_str(), nods + vet_displace, surf);
 
-    }
-
-    dat_str->set_zero();
   }
-  auto end = system_clock::now();
-  auto duration = duration_cast<microseconds>(end - start);
-  cout <<  "花费了" 
-       << double(duration.count()) * microseconds::period::num / microseconds::period::den 
-       << "秒" << endl;
-
   //done
+
+  return 0;
 }
 
+  
 
 
 

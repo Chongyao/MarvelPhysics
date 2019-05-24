@@ -154,7 +154,7 @@ int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& o
   return 0;
 
 }
-
+#endif
 
 int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
                       const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
@@ -245,7 +245,7 @@ int coll_wrapper::Collide(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& o
 
 int coll_wrapper::Collide_imp(const std::vector<std::shared_ptr<Eigen::MatrixXi>>& obta_surfs,
                               const std::vector<std::shared_ptr<Eigen::MatrixXd>>& obta_nods,
-                              Eigen::MatrixXd& new_core_nods, Eigen::MatrixXd& new_core_velo,
+                             Eigen::MatrixXd& new_core_nods, Eigen::MatrixXd& new_core_velo,
                               energy_dat& dat_str,
                               const VectorXd& mass){
   COLL_ptr->Transform_Mesh(core_num_nods, core_num_tris, (unsigned *)core_tris_ptr->data(), new_core_nods.data(), pre_core_nods.data(), 0, false);
@@ -336,7 +336,7 @@ int coll_wrapper::Collide_imp(const std::vector<std::shared_ptr<Eigen::MatrixXi>
 
 }
 
-#endif
+
 
 
 }//namespace marvel

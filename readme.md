@@ -1,4 +1,4 @@
-s# 粒子系统 算法
+# 粒子系统 算法
 课程：计算机动画
 本项目实现了2004年的SCA论文 
 
@@ -34,90 +34,42 @@ $ mkdir build & cd build & cmake .. & make -k
 *blender_physics.json*
 ```javascript
 {
-    "blender": {
-        "surf": "bunny",
-        "input_format": "obj"
-    },
-    "physics_para": {
-        "Poission": 0.45,
-        "Young": 7000.0
-    },
-    "simulation_para": {
-        "num_in_axis": 8,
-        "kv": 500.0,
-        "nn_num": 10,
-        "w_g": 1.0,
-        "dump": 0.0,
-        "position_weig": 99999.0,
-        "solver": "explicit"
-    },
-    "common": {
-        "time_step": 0.0001,
-        "frame_rate": 100,
-        "total_time": 10.0,
-        "density": 5.0,
-        "gravity": 9.8
-    }
+  "indir":"../../Point_Sys/data/",
+  "outdir":"../../Point_Sys/result/",
+  "surf":"Cube",  
+  "num_in_axis":8,
+  "rho":5,
+  "Poission":0.45,
+  "Young":7000,
+  "max_iter":200,
+  "kv":500,
+  "time_step":0.01,
+  "gravity":9.8,
+  "nn_num":10,
+  "position_weig":0,
+  "w_g":40,
+  "rate":50,
+  "w_coll":200,
+  "coll_pos":-2
 }
+
 ```
 将surf中的bunny改为模型名称。
 ### 运行
-开启终端进入build/bin/目录，并运行./z_buffer
+开启终端进入build/bin/目录，并运行./test_energy_implicit
 ```bash
 $ cd build/bin/
-$ ./loop_subdivison
+$ ./test_energy_implicit ../../Point_Sys/scripts/test_energy_implicit.json
 ```
-## 数据结构　edge_core类
-很明显该算法是一个可以并行的算法。
-
-本来考虑使用半边结构来做，后来觉得使用半边结构在处理并行的时候比较复杂比较烦，就简单的建立一个边表，类似于翼边结构。
-### 单边结构
+## 数据结构　energy类
 ```c++
-struct one_edge{
-  int f1,f2,v1,v2,v3,v4;
-  }
-};
-```
-![edge](https://raw.githubusercontent.com/Chongyao/loop_subdivision/master/doc/edge_small.png)
-
-建立两个数组，一个数组存放边，为
-```c++
-std::vector<one_edge edges_;
-```
-一个数组存放每个顶点的valence，即有多少个相邻点与之相连。
-```C++
-vector<size_t> valences_;
+class one_energy{
+public:
+    int Val(const double* x, double val) cosnt;
+    int Gra(const double* x, double* gra) const;
+    int Hes(const doulbe* x, Triplets<double>& hes_trip) const;
+}
 ```
 
-## 算法简介
-![odd](https://raw.githubusercontent.com/Chongyao/loop_subdivision/master/doc/oddeven.png)
-
-在原三角形网格上的每一个边上插入一个点，称之为odd vertex，而原来的点称之为even vertex。
-
-然后分别去更新odd vertices 和 even vertices的位置。
-
-因此该算法是可以并行的，每一次细分下每个边的更新互不影响。
-
-## 算法并行实现及优化
-![odd](https://raw.githubusercontent.com/Chongyao/loop_subdivision/master/doc/struct.png)
-
-对于每一个面片，在加上边后按照一定的顺序设置新的拓扑关系，从而可以并行的在每个边上做处理。这里使用openmp实现线程并行。
-### 建立单边结构的数组
-使用一次哈希的方式建立单边结构数组。
-### 更新odd点的位置和even点的位置(new_verts)
-这一步直接按照公式，对每条边去算就可以了。
-### 更新拓扑(new_tris)
-按照上面的图的顺序在循环每条边，在new_tris中设置６个面片（f1 上三个，对面的f2上也是三个）上的六个顶点。
-### 更新单边结构数组
-在多次细分时不需要重新建立单边数据结构，每细分一次，单边结构数组的大小为原来的两倍加上细分前面片的数量乘３。
-
-循环每条边添加一个单边结构并且更新旧的单边结构。
-
-循环每个面添加三个单边结构。
-
-## 总结与思考
-- 在已知拓扑更新方式并且需要知道adjoint table 的时候，使用半边结构不一定是最好的方式。
-- 使用智能指针避免在每次循环的时候拷贝数据。
-- 细分算法可能并不需要细分很多次，一般细分三到四次可能就差不多了，其次细分前的原网格可能也并不复杂。
 
 
