@@ -2,7 +2,6 @@
 #define ELAS_ENERGY
 #include "def.h"
 #include "data_str_core.h"
-
 #include "constitutive.h"
 #include "gaussian_quadrature.h"
 #include "basis_func.h"

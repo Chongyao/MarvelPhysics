@@ -11,6 +11,7 @@ class basis_func{
   virtual void get_Ddef_Dx(const Eigen::MatrixBase<T>&PNT, const T* const x, const T* const X, const Eigen::DenseBase<T>& def_gra, Eigen::DenseBase<T>& Ddef_Dx) const = 0;
 };
 
+//TODO: integrate tri mesh
 template<typename T>
 class tet_linear_basis : public basis_func<T, 3, 1>{
   void get_def_gra(const Eigen::MatrixBase<T>&PNT, const T* const x, const T* const X, Eigen::DenseBase<T>& def_gra) const{

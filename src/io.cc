@@ -26,6 +26,7 @@ int read_fixed_verts(const char *filename, std::vector<size_t> &fixed) {
 }
 */
 
+
 int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, MatrixXd *pos) {
   ifstream ifs(filename);
   if ( ifs.fail() ) {
