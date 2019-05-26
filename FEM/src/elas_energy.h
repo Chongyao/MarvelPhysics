@@ -8,7 +8,11 @@
 #include "basis_func.h"
 
 #include <Eigen/Dense>
+#include "eigen_ext.h"
 namespace marvel{
+using namespace Eigen;
+using namespace std;
+
 template<typename T>
 inline void compute_lame_coeffs(const T Ym, const T Pr,
                                 T &mu, T &lambda) {
@@ -17,20 +21,26 @@ inline void compute_lame_coeffs(const T Ym, const T Pr,
 }
 
 
-template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t num_quad_,
+template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t num_qdrt_,
          template<typename, size_t> class CSTTT,
          template<typename, size_t, size_t> class BASIS,
-         template<typename, size_t, size_t> class GAUS>
+         template<typename, size_t, size_t> class QDRT>
 class BaseElas : public Functional<T, dim_>{
+  using basis = BASIS<T, dim_, bas_order_>;
+  using csttt = CSTTT<T, dim_>;
+  using qdrt = QDRT<T, dim_, num_qdrt_>;
  public:
+
   BaseElas(const Eigen::DenseBase<T>& nods, const Eigen::DenseBase<T>& cells,
            const double& ym, const double&poi):
-      all_dim_(nods.size()), num_nods_(nods.cols()), nods_(nods), cells_(cells){
+      all_dim_(nods.size()), num_nods_(nods.cols()), num_cells_(cells.cols()) ,
+      nods_(nods), cells_(cells),all_rows_(Matrix<int, dim_, 1>::LinSpaced(0, dim_ -1)){
     
-    static_assert(std::is_base_of<elas_csttt<T, dim_>, CSTTT<T, dim_>>::value, "CSTTT must derive from elas_csttt");
-    static_assert(std::is_base_of<basis_func<T, dim_, bas_order_>, BASIS<T, dim_, bas_order_>>::value, "BASIS must derive from basis_func");
-    static_assert(std::is_base_of<gaus_quad<T, dim_, num_quad_>, GAUS<T, dim_, num_quad_>>::value, "GAUS must derive from gaus_quad");
-    
+    static_assert(std::is_base_of<elas_csttt<T, dim_>, csttt>::value, "CSTTT must derive from elas_csttt");
+    static_assert(std::is_base_of<basis_func<T, dim_, bas_order_>, basis>::value, "BASIS must derive from basis_func");
+    static_assert(std::is_base_of<quadrature<T, dim_, num_qdrt_>, qdrt>::value, "GAUS must derive from gaus_quad");
+
+    //set mtr
     T mu, lambda;
     compute_lame_coeffs(ym, poi, mu, lambda);
     mtr_.resize(cells_.cols(), 2);
@@ -41,17 +51,62 @@ class BaseElas : public Functional<T, dim_>{
   size_t Nx() const {return all_dim_;}
     
   int Val(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
-    // Eigen::Map<const Eigen::Matrix<T, 
+    Eigen::Map<const Eigen::Matrix<T, dim_, -1>> deformed(x, num_nods_);
+    #pragma omp parallel for
+    for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
+      Matrix<T, dim_, dim_> def_gra;
+      
+      const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
+      const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
+      //TODO:considering the order of basis
+      
+      for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
+        data->save_val(csttt::val(def_gra) * qdrt::WGT_[qdrt_id]);
+      }
+    }
+    return 0;
   }
-  int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const ;
-  int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const ;
+  
+  int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
+    Eigen::Map<const Eigen::Matrix<T, dim_, -1>> deformed(x, num_nods_);
+    #pragma omp parallel for
+    for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
+      Matrix<T, dim_, dim_> def_gra;
+      Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
+      
+      const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
+      const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
+
+      Matrix<T, dim_ * dim_, 1> gra_F_based;
+      Matrix<T, dim_ * num_per_cell_, 1> gra_x_based = Matrix<T, dim_ *  num_per_cell_, 1>::Zero();
+
+
+      //TODO:considering the order of basis
+      for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
+        basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
+        gra_F_based = csttt::gra(def_gra);
+        gra_x_based += Ddef_Dx.transpose() * gra_F_based * qdrt::WGT_[qdrt_id];
+      }
+      
+      //save gra
+      for(size_t p = 0; p < num_per_cell_; ++p){
+        data->save_gra(cells_(p, cell_id), gra_x_based.segment<dim_>(p * dim_));
+      }
+    }
+    return 0;
+  }
+  int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
+    
+  }
   
  private:
-  const size_t all_dim_;
-  const size_t num_nods_;
+  const size_t all_dim_, num_nods_, num_cells_;
   const Eigen::Matrix<T, -1, 2> mtr_;
   const Eigen::Matrix<T, dim_, -1> nods_;
   const Eigen::Matrix<size_t, num_per_cell_, -1> cells_;
+  const Matrix<int, dim_, 1> all_rows_;
   
 };
 }
