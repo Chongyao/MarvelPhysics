@@ -158,6 +158,7 @@ endif()
 
 add_subdirectory(external)
 add_subdirectory(Point_Sys)
+add_subdirectory(FEM)
 add_subdirectory(src)
 # add_subdirectory(test)
 
