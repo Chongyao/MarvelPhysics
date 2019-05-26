@@ -62,7 +62,7 @@ class BaseElas : public Functional<T, dim_>{
       
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
-        data->save_val(csttt::val(def_gra) * qdrt::WGT_[qdrt_id]);
+        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id)) * qdrt::WGT_[qdrt_id]);
       }
     }
     return 0;
@@ -86,7 +86,7 @@ class BaseElas : public Functional<T, dim_>{
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
         basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
-        gra_F_based = csttt::gra(def_gra);
+        gra_F_based = csttt::gra(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
         gra_x_based += Ddef_Dx.transpose() * gra_F_based * qdrt::WGT_[qdrt_id];
       }
       
@@ -117,7 +117,7 @@ class BaseElas : public Functional<T, dim_>{
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
         basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
-        hes_F_based = csttt::hes(def_gra);
+        hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
         hes_x_based += Ddef_Dx.transpose() * hes_F_based * Ddef_Dx * qdrt::WGT_[qdrt_id];
       }
       
