@@ -98,7 +98,41 @@ class BaseElas : public Functional<T, dim_>{
     return 0;
   }
   int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
-    
+    Eigen::Map<const Eigen::Matrix<T, dim_, -1>> deformed(x, num_nods_);
+    #pragma omp parallel for
+    for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
+      Matrix<T, dim_, dim_> def_gra;
+      Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
+      
+      const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
+      const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
+
+
+      Matrix<T, dim_ * num_per_cell_, 1> gra_x_based = Matrix<T, dim_ *  num_per_cell_, 1>::Zero();
+      Matrix<T, dim_ * dim_, dim_ * dim_> hes_F_based; 
+      Matrix<T, dim_ * num_per_cell_, dim_ * num_per_cell_> hes_x_based; hes_x_based.setZero();
+
+      
+      //TODO:considering the order of basis
+      for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
+        basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
+        hes_F_based = csttt::hes(def_gra);
+        hes_x_based += Ddef_Dx.transpose() * hes_F_based * Ddef_Dx * qdrt::WGT_[qdrt_id];
+      }
+      
+      //save hes
+      for(size_t p = 0; p < dim_ * num_per_cell_; ++p){
+        for(size_t q = 0; q < dim_ * num_per_cell_; ++q){
+          const size_t I = cells_(p % dim_, p/dim_);
+          const size_t J = cells_(q % dim_, q/dim_);
+          if(hes_x_based(p, q))
+            data->save_hes(I, J, hes_x_based(p, q));
+        }
+      }
+    }
+    return 0;
+
   }
   
  private:
