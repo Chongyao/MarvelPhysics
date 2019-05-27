@@ -11,39 +11,41 @@ using namespace Eigen;
 template<typename T, size_t dim_>
 class elas_csttt{
  public:
-  virtual ~elas_csttt(){}
-  virtual T
-  val(const Eigen::DenseBase<T>& F, const double& lam, const double& mu) const = 0;
+  // virtual ~elas_csttt(){}
+  static T
+  val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) ;
   
-  virtual  Eigen::Matrix<T, dim_ * dim_, 1>&
-  gra(const Eigen::DenseBase<T>& F, const double& lam, const double& mu)const = 0;
+  static  Eigen::Matrix<T, dim_ * dim_, 1>
+  gra(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu);
   
-  virtual  Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>&
-  hes(const Eigen::DenseBase<T>& F, const double& lam, const double& mu) const = 0;
+  static  Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
+  hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) ;
 };
 
 template<typename T, size_t dim_>
 class linear_csttt : public elas_csttt<T, dim_>{
  public:
-  linear_csttt();
-  T val(const Eigen::DenseBase<T>& F, const double& lam, const double& mu) const{
+  
+  static T
+  val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
     Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Matrix<T, dim_, dim_>::Identity();
     return mu * (strain.array() * strain.array()).sum() + 0.5 * lam * strain.trace() * strain.trace();
   }
 
-  Matrix<T, dim_ * dim_, 1>&
-  gra(const Eigen::DenseBase<T>& F, const double& lam, const double& mu) const{
+  static Matrix<T, dim_ * dim_, 1>
+  gra(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu){
     const Matrix<T, dim_, dim_> Iden = Matrix<T, dim_, dim_>::Identity();
     Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Iden;
     Matrix<T, dim_ , dim_> gra_mat = mu * (F + F.transpose() - 2 * Iden) + lam * (F - Iden).trace() * Iden;
     Map<Matrix<T, dim_ * dim_, 1>> gra_vec(gra_mat.data());
-    return gra_vec;
+    return std::move(gra_vec);
   }
 
-  Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>&
-  hes(const Eigen::DenseBase<T>& F, const double& lam, const double& mu) const {
+  static Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
+  hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+
     const Matrix<T, dim_ * dim_, dim_ * dim_> Iden = Matrix<T, dim_ * dim_, dim_ * dim_>::Identity();
-    Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Iden;
+    Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Matrix<T, dim_, dim_>::Identity();
 
     Matrix<T, dim_ * dim_, dim_ * dim_> DDtrace = Matrix<T, dim_ * dim_, dim_ * dim_>::Zero();
     for(size_t row = 0; row < dim_ * dim_; row += dim_ +1){
@@ -53,7 +55,7 @@ class linear_csttt : public elas_csttt<T, dim_>{
     }
 
     Matrix<T, dim_ * dim_, dim_ * dim_> hes = 2 * mu * Iden + lam * DDtrace;
-    return hes;
+    return std::move(hes);
   }
   
   

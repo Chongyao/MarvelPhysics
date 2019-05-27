@@ -20,6 +20,15 @@ class dat_str_core{
   int save_gra(const size_t& pos, const Eigen::Matrix<T, dim_, 1>& point_gra);
   int save_gra(const size_t& pos, const T& one_gra);
   
+  template<typename Derived>
+  int save_gra(const size_t& pos, const Eigen::MatrixBase<Derived>& point_gra){
+    for(size_t d = 0; d < dim_; ++d){
+      #pragma omp atomic
+      gra_(dim_ * pos + d) += point_gra(d);      
+    }
+    return 0;
+  }
+  
 
   int save_hes(const size_t&m, const size_t& n, const Eigen::Matrix<T, dim_, dim_>& loc_hes);
   int save_hes(const size_t& row, const size_t& col, const T& value);

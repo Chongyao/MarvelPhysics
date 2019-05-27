@@ -16,5 +16,11 @@ int main(int argc, char** argv){
 
   cout << tets.col(tets.cols() -1) << endl;
   
+  basis_func<double, 3, 1, 4> basis;
+  // tet_one_qdrt<double, 3, 1> qdrt();
+  linear_csttt<double, 3> csttt;
+
+  BaseElas<double, 3, 4, 1, 1, linear_csttt, basis_func, quadrature> elas_energy(nods, tets, 4000, 0.45);
+  
   return 0;
 }

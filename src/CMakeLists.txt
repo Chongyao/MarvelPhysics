@@ -11,7 +11,7 @@ file(GLOB source *.cc *.c *.cpp)
 # endif(CUDA_FOUND)
 
 cuda_add_library(marvel-core SHARED ${source})
-# target_link_libraries(marvel-core	
-  
-# )
+target_link_libraries(marvel-core	
+  coll_rigid
+)
 

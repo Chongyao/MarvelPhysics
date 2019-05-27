@@ -22,22 +22,24 @@ inline void compute_lame_coeffs(const T Ym, const T Pr,
 
 template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t num_qdrt_,
          template<typename, size_t> class CSTTT,
-         template<typename, size_t, size_t> class BASIS,
-         template<typename, size_t, size_t> class QDRT>
+         template<typename, size_t, size_t, size_t > class BASIS,
+         template<typename, size_t, size_t, size_t> class QDRT>
 class BaseElas : public Functional<T, dim_>{
-  using basis = BASIS<T, dim_, bas_order_>;
+  using basis = BASIS<T, dim_, bas_order_, num_per_cell_>;
   using csttt = CSTTT<T, dim_>;
-  using qdrt = QDRT<T, dim_, num_qdrt_>;
+  using qdrt = QDRT<T, dim_, num_qdrt_, num_per_cell_>;
+  
  public:
 
-  BaseElas(const Eigen::DenseBase<T>& nods, const Eigen::DenseBase<T>& cells,
+  BaseElas(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells,
            const double& ym, const double&poi):
       all_dim_(nods.size()), num_nods_(nods.cols()), num_cells_(cells.cols()) ,
-      nods_(nods), cells_(cells),all_rows_(Matrix<int, dim_, 1>::LinSpaced(0, dim_ -1)){
+      nods_(nods), cells_(cells), all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)){
     
+
     static_assert(std::is_base_of<elas_csttt<T, dim_>, csttt>::value, "CSTTT must derive from elas_csttt");
-    static_assert(std::is_base_of<basis_func<T, dim_, bas_order_>, basis>::value, "BASIS must derive from basis_func");
-    static_assert(std::is_base_of<quadrature<T, dim_, num_qdrt_>, qdrt>::value, "GAUS must derive from gaus_quad");
+    static_assert(std::is_base_of<basis_func<T, dim_, bas_order_, num_per_cell_>, basis>::value, "BASIS must derive from basis_func");
+    static_assert(std::is_base_of<quadrature<T, dim_, num_qdrt_, num_per_cell_>, qdrt>::value, "GAUS must derive from gaus_quad");
 
     //set mtr
     T mu, lambda;
@@ -50,7 +52,8 @@ class BaseElas : public Functional<T, dim_>{
   size_t Nx() const {return all_dim_;}
     
   int Val(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
-    Eigen::Map<const Eigen::Matrix<T, dim_, -1>> deformed(x, num_nods_);
+    Map<const Eigen::Matrix<T, -1 ,-1>> deformed(x, dim_, num_nods_ );
+
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
@@ -68,7 +71,7 @@ class BaseElas : public Functional<T, dim_>{
   }
   
   int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
-    Eigen::Map<const Eigen::Matrix<T, dim_, -1>> deformed(x, num_nods_);
+    Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
@@ -88,16 +91,17 @@ class BaseElas : public Functional<T, dim_>{
         gra_F_based = csttt::gra(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
         gra_x_based += Ddef_Dx.transpose() * gra_F_based * qdrt::WGT_[qdrt_id];
       }
-      
+
       //save gra
+      const Map<Matrix<T, dim_, num_per_cell_> > gra_x_based_reshape(gra_x_based.data());
       for(size_t p = 0; p < num_per_cell_; ++p){
-        data->save_gra(cells_(p, cell_id), gra_x_based.segment<dim_>(p * dim_));
+        data->save_gra(cells_(p, cell_id), gra_x_based_reshape.col(p));
       }
     }
     return 0;
   }
   int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
-    Eigen::Map<const Eigen::Matrix<T, dim_, -1>> deformed(x, num_nods_);
+    Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
@@ -136,10 +140,12 @@ class BaseElas : public Functional<T, dim_>{
   
  private:
   const size_t all_dim_, num_nods_, num_cells_;
-  const Eigen::Matrix<T, -1, 2> mtr_;
+  Eigen::Matrix<T, -1, 2> mtr_;
   const Eigen::Matrix<T, dim_, -1> nods_;
-  const Eigen::Matrix<size_t, num_per_cell_, -1> cells_;
-  const Matrix<int, dim_, 1> all_rows_;
+  const Eigen::Matrix<int, num_per_cell_, -1> cells_;
+  Matrix<int, dim_, 1> all_rows_;
+  
+
   
 };
 }
