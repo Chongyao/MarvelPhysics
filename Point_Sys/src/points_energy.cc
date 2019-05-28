@@ -96,7 +96,7 @@ double point_sys::get_mass(const size_t &i) const{
 }
 
 size_t point_sys::Nx() const{
-  return dim_;
+  return dim_ * 3;
 }
 
 int point_sys::calc_weig() const{

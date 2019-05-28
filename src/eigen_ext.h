@@ -19,7 +19,8 @@ public:
   indexing_functor(const ArgType& arg, const RowIndexType& row_indices, const ColIndexType& col_indices)
     : m_arg(arg), m_rowIndices(row_indices), m_colIndices(col_indices)
   {}
-  const typename ArgType::Scalar& operator() (Index row, Index col) const {
+  //TODO: did't use Scalar&
+  const typename ArgType::Scalar operator() (Index row, Index col) const {
     return m_arg(m_rowIndices[row], m_colIndices[col]);
   }
 };

@@ -9,7 +9,7 @@ namespace marvel{
 
 template<size_t dim_>
 size_t momentum<dim_>::Nx() const{
-  return dof_;
+  return dim_ * dof_;
 }
 
 template<size_t dim_>
@@ -98,15 +98,15 @@ int position_constraint<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
 
 template<size_t dim_>
 size_t position_constraint<dim_>::Nx() const{
-  return dof_;
+  return dim_ * dof_;
 }
 /******************************************position_constraint*******************************/
 
 /******************************************gravity*******************************/
 //dof here is not about dim_
 template<size_t dim_>
-gravity_energy<dim_>::gravity_energy(const size_t dof_, const double &w_g, const double &gravity, const VectorXd &mass, const char &axis):
-    w_g_(w_g), dof_(dof_), gravity_(gravity), mass_(mass), axis_(axis){}
+gravity_energy<dim_>::gravity_energy(const size_t dof, const double &w_g, const double &gravity, const VectorXd &mass, const char &axis):
+    w_g_(w_g), dof_(dof), gravity_(gravity), mass_(mass), axis_(axis){}
 
 template<size_t dim_>
 int gravity_energy<dim_>::Val(const double *x, data_ptr<dim_> &data) const{
@@ -137,7 +137,7 @@ int gravity_energy<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
 
 template<size_t dim_>
 size_t gravity_energy<dim_>::Nx() const{
-  return dof_;
+  return dim_ * dof_;
 }
 /******************************************gravity*******************************/
 
@@ -198,7 +198,7 @@ int collision<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
 }
 template<size_t dim_>
 size_t collision<dim_>::Nx() const{
-  return dof_;
+  return dim_ * dof_;
 }
 
 /*************************************collision*********************************/

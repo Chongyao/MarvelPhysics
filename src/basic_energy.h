@@ -28,7 +28,7 @@ class position_constraint : public Functional<double, dim_>{
 template<size_t dim_>
 class gravity_energy : public Functional<double, dim_>{
  public:
-  gravity_energy(const size_t dim, const double &w_g, const double &gravity, const Eigen::VectorXd &mass, const char &axis);
+  gravity_energy(const size_t dof, const double &w_g, const double &gravity, const Eigen::VectorXd &mass, const char &axis);
   int Val(const double *disp, data_ptr<dim_> &data) const ;
   int Gra(const double *disp, data_ptr<dim_> &data) const;
   int Hes(const double *disp, data_ptr<dim_> &data) const;

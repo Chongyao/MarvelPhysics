@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include <iostream>
-
+#include "vtk.h"
 // using mati_t=zjucad::matrix::matrix<size_t>;
 // using matd_t=zjucad::matrix::matrix<double>;
 
@@ -111,7 +111,8 @@ int tet_mesh_read_from_vtk(const char* filename,  Eigen::MatrixXd& nods, Eigen::
 
   return 0;
 }
-// int tet_mesh_write_to_vtk(const char *path, const matd_t &nods, const mati_t &tets, const matd_t *mtr=nullptr);
+
+int tet_mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::MatrixXd> nods, const Eigen::Ref<Eigen::MatrixXi> tets, const Eigen::MatrixXd *mtr=nullptr);
 
 }
 
