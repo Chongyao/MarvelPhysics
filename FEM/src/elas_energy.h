@@ -8,6 +8,8 @@
 
 #include <Eigen/Dense>
 #include "eigen_ext.h"
+
+#include <iostream>
 namespace marvel{
 using namespace Eigen;
 using namespace std;
@@ -44,9 +46,9 @@ class BaseElas : public Functional<T, dim_>{
     //set mtr
     T mu, lambda;
     compute_lame_coeffs(ym, poi, mu, lambda);
-    mtr_.resize(cells_.cols(), 2);
-    mtr_.col(0) = Eigen::Matrix<T, -1, 1>::Ones(cells_.cols()) * lambda;
-    mtr_.col(1) = Eigen::Matrix<T, -1, 1>::Ones(cells_.cols()) * mu;
+    mtr_.resize(2, cells_.cols());
+    mtr_.row(0) = Eigen::Matrix<T, 1, -1>::Ones(cells_.cols()) * lambda;
+    mtr_.row(1) = Eigen::Matrix<T, 1, -1>::Ones(cells_.cols()) * mu;
   }
   
   size_t Nx() const {return all_dim_;}
@@ -57,16 +59,20 @@ class BaseElas : public Functional<T, dim_>{
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
+      T jac_det;
       
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
       //TODO:considering the order of basis
       
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
-        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id)) * qdrt::WGT_[qdrt_id]);
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, jac_det);
+        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * qdrt::WGT_[qdrt_id] * jac_det);
+
+
       }
     }
+
     return 0;
   }
   
@@ -75,6 +81,7 @@ class BaseElas : public Functional<T, dim_>{
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
+      T jac_det;
       Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
       
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
@@ -86,10 +93,11 @@ class BaseElas : public Functional<T, dim_>{
 
       //TODO:considering the order of basis
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
+        
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, jac_det);
         basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         gra_F_based = csttt::gra(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        gra_x_based += Ddef_Dx.transpose() * gra_F_based * qdrt::WGT_[qdrt_id];
+        gra_x_based += Ddef_Dx.transpose() * gra_F_based * qdrt::WGT_[qdrt_id] * jac_det;
       }
 
       //save gra
@@ -105,6 +113,7 @@ class BaseElas : public Functional<T, dim_>{
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
+      T jac_det;
       Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
       
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
@@ -118,11 +127,23 @@ class BaseElas : public Functional<T, dim_>{
       
       //TODO:considering the order of basis
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra);
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, jac_det);
         basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        hes_x_based += Ddef_Dx.transpose() * hes_F_based * Ddef_Dx * qdrt::WGT_[qdrt_id];
+        hes_x_based += Ddef_Dx.transpose() * hes_F_based * Ddef_Dx * qdrt::WGT_[qdrt_id] * jac_det;
+       
+
+        {//checkhessian
+          //sysmetric
+          // cout << hes_x_based << endl;
+          // cout <<"sys"<< (hes_x_based - hes_x_based.transpose()).sum() << endl;
+          
+          // cout << "translate " << (hes_x_based * VectorXd::Ones(dim_ * num_per_cell_)).sum() << endl;
+        }
+        
       }
+
+
       
       //save hes
       for(size_t p = 0; p < dim_ * num_per_cell_; ++p){
@@ -140,7 +161,7 @@ class BaseElas : public Functional<T, dim_>{
   
  private:
   const size_t all_dim_, num_nods_, num_cells_;
-  Eigen::Matrix<T, -1, 2> mtr_;
+  Eigen::Matrix<T, 2, -1> mtr_;
   const Eigen::Matrix<T, dim_, -1> nods_;
   const Eigen::Matrix<int, num_per_cell_, -1> cells_;
   Matrix<int, dim_, 1> all_rows_;

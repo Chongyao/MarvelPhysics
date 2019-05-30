@@ -14,7 +14,6 @@ using namespace marvel;
 using TET_ELAS = BaseElas<double, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
 int main(int argc, char** argv){
   const char* filename = argv[1];
-  cout << filename << endl;
   
   MatrixXd nods(1, 1);
   MatrixXi tets(1, 1);
@@ -22,8 +21,6 @@ int main(int argc, char** argv){
   const size_t num_nods = nods.cols();
   cout <<"V"<< nods.rows() << " " << nods.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
 
-  cout << tets.col(tets.cols() -1) << endl;
-  
   const string outdir = argv[3];
   
   //set mtr
@@ -32,7 +29,7 @@ int main(int argc, char** argv){
   constexpr  double poi = 0.45;
   constexpr  double gravity = 9.8;
   constexpr  double dt = 0.01;
-  const      double w_pos = 1e3;
+  const      double w_pos = 1e4;
   const      size_t num_frame = 100;
 
   //read fixed points
@@ -51,15 +48,15 @@ int main(int argc, char** argv){
   enum energy_type{ELAS, GRAV, KIN, POS};
   vector<shared_ptr<Functional<double, 3>>> ebf(POS + 1);{
     ebf[ELAS] = make_shared<TET_ELAS>(nods, tets, Young, poi);
-    ebf[GRAV] = make_shared<gravity_energy<3>>(num_nods, 1, gravity, mass_vec, 'Y');
-    ebf[KIN] = make_shared<momentum<3>>(num_nods, mass_vec, dt);
-    ebf[POS] = make_shared<position_constraint<3>>(num_nods, w_pos, cons);
+    // ebf[ELAS] = nullptr;
+    ebf[GRAV] = make_shared<gravity_energy<3>>(num_nods, 1, gravity, mass_vec, 'z');
+    ebf[KIN] = make_shared<momentum<3>>(nods.data(), num_nods, mass_vec, dt);
+    // ebf[POS] = make_shared<position_constraint<3>>(nods.data(), num_nods, w_pos, cons);
+    // ebf[GRAV] = nullptr;
+    // ebf[KIN] = nullptr;
+    ebf[POS] =nullptr;
     }
   cout << "assemble energy" << endl;
-  for(size_t i = 0; i < POS + 1; ++i){
-    cout << ebf[i]->Nx() << endl;
-  }
-
   shared_ptr<Functional<double, 3>> energy;
   try {
     energy = make_shared<energy_t<double, 3>>(ebf);
@@ -70,8 +67,10 @@ int main(int argc, char** argv){
   }
   
   //Sovle
+  const string filename_tmp = outdir  + "/frame_origin.vtk";
+  tet_mesh_write_to_vtk(filename_tmp.c_str(), nods, tets);
   shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<dat_str_core<double, 3>>(num_nods);
-  newton_iter<double, 3> imp_euler(dat_str, energy, dt);
+  newton_iter<double, 3> imp_euler(dat_str, energy, dt, 40, 1e-4, true, true);
   for(size_t f_id = 0; f_id < num_frame; ++f_id){
     cout << "[frame " << f_id << "]" << endl;
     imp_euler.solve(nods.data());

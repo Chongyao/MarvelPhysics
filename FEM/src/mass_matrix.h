@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 #include "eigen_ext.h"
+#include <iostream>
 namespace marvel {
 
 // using mati_t=zjucad::matrix::matrix<size_t>;
@@ -24,7 +25,7 @@ namespace marvel {
 //TODO: integrate mass with baiss and quadrature
 template<typename T, size_t dim_, size_t num_per_cell_>
 int calc_mass_vector(const Matrix<T, dim_, -1> nods, const Matrix<size_t, num_per_cell_, -1> cells, const T& rho, Matrix<T, -1, 1>& mass_vector){
-  cout << "use partial specilization" << endl;
+  std::cout << "use partial specilization" << std::endl;
 }
 
 template<typename T>
@@ -33,7 +34,7 @@ int calc_mass_vector(const Matrix<T, 3, -1> nods, const Matrix<int, 4, -1> cells
   const size_t dim  = nods.rows();
   const Matrix<int, 3, 1> all_rows = Matrix<int, 3, 1>::LinSpaced(dim, 0, dim - 1);
 
-  mass_vector.resize(dim * num_nods);
+  mass_vector.resize(num_nods);
   mass_vector.setZero();
   #pragma omp parallel for
   for(size_t cell_id = 0; cell_id< cells.cols(); ++cell_id){
@@ -43,10 +44,8 @@ int calc_mass_vector(const Matrix<T, 3, -1> nods, const Matrix<int, 4, -1> cells
     T volume = fabs(one_tet.determinant()) / 6.0;
     T coeff = rho * volume / 20.0 * 3;
     for(size_t p_id = 0; p_id < cells.rows(); ++p_id){
-      for(size_t d = 0; d < 3; ++d){
-        #pragma omp atomic
-        mass_vector(p_id * dim + d) += coeff;
-      }
+      #pragma omp atomic
+      mass_vector(cells(p_id, cell_id)) += coeff;
     }
   }
 }

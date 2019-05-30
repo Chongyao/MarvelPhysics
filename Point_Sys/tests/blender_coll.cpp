@@ -31,7 +31,7 @@
 #include "vtk2surf.h"
 
 #include "coll_wrapper.h"
-
+#include "implicit_euler.h"
 using namespace marvel;
 using namespace std;
 using namespace Eigen;
@@ -91,6 +91,7 @@ int main(int argc, char** argv){
   nods.transposeInPlace();
   
 
+  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points(3,3);
   MatrixXd test(3, 3);
@@ -99,12 +100,12 @@ int main(int argc, char** argv){
 
   const size_t dim = points.cols();
   cout <<"generate points done." << endl;
-  
+  std::shared_ptr<dat_str_core<double, 3>> dat_str = make_shared<energy_dat>(dim);  
   
   cout << "[INFO] Assemble energies..." << endl;
-  enum {POTS, CONS,  GRAV, MOME};
+  enum {POTS, CONS,  GRAV,  MOME};
   vector<std::shared_ptr<Functional<double, 3>>> ebf(MOME + 1); 
-
+  
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>POINTS ENERGY<<<<<<<<<<<<<<<<<<" << endl;
@@ -123,7 +124,9 @@ int main(int argc, char** argv){
     SH.get_friends(points.col(i), sup_radi(i), friends_all[i]);
   }
 
-  ebf[POTS] = make_shared<point_sys>(points, pt.get<double>("rho"), pt.get<double>("Young"), pt.get<double>("Poission"), volume, pt.get<double>("kv"), friends_all, sup_radi);
+  ebf[POTS] = make_shared<point_sys>(points, common.get<double>("density"), physics_para.get<double>("Young"), physics_para.get<double>("Poission"), volume, simulation_para.get<double>("kv"), friends_all, sup_radi);
+
+  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);
 
 
 
@@ -134,12 +137,17 @@ int main(int argc, char** argv){
   if ( boost::filesystem::exists(cons_file_path) )
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
   cout << "constrint " << cons.size() << " points" << endl;
-  ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);
+  ebf[CONS] = std::make_shared<position_constraint<3>>(dim, simulation_para.get<double>("position_weig"), cons);
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   const double gravity = common.get<double>("gravity");
   const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
-  ebf[GRAV] = make_shared<gravity_energy<3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
+  ebf[GRAV] = make_shared<gravity_energy<3>>(dim, common.get<double>("gravity"), gravity,  mass_vector, 'z');
+
+  cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
+  double delt_t = common.get<double>("time_step");
+  // momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
+  ebf[MOME] = make_shared<momentum<3>>(dim, mass_vector, delt_t);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
@@ -176,89 +184,89 @@ int main(int argc, char** argv){
     }
   }
   
-  // ebf[COLL] = make_shared<coll_wrapper>(obta_surfs, obta_nods, fake_surf_ptr, points);
+  // auto coll_ptr = make_shared<coll_wrapper>(obta_surfs, obta_nods, fake_surf_ptr, points);
+  
 
 
-
-  std::shared_ptr<Functional<double, 3>> energy;
-  try {
-    energy = make_shared<energy_t<double, 3>>(ebf);
-
-  } catch ( std::exception &e ) {
-    cerr << e.what() << endl;
-    exit(EXIT_FAILURE);
-  }
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>SOlVE<<<<<<<<<<<<<<<<<<" << endl;
   //initilize variables in time integration
-  std::shared_ptr<energy_dat> dat_str = make_shared<energy_dat>(dim);
+
 
   string solver = simulation_para.get<string>("solver");
 
-  double delt_t = common.get<double>("time_step");
+
   MatrixXd points_pos;
   MatrixXd displace;
   MatrixXd velocity;
   MatrixXd acce;
-  MatrixXd gra;
+
   MatrixXd vet_displace;
   points_pos.setZero(3, dim); 
   displace.setZero(3, dim); 
   velocity.setZero(3, dim); 
   acce.setZero(3, dim); 
-  gra.setZero(3, dim);
+
 
   vet_displace.setZero(3, nods.cols());
+  Map<VectorXd> acce_vec(acce.data(), 3 * dim);
+  Map<VectorXd> velo_vec(velocity.data(), 3 * dim);
+  Map<MatrixXd> gra_vec(dat_str->get_gra().data(), 3, dim);
 
-
-  dynamic_pointer_cast<point_sys>(ebf[POTS])->pre_compute(dat_str);
   size_t iters_perframe = static_cast<size_t>(round(1.0/delt_t/common.get<size_t>("frame_rate")));
   size_t max_iter  = static_cast<size_t>(ceil(common.get<double>("total_time") / delt_t));
   cout << "max iter is " << max_iter << endl;
   double dump = simulation_para.get<double>("dump");
-  double previous_step_Val = 0;
+
 
   auto start = system_clock::now();
   size_t frame_id = 0;
   if(solver == "explicit"){
+    ebf[MOME] = nullptr;
+    // ebf[GRAV] = nullptr;
+    ebf[CONS] = nullptr;
+    std::shared_ptr<Functional<double, 3>> energy;
+    try {
+      energy = make_shared<energy_t<double, 3>>(ebf);
+
+    } catch ( std::exception &e ) {
+      cerr << e.what() << endl;
+      exit(EXIT_FAILURE);
+    }
+
     for(size_t i = 0; i < max_iter; ++i){
-      #if 0
-      cout << "iter is "<<endl<< i << endl;
-
-
-      GE.Val(displace.data(), dat_str);
-      GE.Gra(displace.data(), dat_str);
-
-      PS.Val(displace.data(), dat_str);
-      PS.Gra(displace.data(), dat_str);
-
-      // COLL.Val(points.data(), displace.data(), dat_str);
-      // COLL.Gra(points.data(), displace.data(), dat_str, PS.get_Mass_VectorXd());
-      pos_cons.Gra(displace.data(), dat_str);
-      pos_cons.Hes(displace.data(),dat_str);
+      dat_str->set_zero();
+      energy->Val(displace.data(), dat_str);
+      energy->Gra(displace.data(), dat_str);
          
      #pragma omp parallel for
       for(size_t j = 0; j < dim; ++j){
-        acce.col(j) = -dat_str.gra_.col(j)/PS.get_mass(j) - velocity.col(j)*dump;
+        
+        acce.col(j) = -gra_vec.col(j)/mass_vector(j) - velocity.col(j)*dump;
       }
-    
+      for(const auto& c: cons){
+        acce.col(c).setZero();
+      }
+
+      // acce_vec = (dat_str->get_gra()).array() / mass_vector.array() -  velo_vec.array() * dump;
+      // cout << acce.row(0) << endl;
+
+
+
       velocity += delt_t * acce;
       displace += delt_t *velocity;
-      points_pos = points + displace;
+      // points_pos = points + displace;
 
       //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
-
-      COLLISION.Collide(obta_surfs, obta_nods, velocity, points_pos);
-      displace = points_pos - points;      
-      //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
-
       
-      if (i > 10 && fabs(dat_str.val_ - previous_step_Val) < 1e-6)
-        break;
+      // coll_ptr->Collide(obta_surfs, obta_nods, velocity, points_pos);
+      // displace = points_pos - points;      
+      //>>>>>>>>>>>>>>>>>>COLLID<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<//
+
     
-      previous_step_Val = dat_str.val_;
-      
+
       
       if(i%iters_perframe == 0){
+        cout << "frame is " << frame_id << endl;
         auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
         auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
         MatrixXd points_now = points + displace;
@@ -270,14 +278,39 @@ int main(int argc, char** argv){
 
       }
 
-      dat_str.set_zero();
-
-
-      
+    
     }
-    #endif
+
   }
   else{//TODO:need to be rewrite
+    std::shared_ptr<Functional<double, 3>> energy;
+    try {
+      energy = make_shared<energy_t<double, 3>>(ebf);
+
+    } catch ( std::exception &e ) {
+      cerr << e.what() << endl;
+      exit(EXIT_FAILURE);
+    }
+
+    newton_iter<double, 3> imp_euler(dat_str, energy, delt_t, 20, 1e-2, true, false);
+    for(size_t i = 0; i < max_iter; ++i){
+      cout << "iter is "<< i << endl;
+      imp_euler.solve(displace.data());
+      dynamic_pointer_cast<momentum<3>>(ebf[MOME])->update_location_and_velocity(displace.data());
+
+      if(i%iters_perframe == 0){
+        auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";
+        auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(frame_id) + ".vtk";
+        MatrixXd points_now = points + displace;
+        point_write_to_vtk(point_filename.c_str(), points_now.data(), dim);
+        
+        vet_displace = displace.block(0, 0, 3, nods.cols());
+        writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
+        ++frame_id;
+
+      }
+    }
+
     
     
   }

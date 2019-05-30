@@ -2,6 +2,7 @@
 #define FEM_CONSTITUTIVE
 #include <Eigen/Dense>
 #include <cmath>
+#include <iostream>
 namespace marvel{
 using namespace Eigen;
 
@@ -43,18 +44,31 @@ class linear_csttt : public elas_csttt<T, dim_>{
 
   static Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
   hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+    static Matrix<T, dim_ * dim_, dim_ * dim_> hes;
+    static bool have_calc = false;
+    if(!have_calc){
+      const Matrix<T, dim_ * dim_, dim_ * dim_> Iden = Matrix<T, dim_ * dim_, dim_ * dim_>::Identity();
+      Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Matrix<T, dim_, dim_>::Identity();
 
-    const Matrix<T, dim_ * dim_, dim_ * dim_> Iden = Matrix<T, dim_ * dim_, dim_ * dim_>::Identity();
-    Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Matrix<T, dim_, dim_>::Identity();
-
-    Matrix<T, dim_ * dim_, dim_ * dim_> DDtrace = Matrix<T, dim_ * dim_, dim_ * dim_>::Zero();
-    for(size_t row = 0; row < dim_ * dim_; row += dim_ +1){
-      for(size_t col = 0; col < dim_; col += dim_ + 1){
-        DDtrace(row, col) = 1;
+      Matrix<T, dim_ * dim_, dim_ * dim_> DDtrace = Matrix<T, dim_ * dim_, dim_ * dim_>::Zero();
+      for(size_t row = 0; row < dim_ * dim_; row += dim_ +1){
+        for(size_t col = 0; col < dim_ * dim_; col += dim_ + 1){
+          DDtrace(row, col) = 1;
+        }
       }
-    }
 
-    Matrix<T, dim_ * dim_, dim_ * dim_> hes = 2 * mu * Iden + lam * DDtrace;
+      Matrix<T, dim_ * dim_, dim_ * dim_> Dsquare = Matrix<T, dim_ * dim_, dim_ * dim_>::Zero();{
+        for(size_t row = 0; row < dim_; ++row){
+          for(size_t col = 0; col < dim_; ++col){
+            Dsquare(row * dim_ + col, col * dim_ + row) = 1;
+          }
+        }
+        Dsquare += Iden;
+      }
+      hes = mu * Dsquare + lam * DDtrace;
+      have_calc = true;
+    }
+    
     return std::move(hes);
   }
   

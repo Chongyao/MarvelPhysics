@@ -1,6 +1,6 @@
 #include "basic_energy.h"
 #include <Eigen/SparseCore>
-
+#include <iostream>
 using namespace std;
 using namespace Eigen;
 
@@ -15,6 +15,19 @@ size_t momentum<dim_>::Nx() const{
 template<size_t dim_>
 momentum<dim_>::momentum(const size_t dof, const VectorXd& mass_vec, const double& dt):dof_(dof), dispk_(VectorXd::Zero(dim_ * dof)), vk_(VectorXd::Zero(dim_ *dof)), dt_(dt), d1dt_(1 / dt), d1dtdt_(1 / dt /dt), mass_vec_(dim_ * dof){
 
+  #pragma omp parallel for
+  for(size_t i = 0; i < dof; ++i){
+    for(size_t j = 0; j < dim_; ++j){
+      mass_vec_(i * dim_ + j) = mass_vec(i);
+    }
+  }
+
+}
+
+template<size_t dim_>
+momentum<dim_>::momentum(const double* rest, const size_t dof, const VectorXd& mass_vec, const double& dt):dof_(dof), vk_(VectorXd::Zero(dim_ *dof)), dt_(dt), d1dt_(1 / dt), d1dtdt_(1 / dt /dt), mass_vec_(dim_ * dof){
+  
+  dispk_ = Map<const VectorXd>(rest, dim_ * dof);
   #pragma omp parallel for
   for(size_t i = 0; i < dof; ++i){
     for(size_t j = 0; j < dim_; ++j){
@@ -67,19 +80,33 @@ int momentum<dim_>::update_location_and_velocity(const double *new_dispk_ptr) {
 /******************************************momentum*******************************/
 /******************************************position_constraint*******************************/
 template<size_t dim_>
-position_constraint<dim_>::position_constraint(const size_t dof, const double &w, const vector<size_t> &cons):w_(w), cons_(cons), dof_(dof){}
+position_constraint<dim_>::position_constraint(const size_t dof, const double &w, const vector<size_t> &cons):w_(w), cons_(cons), dof_(dof){
+  rest_ = MatrixXd::Zero(dim_, dof);
+}
 
 template<size_t dim_>
+position_constraint<dim_>::position_constraint(const double *rest, const size_t dof, const double &w, const std::vector<size_t> &cons):w_(w), cons_(cons), dof_(dof){
+  rest_ = Map<const MatrixXd>(rest, dim_, dof_);
+}
+
+//TODO: simplify _x
+template<size_t dim_>
 int position_constraint<dim_>::Val(const double *x, data_ptr<dim_> &data) const{
-  Map<const MatrixXd> _x(x, dim_, dof_);
-  for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c)
+  Map<const MatrixXd> deformed(x, dim_, dof_);
+  MatrixXd _x = deformed - rest_;
+  for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c){
     data->save_val( w_ * _x.col(*iter_c).dot(_x.col(*iter_c)));
+
+  }
+
   return 0;
 }
 
 template<size_t dim_>
 int position_constraint<dim_>::Gra(const double *x, data_ptr<dim_> &data)const {
-  Map<const MatrixXd> _x(x, dim_, dof_);
+  Map<const MatrixXd> deformed(x, dim_, dof_);
+  MatrixXd _x = deformed - rest_;
+  
   for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c)
     data->save_gra(*iter_c, 2.0 * w_ * _x.col(*iter_c));
   return 0;
@@ -87,7 +114,6 @@ int position_constraint<dim_>::Gra(const double *x, data_ptr<dim_> &data)const {
 
 template<size_t dim_>
 int position_constraint<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
-  Map<const MatrixXd> _x(x, dim_, dof_);
   for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c){
     for(size_t j = 0; j < dim_; ++j){
       data->save_hes(*iter_c*dim_ + j, *iter_c*dim_ + j, 2 * w_);
@@ -122,10 +148,12 @@ int gravity_energy<dim_>::Gra(const double *x, data_ptr<dim_> &data) const{
   size_t which_axis = size_t(axis_ - 'x');
 
   MatrixXd g(dim_, dof_);
+  g.setZero();
   //do not add mass!!!1
   // g.row(which_axis) = VectorXd::Constant(dof_, -gravity_ * w_g_).transpose();
   g.row(which_axis) = VectorXd::Constant(dof_, gravity_ * w_g_).cwiseProduct(mass_).transpose();
   Map<const VectorXd> g_(g.data(), dim_ * dof_);
+
   data->save_gra(g_);
   // Gra.row(which_axis) += g;
   return 0;

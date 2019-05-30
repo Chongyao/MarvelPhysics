@@ -62,7 +62,7 @@ int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, 
 }
 
 int tet_mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::MatrixXd> nods, const Eigen::Ref<Eigen::MatrixXi> tets, const Eigen::MatrixXd *mtr){
-  assert(tets.cols() == 4);
+  assert(tets.rows() == 4);
 
   std::ofstream ofs(path);
   if ( ofs.fail() )

@@ -182,8 +182,8 @@ int main(int argc, char** argv){
     
     
     dynamic_pointer_cast<momentum<3>>(ebf[MOME])->update_location_and_velocity(displace.data());
-    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj";
-    auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
+    auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj"; 
+   auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
 
     points_now = points + displace;
     vet_displace = displace.block(0, 0, 3, nods.cols());

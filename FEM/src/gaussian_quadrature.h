@@ -44,9 +44,6 @@ template<typename T>
  Matrix<T, 3, 1>  quadrature<T, 3, 1, 4>::PNT_ = Matrix<T, 3, 1>::Ones() / 4 ;
 
 template<typename T>
-std::array<T, 1> quadrature<T, 3, 1, 4>::WGT_ = {0.0};
-
-
-
+std::array<T, 1> quadrature<T, 3, 1, 4>::WGT_ = {1.0/6.0};
 }
 #endif
