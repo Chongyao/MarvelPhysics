@@ -96,7 +96,7 @@ double point_sys::get_mass(const size_t &i) const{
 }
 
 size_t point_sys::Nx() const{
-  return dim_;
+  return dim_ * 3;
 }
 
 int point_sys::calc_weig() const{
@@ -167,8 +167,10 @@ int point_sys::calc_defo_gra(const double *x, dat_ptr &data) const{
       one_du.row(k) = inv_A * b.col(k);
     }
     one_du.transposeInPlace();
-
-    
+    // if(one_du.sum() != 0){
+    //   cout << one_du << endl;
+    // }
+      
     Matrix3d F = one_du + Matrix3d::Identity();
 
     dynamic_pointer_cast<energy_dat>(data)->save_ele_def_gra(i, F);
@@ -218,29 +220,25 @@ int point_sys::Val(const double *x, dat_ptr &data)const {
     double energy = 0.5*vol_i_(i)*(stress.array()*strain.array()).sum();
     energy += 0.5 * kv_ * pow(def_gra.determinant() - 1, 2);
 
-#pragma omp critical
-    {
-
-      dynamic_pointer_cast<energy_dat>(data)->save_ele_strain(i, strain);
-      dynamic_pointer_cast<energy_dat>(data)->save_ele_stress(i, stress);
-      dynamic_pointer_cast<energy_dat>(data)->save_val(energy);      
-    }
+    dynamic_pointer_cast<energy_dat>(data)->save_ele_strain(i, strain);
+    dynamic_pointer_cast<energy_dat>(data)->save_ele_stress(i, stress);
+    dynamic_pointer_cast<energy_dat>(data)->save_val(energy);    
 
   }
 
-
-
- 
+  return 0;
 }
 
 
 int point_sys::Gra(const double *x, dat_ptr &data) const{
- #pragma omp parallel for
+
+
+#pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
 
     const Matrix3d& def_gra = dynamic_pointer_cast<energy_dat>(data)->def_gra_[i];
     const Matrix3d& stress = dynamic_pointer_cast<energy_dat>(data)->stress_[i];
-    const Matrix3d& strain = dynamic_pointer_cast<energy_dat>(data)->stress_[i];
+    const Matrix3d& strain = dynamic_pointer_cast<energy_dat>(data)->strain_[i];
 
 
     
@@ -252,16 +250,14 @@ int point_sys::Gra(const double *x, dat_ptr &data) const{
       gra_def_gra.col(j) = cross1.cross(cross2);
     }
     gra_def_gra.transposeInPlace();
-#pragma omp critical (vol_cross)
-    {
-      dynamic_pointer_cast<energy_dat>(data)->save_ele_vol_cross(i, gra_def_gra);
-    }
+
+    dynamic_pointer_cast<energy_dat>(data)->save_ele_vol_cross(i, gra_def_gra);
     
     //assemble Fe and Fv
     const Matrix3d& inv_A = dynamic_pointer_cast<energy_dat>(data)->inv_A_all_[i];
     
     Matrix3d pre_F = vol_i_(i)*(2*def_gra*stress + kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
-    
+
     
     //add to gra_
     Vector3d di;
@@ -273,7 +269,6 @@ int point_sys::Gra(const double *x, dat_ptr &data) const{
       xij = (points_.col(friends_[i][iter_j]) - points_.col(i));
       di += -w*xij;
       force_j = w*pre_F*xij;
-      
       data->save_gra(friends_[i][iter_j], force_j);
     }
     
@@ -291,7 +286,7 @@ int point_sys::Gra(const double *x, dat_ptr &data) const{
 int point_sys::Hes(const double*x, dat_ptr &data) const{
   
   auto start = system_clock::now();
-  omp_set_num_threads(4);  
+  // omp_set_num_threads(4);  
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     // cout << "dim is " << i << endl;

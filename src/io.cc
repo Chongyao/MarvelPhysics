@@ -26,6 +26,7 @@ int read_fixed_verts(const char *filename, std::vector<size_t> &fixed) {
 }
 */
 
+
 int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, MatrixXd *pos) {
   ifstream ifs(filename);
   if ( ifs.fail() ) {
@@ -59,6 +60,30 @@ int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, 
 
   return 0;
 }
+
+int tet_mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::MatrixXd> nods, const Eigen::Ref<Eigen::MatrixXi> tets, const Eigen::MatrixXd *mtr){
+  assert(tets.rows() == 4);
+
+  std::ofstream ofs(path);
+  if ( ofs.fail() )
+    return __LINE__;
+
+  ofs << std::setprecision(15);
+  tet2vtk(ofs, nods.data(), nods.cols(), tets.data(), tets.cols());
+  if ( mtr != nullptr ) {
+    for (int i = 0; i < mtr->rows(); ++i) {
+      const std::string mtr_name = "theta_"+std::to_string(i);
+      const Eigen::MatrixXd curr_mtr = mtr->row(i);
+      if ( i == 0 )
+        ofs << "CELL_DATA " << curr_mtr.size() << "\n";
+      vtk_data(ofs, curr_mtr.data(), curr_mtr.cols(), mtr_name.c_str(), mtr_name.c_str());
+    }
+  }
+  ofs.close();
+  return 0;
+
+}
+
 /*
 int hex_mesh_read_from_vtk(const char *path, matd_t *node, mati_t *hex, matd_t *mtr) {
   ifstream ifs(path);

@@ -92,7 +92,7 @@ typedef struct {
 
 #define SAFE_FRONT_NUM  17000000
 // #define MAX_FRONT_NUM   18000000
-#define MAX_FRONT_NUM 10000000
+#define MAX_FRONT_NUM 1000000
 typedef struct {
 	uint4 *_dFront; // left, right, valid 0/1, dummy
 	uint *_dIdx;
