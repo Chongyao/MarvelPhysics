@@ -44,7 +44,7 @@ int newton_iter<T, dim_>::solve(T* x){
 
   
   for(size_t newton_i = 0; newton_i < max_iter_; ++newton_i){
-    cout << "[INFO]>>>>>>>>>>>>newton iter is " << newton_i << endl;
+    cout << "[INFO]>>>>>>>>>>>>>>>newton iter is " << newton_i << endl;
     dat_str_->set_zero();
     energy_->Val(x, dat_str_);
     energy_->Gra(x, dat_str_);
@@ -55,7 +55,7 @@ int newton_iter<T, dim_>::solve(T* x){
         
     dat_str_->hes_compress();
     
-    const T res_value = res.array().square().sum();
+    const T res_value = res.array().abs().sum();
     cout << "[INFO]: Newton res " << res_value << endl;
     cout << "[INFO]: ALL Energy: " << dat_str_->get_val() << endl;
     if(res_value < 1e-4){
@@ -73,8 +73,6 @@ int newton_iter<T, dim_>::solve(T* x){
       llt.compute(dat_str_->get_hes());
       time *= 2;
     }
-
-    // const auto  solution = llt.solve(-dat_str_->get_gra());
     solution = llt.solve(-res).eval();
     __TIME_END__("[INFO]: Solve linear system by Cholesky");
 

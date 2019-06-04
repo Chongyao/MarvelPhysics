@@ -1,6 +1,6 @@
 #include "basic_energy.h"
 #include <Eigen/SparseCore>
-
+#include <iostream>
 using namespace std;
 using namespace Eigen;
 
@@ -9,13 +9,26 @@ namespace marvel{
 
 template<size_t dim_>
 size_t momentum<dim_>::Nx() const{
-  return dof_;
+  return dim_ * dof_;
 }
 
 template<size_t dim_>
 momentum<dim_>::momentum(const size_t dof, const VectorXd& mass_vec, const double& dt):dof_(dof), dispk_(VectorXd::Zero(dim_ * dof)), vk_(VectorXd::Zero(dim_ *dof)), dt_(dt), d1dt_(1 / dt), d1dtdt_(1 / dt /dt), mass_vec_(dim_ * dof){
 
-  #pragma omp parallel for
+  // #pragma omp parallel for
+  for(size_t i = 0; i < dof; ++i){
+    for(size_t j = 0; j < dim_; ++j){
+      mass_vec_(i * dim_ + j) = mass_vec(i);
+    }
+  }
+
+}
+
+template<size_t dim_>
+momentum<dim_>::momentum(const double* rest, const size_t dof, const VectorXd& mass_vec, const double& dt):dof_(dof), vk_(VectorXd::Zero(dim_ *dof)), dt_(dt), d1dt_(1 / dt), d1dtdt_(1 / dt /dt), mass_vec_(dim_ * dof){
+  
+  dispk_ = Map<const VectorXd>(rest, dim_ * dof);
+    // #pragma omp parallel for
   for(size_t i = 0; i < dof; ++i){
     for(size_t j = 0; j < dim_; ++j){
       mass_vec_(i * dim_ + j) = mass_vec(i);
@@ -31,22 +44,23 @@ int momentum<dim_>::Val(const double *x, data_ptr<dim_> &data) const{
   // data.val_ += 0.5 * acce.dot(mass_sparse_ * acce);
   
   data->save_val(0.5 * acce.dot(mass_vec_.cwiseProduct(acce)));
+  cout << "KIN " << 0.5 * acce.dot(mass_vec_.cwiseProduct(acce)) << endl;
   return 0;
 }
 template<size_t dim_>
 int momentum<dim_>::Gra(const double *x, data_ptr<dim_> &data) const{
   Map<const VectorXd> _x(x, dim_ * dof_);
-
+  
   const VectorXd acce = (_x  - dispk_) * d1dtdt_  - vk_ * d1dt_;
   // data.gra_ += mass_sparse_ * acce;
   data->save_gra(mass_vec_.cwiseProduct(acce));
-
+  cout << "KIN gra " << mass_vec_.cwiseProduct(acce).array().square().sum() << endl;
   return 0;
 }
 
 template<size_t dim_>
 int momentum<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
-  #pragma omp parallel for
+  // #pragma omp parallel for
   for(size_t i = 0; i < dim_ *dof_; ++i){
     // data.hes_trips.push_back(Triplet<double>(i, i, d1dtdt_ * mass_sparse_.coeff(i, i)));
     data->save_hes(i, i, d1dtdt_ * mass_vec_(i));
@@ -67,19 +81,33 @@ int momentum<dim_>::update_location_and_velocity(const double *new_dispk_ptr) {
 /******************************************momentum*******************************/
 /******************************************position_constraint*******************************/
 template<size_t dim_>
-position_constraint<dim_>::position_constraint(const size_t dof, const double &w, const vector<size_t> &cons):w_(w), cons_(cons), dof_(dof){}
+position_constraint<dim_>::position_constraint(const size_t dof, const double &w, const vector<size_t> &cons):w_(w), cons_(cons), dof_(dof){
+  rest_ = MatrixXd::Zero(dim_, dof);
+}
 
 template<size_t dim_>
+position_constraint<dim_>::position_constraint(const double *rest, const size_t dof, const double &w, const std::vector<size_t> &cons):w_(w), cons_(cons), dof_(dof){
+  rest_ = Map<const MatrixXd>(rest, dim_, dof_);
+}
+
+//TODO: simplify _x
+template<size_t dim_>
 int position_constraint<dim_>::Val(const double *x, data_ptr<dim_> &data) const{
-  Map<const MatrixXd> _x(x, dim_, dof_);
-  for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c)
+  Map<const MatrixXd> deformed(x, dim_, dof_);
+  MatrixXd _x = deformed - rest_;
+  for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c){
     data->save_val( w_ * _x.col(*iter_c).dot(_x.col(*iter_c)));
+
+  }
+
   return 0;
 }
 
 template<size_t dim_>
 int position_constraint<dim_>::Gra(const double *x, data_ptr<dim_> &data)const {
-  Map<const MatrixXd> _x(x, dim_, dof_);
+  Map<const MatrixXd> deformed(x, dim_, dof_);
+  MatrixXd _x = deformed - rest_;
+  
   for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c)
     data->save_gra(*iter_c, 2.0 * w_ * _x.col(*iter_c));
   return 0;
@@ -87,7 +115,6 @@ int position_constraint<dim_>::Gra(const double *x, data_ptr<dim_> &data)const {
 
 template<size_t dim_>
 int position_constraint<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
-  Map<const MatrixXd> _x(x, dim_, dof_);
   for(auto iter_c = cons_.begin(); iter_c != cons_.end(); ++iter_c){
     for(size_t j = 0; j < dim_; ++j){
       data->save_hes(*iter_c*dim_ + j, *iter_c*dim_ + j, 2 * w_);
@@ -98,15 +125,15 @@ int position_constraint<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
 
 template<size_t dim_>
 size_t position_constraint<dim_>::Nx() const{
-  return dof_;
+  return dim_ * dof_;
 }
 /******************************************position_constraint*******************************/
 
 /******************************************gravity*******************************/
 //dof here is not about dim_
 template<size_t dim_>
-gravity_energy<dim_>::gravity_energy(const size_t dof_, const double &w_g, const double &gravity, const VectorXd &mass, const char &axis):
-    w_g_(w_g), dof_(dof_), gravity_(gravity), mass_(mass), axis_(axis){}
+gravity_energy<dim_>::gravity_energy(const size_t dof, const double &w_g, const double &gravity, const VectorXd &mass, const char &axis):
+    w_g_(w_g), dof_(dof), gravity_(gravity), mass_(mass), axis_(axis){}
 
 template<size_t dim_>
 int gravity_energy<dim_>::Val(const double *x, data_ptr<dim_> &data) const{
@@ -122,12 +149,12 @@ int gravity_energy<dim_>::Gra(const double *x, data_ptr<dim_> &data) const{
   size_t which_axis = size_t(axis_ - 'x');
 
   MatrixXd g(dim_, dof_);
-  //do not add mass!!!1
-  // g.row(which_axis) = VectorXd::Constant(dof_, -gravity_ * w_g_).transpose();
+  g.setZero();
   g.row(which_axis) = VectorXd::Constant(dof_, gravity_ * w_g_).cwiseProduct(mass_).transpose();
   Map<const VectorXd> g_(g.data(), dim_ * dof_);
+  cout << "grav gradient " << g_.array().square().sum() << endl;
   data->save_gra(g_);
-  // Gra.row(which_axis) += g;
+
   return 0;
 }
 template<size_t dim_>
@@ -137,7 +164,7 @@ int gravity_energy<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
 
 template<size_t dim_>
 size_t gravity_energy<dim_>::Nx() const{
-  return dof_;
+  return dim_ * dof_;
 }
 /******************************************gravity*******************************/
 
@@ -178,16 +205,11 @@ template<size_t dim_>
 int collision<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
   const size_t which_axis = size_t(ground_axis_ - 'x');
   Map<const MatrixXd> _x(x, dim_, dof_);
-  #pragma omp parallel for
+  // #pragma omp parallel for
   for(size_t i = 0; i < dof_; ++i){
     const double position_now = _x(which_axis, i) + (*init_points_ptr_)(which_axis, i);
     if (( position_now - ground_pos_) < 0){
       for(size_t j = 0; j < dim_; ++j){
-// #pragma omp critical
-//         {
-//         data.hes_trips.push_back(Triplet<double>(i * 3 + j, i * 3 + j, 2 * w_coll_));
-//         }
-
         data->save_hes(i * dim_ + j, i * dim_ + j, 2 * w_coll_);
       }
     }
@@ -198,7 +220,7 @@ int collision<dim_>::Hes(const double *x, data_ptr<dim_> &data) const{
 }
 template<size_t dim_>
 size_t collision<dim_>::Nx() const{
-  return dof_;
+  return dim_ * dof_;
 }
 
 /*************************************collision*********************************/

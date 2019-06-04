@@ -13,13 +13,18 @@ using data_ptr = std::shared_ptr<dat_str_core<double, dim_>>;
 template<size_t dim_>
 class position_constraint : public Functional<double, dim_>{
  public:
+  //used for displace based
   position_constraint(const size_t dof, const double &w, const std::vector<size_t> &cons);
+
+  //used for position based
+  position_constraint(const double *rest, const size_t dof, const double &w, const std::vector<size_t> &cons);
   int Val(const double *x, data_ptr<dim_> &data) const;  
   int Gra(const double *x, data_ptr<dim_> &data) const ;
   int Hes(const double *x, data_ptr<dim_> &data) const ;
   size_t Nx() const;
 
  private:
+  Eigen::MatrixXd rest_;
   const size_t dof_;
   const double w_;
   const std::vector<size_t> cons_;
@@ -28,7 +33,7 @@ class position_constraint : public Functional<double, dim_>{
 template<size_t dim_>
 class gravity_energy : public Functional<double, dim_>{
  public:
-  gravity_energy(const size_t dim, const double &w_g, const double &gravity, const Eigen::VectorXd &mass, const char &axis);
+  gravity_energy(const size_t dof, const double &w_g, const double &gravity, const Eigen::VectorXd &mass, const char &axis);
   int Val(const double *disp, data_ptr<dim_> &data) const ;
   int Gra(const double *disp, data_ptr<dim_> &data) const;
   int Hes(const double *disp, data_ptr<dim_> &data) const;
@@ -63,7 +68,11 @@ class collision : public Functional<double, dim_>{
 template<size_t dim_>
 class momentum : public  Functional<double, dim_>{
  public:
+  //used for displacement based 
   momentum(const size_t dof,const Eigen::VectorXd& mass_vec, const double& dt);
+
+  //used for position based
+  momentum(const double* x, const size_t dof,const Eigen::VectorXd& mass_vec, const double& dt);
   int Val(const double *disp, data_ptr<dim_> &data) const ;
   int Gra(const double *disp, data_ptr<dim_> &data) const ;
   int Hes(const double *disp, data_ptr<dim_> &data) const ;
