@@ -5,6 +5,7 @@
 #include <Eigen/Sparse>
 #include "eigen_ext.h"
 #include <iostream>
+#include <vector>
 namespace marvel {
 
 // using mati_t=zjucad::matrix::matrix<size_t>;
@@ -36,18 +37,49 @@ int calc_mass_vector(const Matrix<T, 3, -1> nods, const Matrix<int, 4, -1> cells
 
   mass_vector.resize(num_nods);
   mass_vector.setZero();
-  #pragma omp parallel for
+  std::vector<Eigen::Triplet<T> > trips;
+  // #pragma omp parallel for
   for(size_t cell_id = 0; cell_id< cells.cols(); ++cell_id){
     
     Matrix<T, 3, 4> one_tet_ = indexing(nods, all_rows, cells.col(cell_id));
-    Matrix<T, 3, 3> one_tet = one_tet_.block(0, 0, 3, 3) - nods.col(cells(3, cell_id)) * Matrix<T, 1, 3>::Ones();
+    Matrix<T, 3, 3> one_tet = one_tet_.block(0, 0, 3, 3) - one_tet_.col(3) * Matrix<T, 1, 3>::Ones();
     T volume = fabs(one_tet.determinant()) / 6.0;
-    T coeff = rho * volume / 20.0 * 3;
-    for(size_t p_id = 0; p_id < cells.rows(); ++p_id){
-      #pragma omp atomic
-      mass_vector(cells(p_id, cell_id)) += coeff;
+    T coeff = rho * volume / 20.0;
+
+    // for(size_t p_id = 0; p_id < cells.rows(); ++p_id){
+    //   #pragma omp atomic
+    //   mass_vector(cells(p_id, cell_id)) += coeff;
+    // }
+
+    for (size_t p = 0; p < cells.rows(); ++p) {
+      for (size_t q = p; q < cells.rows(); ++q) {
+        trips.push_back(Triplet<T>(cells(p, cell_id), cells(q, cell_id), coeff));
+        trips.push_back(Triplet<T>(cells(q, cell_id), cells(p, cell_id), coeff));
+      }
     }
   }
+
+#pragma omp parallel for
+  for (size_t i = 0; i < trips.size(); ++i){
+    trips[i] = Triplet<double>(trips[i].row(), trips[i].row(), trips[i].value());
+  }
+
+  SparseMatrix<T> mass(num_nods, num_nods);
+  mass.setFromTriplets(trips.begin(), trips.end());
+  #pragma omp parallel for
+  for (size_t i = 0; i < num_nods; ++i){
+    mass_vector[i] = mass.coeff(i, i);
+  }
+  
+    
+
+  
+
+    
+
+    
+
+  
 }
 
 

@@ -2,7 +2,7 @@
 #define FEM_CONSTITUTIVE
 #include <Eigen/Dense>
 #include <cmath>
-#include <iostream>
+
 namespace marvel{
 using namespace Eigen;
 

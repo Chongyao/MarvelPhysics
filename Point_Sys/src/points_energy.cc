@@ -286,7 +286,7 @@ int point_sys::Gra(const double *x, dat_ptr &data) const{
 int point_sys::Hes(const double*x, dat_ptr &data) const{
   
   auto start = system_clock::now();
-  omp_set_num_threads(4);  
+  // omp_set_num_threads(4);  
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     // cout << "dim is " << i << endl;

@@ -5,6 +5,7 @@
 
 namespace marvel{
 using namespace Eigen;
+using namespace std;
 
 
 
@@ -20,7 +21,7 @@ class basis_func{
 //TODO: integrate tri mesh
 template<typename T>
 class basis_func<T, 3, 1, 4>{
-
+  //TODO:DX_D can be calculated once
  public:
   static void get_def_gra(const Eigen::Matrix<T, 3, 1>&PNT, const T* const x, const T* const X, Eigen::Matrix<T, 3, 3> & def_gra, T& Jac_det) {
     const Map<const Matrix<T, 3, 4>> deformed(x);

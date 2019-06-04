@@ -8,8 +8,8 @@
 
 #include <Eigen/Dense>
 #include "eigen_ext.h"
-
 #include <iostream>
+
 namespace marvel{
 using namespace Eigen;
 using namespace std;
@@ -32,7 +32,7 @@ class BaseElas : public Functional<T, dim_>{
   using qdrt = QDRT<T, dim_, num_qdrt_, num_per_cell_>;
   
  public:
-
+  //TODO:save vol and DM 
   BaseElas(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells,
            const double& ym, const double&poi):
       all_dim_(nods.size()), num_nods_(nods.cols()), num_cells_(cells.cols()) ,
@@ -55,7 +55,7 @@ class BaseElas : public Functional<T, dim_>{
     
   int Val(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
     Map<const Eigen::Matrix<T, -1 ,-1>> deformed(x, dim_, num_nods_ );
-
+    T myval = 0;
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
@@ -68,8 +68,6 @@ class BaseElas : public Functional<T, dim_>{
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, jac_det);
         data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * qdrt::WGT_[qdrt_id] * jac_det);
-
-
       }
     }
 
@@ -78,7 +76,8 @@ class BaseElas : public Functional<T, dim_>{
   
   int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
     Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
-    #pragma omp parallel for
+
+    // #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
       T jac_det;
@@ -106,11 +105,12 @@ class BaseElas : public Functional<T, dim_>{
         data->save_gra(cells_(p, cell_id), gra_x_based_reshape.col(p));
       }
     }
+
     return 0;
   }
   int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
     Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
       T jac_det;
@@ -131,25 +131,15 @@ class BaseElas : public Functional<T, dim_>{
         basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
         hes_x_based += Ddef_Dx.transpose() * hes_F_based * Ddef_Dx * qdrt::WGT_[qdrt_id] * jac_det;
-       
-
-        {//checkhessian
-          //sysmetric
-          // cout << hes_x_based << endl;
-          // cout <<"sys"<< (hes_x_based - hes_x_based.transpose()).sum() << endl;
-          
-          // cout << "translate " << (hes_x_based * VectorXd::Ones(dim_ * num_per_cell_)).sum() << endl;
-        }
-        
       }
 
 
-      
+  
       //save hes
       for(size_t p = 0; p < dim_ * num_per_cell_; ++p){
         for(size_t q = 0; q < dim_ * num_per_cell_; ++q){
-          const size_t I = cells_(p % dim_, p/dim_);
-          const size_t J = cells_(q % dim_, q/dim_);
+          const size_t I = cells_(p / dim_, cell_id) * dim_ + p%dim_;
+          const size_t J = cells_(q / dim_, cell_id) * dim_ + q%dim_;
           if(hes_x_based(p, q))
             data->save_hes(I, J, hes_x_based(p, q));
         }
