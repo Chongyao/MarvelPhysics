@@ -4,8 +4,10 @@
 #include <cmath>
 #include <unsupported/Eigen/CXX11/Tensor>
 #include "tensor.h"
+#include <iostream>
 namespace marvel{
 using namespace Eigen;
+using namespace std;
 
 
 
@@ -77,7 +79,7 @@ class linear_csttt : public elas_csttt<T, dim_>{
 template<typename T, size_t dim_>
 class stvk : public elas_csttt<T, dim_>{
  public:
-  
+  using tensor_type = fourth_tensor<T, dim_, dim_, dim_, dim_>;
   static T
   val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
     Matrix<T, dim_, dim_> strain = 0.5 * (F.transpose() * F - Matrix<T, dim_, dim_>::Identity());
@@ -99,7 +101,7 @@ class stvk : public elas_csttt<T, dim_>{
     const Matrix<T, dim_, dim_> Iden = Matrix<T, dim_, dim_>::Identity();
     static Matrix<T, dim_ * dim_, dim_ * dim_> hes;
     //TODO: fill this hes
-    fourth_tensor<T, dim_, dim_, dim_, dim_>  dF_dF;{
+     tensor_type dF_dF;{
       for(size_t row_out = 0; row_out < dim_; ++row_out){
         for(size_t col_out = 0; col_out < dim_; ++col_out){
           Matrix<T, dim_, dim_> zero = Matrix<T, dim_, dim_>::Zero();
@@ -108,30 +110,36 @@ class stvk : public elas_csttt<T, dim_>{
         }
       }
     }
+
+
     Matrix<T, dim_, dim_> rhs = 2 * mu * strain + lam * strain.trace() * Iden;
 
-    decltype(dF_dF) drhs_dF;{
+
+    tensor_type drhs_dF;{
       decltype(dF_dF) dstrain_dF;{
         for(size_t row_out = 0; row_out < dim_; ++row_out){
           for(size_t col_out = 0; col_out < dim_; ++col_out){
             Matrix<T, dim_, dim_> zero = Matrix<T, dim_, dim_>::Zero();
             zero.col(row_out) += F.col(col_out);
             zero.col(col_out) += F.col(row_out);
-            dF_dF(row_out, col_out) = mu * zero;
+            dstrain_dF(row_out, col_out) = mu * zero;
             
           }
         }
       }
-      decltype(dF_dF) dtrace_dF;{
+
+      tensor_type  dtrace_dF;{
         for(size_t row_out = 0; row_out < dim_; ++row_out){
-          dF_dF(row_out, row_out) = lam * F;
+          dtrace_dF(row_out, row_out) = lam * F;
         }
       }
       drhs_dF = dstrain_dF + dtrace_dF;
     }
 
-    decltype(dF_dF) hes_tensor = dF_dF * rhs + drhs_dF.mat_mult_this(F);
+
+    tensor_type hes_tensor = dF_dF * rhs + F * drhs_dF ;
     hes_tensor.Flatten(hes);
+
     return std::move(hes);
   }
   
