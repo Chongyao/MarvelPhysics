@@ -11,7 +11,7 @@ using namespace std;
 using namespace Eigen;
 using namespace marvel;
 
-using TET_ELAS = BaseElas<double, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
+using TET_ELAS = BaseElas<double, 3, 4, 1, 1, stvk, basis_func, quadrature>;
 int main(int argc, char** argv){
   std::cout.precision(10);
   const char* filename = argv[1];
@@ -25,13 +25,14 @@ int main(int argc, char** argv){
   
   MatrixXd nods_example;
   tet_mesh_read_from_vtk(example_file, nods_example, tets);
+  cout <<"V"<< nods_example.rows() << " " << nods_example.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
   
 
   const string outdir = argv[3];
   
   //set mtr
   constexpr  double rho = 5;
-  constexpr  double Young = 800.0;
+  constexpr  double Young = 5000.0;
   constexpr  double poi = 0.45;
   constexpr  double gravity = 9.8;
   constexpr  double dt = 0.01;
@@ -56,7 +57,7 @@ int main(int argc, char** argv){
   enum energy_type{EXAMPLE, ELAS, GRAV, KIN, POS};
   vector<shared_ptr<Functional<double, 3>>> ebf(POS + 1);{
     ebf[ELAS] = make_shared<TET_ELAS>(nods, tets, Young, poi);
-    ebf[EXAMPLE] = make_shared<TET_ELAS>(nods_example, test, Young, poi);
+    ebf[EXAMPLE] = make_shared<TET_ELAS>(nods_example, tets, Young * 0, poi);
     ebf[GRAV] = make_shared<gravity_energy<3>>(num_nods, 1, gravity, mass_vec, 'z');
     ebf[KIN] = make_shared<momentum<3>>(nods.data(), num_nods, mass_vec, dt);
     ebf[POS] = make_shared<position_constraint<3>>(nods.data(), num_nods, w_pos, cons);
