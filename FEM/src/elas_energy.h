@@ -23,9 +23,9 @@ inline void compute_lame_coeffs(const T Ym, const T Pr,
 
 
 template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t num_qdrt_,
-         template<typename, size_t> class CSTTT,
-         template<typename, size_t, size_t, size_t > class BASIS,
-         template<typename, size_t, size_t, size_t> class QDRT>
+         template<typename, size_t> class CSTTT,  // constituitive function
+         template<typename, size_t, size_t, size_t > class BASIS, //  basis
+         template<typename, size_t, size_t, size_t> class QDRT> //  
 class BaseElas : public Functional<T, dim_>{
   using basis = BASIS<T, dim_, bas_order_, num_per_cell_>;
   using csttt = CSTTT<T, dim_>;
@@ -108,6 +108,7 @@ class BaseElas : public Functional<T, dim_>{
 
     return 0;
   }
+
   int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
     Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
     // #pragma omp parallel for
@@ -123,18 +124,15 @@ class BaseElas : public Functional<T, dim_>{
       Matrix<T, dim_ * num_per_cell_, 1> gra_x_based = Matrix<T, dim_ *  num_per_cell_, 1>::Zero();
       Matrix<T, dim_ * dim_, dim_ * dim_> hes_F_based; 
       Matrix<T, dim_ * num_per_cell_, dim_ * num_per_cell_> hes_x_based; hes_x_based.setZero();
-
       
       //TODO:considering the order of basis
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, jac_det);
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
         basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
         hes_x_based += Ddef_Dx.transpose() * hes_F_based * Ddef_Dx * qdrt::WGT_[qdrt_id] * jac_det;
       }
 
-
-  
       //save hes
       for(size_t p = 0; p < dim_ * num_per_cell_; ++p){
         for(size_t q = 0; q < dim_ * num_per_cell_; ++q){
@@ -148,14 +146,32 @@ class BaseElas : public Functional<T, dim_>{
     return 0;
 
   }
+
+  void PreComputation() {
+    Dm_inv.resize(num_cells_);
+    Jac_det.resize(num_cells_);
+    Eigen::Matrix<T, 3, num_per_cell_-1> Dm_inv_tmp;
+    T Jac_det_tmp;
+    for(int i = 0; i < num_cells_; i++) {
+      const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
+      for(int j = 0; j < num_qdrt_; j++) {
+        calc_InvDm_Det(qdrt::PNT_.col(qdrt_id), x_cell, Jac_det_tmp, Dm_inv_tmp);
+        Jac_det[i].push_back(Jac_det_tmp);
+        Dm_inv[i].push_back(Dm_inv_tmp);
+      }
+    }
+  }
   
  private:
   const size_t all_dim_, num_nods_, num_cells_;
   Eigen::Matrix<T, 2, -1> mtr_;
-  const Eigen::Matrix<T, dim_, -1> nods_;
-  const Eigen::Matrix<int, num_per_cell_, -1> cells_;
+  const Eigen::Matrix<T, dim_, -1> nods_; // vertices
+  const Eigen::Matrix<int, num_per_cell_, -1> cells_; // elements
   Matrix<int, dim_, 1> all_rows_;
   
+private:
+  std::vector<std::vector<Eigen::Matrix<T, dim_, dim_>>> Dm_inv;
+  std::vector<std::vector<T>> Jac_det;
 
   
 };

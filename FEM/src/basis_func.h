@@ -13,7 +13,7 @@ template<typename T, size_t dim_, size_t order_, size_t num_per_cell_>
 class basis_func{
  public:
 
-
+  static void calc_InvDm_Det(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X, double& Jac_det, Matrix<T, dim_, dim_>& Dm_inv);
   static void get_def_gra(const Eigen::Matrix<T, dim_, 1>&PNT, const T* const x, const T* const X, Eigen::Matrix<T, dim_, dim_> & def_gra) ;
   static void get_Ddef_Dx(const Eigen::Matrix<T, dim_, 1>&PNT, const T* const x, const T* const X, const Eigen::Matrix<T, dim_, dim_>& def_gra, Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_>& Ddef_Dx);
 };
@@ -23,13 +23,10 @@ template<typename T>
 class basis_func<T, 3, 1, 4>{
   //TODO:DX_D can be calculated once
  public:
-  static void get_def_gra(const Eigen::Matrix<T, 3, 1>&PNT, const T* const x, const T* const X, Eigen::Matrix<T, 3, 3> & def_gra, T& Jac_det) {
+  static void get_def_gra(const Eigen::Matrix<T, 3, 1>&PNT, const T* const x, const Matrix<T, dim_, dim_>& Dm_inv, Eigen::Matrix<T, 3, 3> & def_gra) {
     const Map<const Matrix<T, 3, 4>> deformed(x);
-    const Map<const Matrix<T, 3, 4>> rest(X);
     const Matrix<T, 3, 3> Dx_D = deformed.block(0, 0, 3, 3) - deformed.col(3) * Matrix<T, 1, 3>::Ones();
-    const Matrix<T, 3, 3> DX_D = rest.block(0, 0, 3, 3) - rest.col(3) * Matrix<T, 1, 3>::Ones();
-    Jac_det = fabs(DX_D.determinant());
-    def_gra = Dx_D * DX_D.inverse();
+    def_gra = Dx_D * Dm_inv;
     return;
   }
 
