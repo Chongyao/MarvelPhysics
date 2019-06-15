@@ -95,4 +95,7 @@ template class gravity_energy<3>;
 template class collision<3>;
 
 }//namespace marvel
+
+#include "basic_energy.imp"
+
 #endif

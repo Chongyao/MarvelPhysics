@@ -10,8 +10,15 @@ file(GLOB source *.cc *.c *.cpp)
 #     set(CU_JACOBI_LIBRARY "")
 # endif(CUDA_FOUND)
 
-cuda_add_library(marvel-core SHARED ${source})
-target_link_libraries(marvel-core	
-  coll_rigid
-)
+if (${APPLE})
+    add_library(marvel-core SHARED ${source})
+    target_link_libraries(marvel-core	
+        # coll_rigid
+    )
+else ()
+    cuda_add_library(marvel-core SHARED ${source})
+    target_link_libraries(marvel-core	
+    coll_rigid
+    )
+endif(${APPLE})
 

@@ -29,4 +29,7 @@ template class newton_iter<double, 3>;
 
   
 }
+
+#include "implicit_euler.imp"
+
 #endif

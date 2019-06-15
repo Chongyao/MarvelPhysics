@@ -56,4 +56,7 @@ class dat_str_core{
 
 template class dat_str_core<double, 3>;
 }
+
+#include "data_str_core.imp"
+
 #endif
