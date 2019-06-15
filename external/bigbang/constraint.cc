@@ -200,8 +200,8 @@ size_t hard_position_constraint::Nf() const {
 }
 
 int hard_position_constraint::Val(const double *x, double *val) const {
-  Eigen::Map<const MatrixXd> X(x, rd_, Nx()/rd_);
-  Eigen::Map<MatrixXd> V(val, rd_, Nf()/rd_);
+  Map<const MatrixXd> X(x, rd_, Nx()/rd_);
+  Map<MatrixXd> V(val, rd_, Nf()/rd_);
 
   if ( rd_ == 3 ) {
     size_t i = 0;

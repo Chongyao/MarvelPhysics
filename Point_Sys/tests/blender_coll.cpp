@@ -30,7 +30,7 @@
 
 #include "vtk2surf.h"
 
-#include "coll_wrapper/coll_wrapper.h"
+#include "coll_wrapper.h"
 #include "implicit_euler.h"
 using namespace marvel;
 using namespace std;
@@ -208,9 +208,9 @@ int main(int argc, char** argv){
 
 
   vet_displace.setZero(3, nods.cols());
-  Eigen::Map<VectorXd> acce_vec(acce.data(), 3 * dim);
-  Eigen::Map<VectorXd> velo_vec(velocity.data(), 3 * dim);
-  Eigen::Map<MatrixXd> gra_vec(dat_str->get_gra().data(), 3, dim);
+  Map<VectorXd> acce_vec(acce.data(), 3 * dim);
+  Map<VectorXd> velo_vec(velocity.data(), 3 * dim);
+  Map<MatrixXd> gra_vec(dat_str->get_gra().data(), 3, dim);
 
   size_t iters_perframe = static_cast<size_t>(round(1.0/delt_t/common.get<size_t>("frame_rate")));
   size_t max_iter  = static_cast<size_t>(ceil(common.get<double>("total_time") / delt_t));

@@ -48,7 +48,7 @@ class spatial_hash{
   const Eigen::MatrixXd points;
   size_t nn_num;
   size_t points_num;
-  std::unordered_multiEigen::Map<Eigen::Vector3i, size_t> points_hash;
+  std::unordered_multimap<Eigen::Vector3i, size_t> points_hash;
   Eigen::MatrixXi points_dis;
 
   Eigen::MatrixXi NN;

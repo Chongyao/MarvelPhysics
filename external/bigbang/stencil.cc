@@ -592,7 +592,7 @@ void quad_stencil::apply_local_LMA(const mati_t &quad_H, const matd_t &nods_H, c
   }
 
   //-> insert into a sparse K
-  SparseMatrix<double> K_H = Eigen::Map<const MatrixXd>(&adjc_H[0], adjc_H.size(1), adjc_H.size(2)).sparseView();
+  SparseMatrix<double> K_H = Map<const MatrixXd>(&adjc_H[0], adjc_H.size(1), adjc_H.size(2)).sparseView();
 
   //-> global to local mapping
   mati_t g2l = -1*ones<size_t>(nods_H.size(2), 1);
@@ -1068,7 +1068,7 @@ void hexs_stencil::apply_local_LMA(const mati_t &hexs_H, const matd_t &nods_H, c
   }
 
   //-> insert into a sparse K
-  SparseMatrix<double> K_H = Eigen::Map<const MatrixXd>(&adjc_H[0], adjc_H.size(1), adjc_H.size(2)).sparseView();
+  SparseMatrix<double> K_H = Map<const MatrixXd>(&adjc_H[0], adjc_H.size(1), adjc_H.size(2)).sparseView();
 
   //-> global to local mapping
   mati_t g2l = -1*ones<size_t>(nods_H.size(2), 1);

@@ -12,8 +12,8 @@
 #include <chrono>
 #include <limits>
 
-#include "coll_wrapper/coll_response.h"
-#include "coll_wrapper/coll_wrapper.h"
+#include "coll_response.h"
+#include "coll_wrapper.h"
 using namespace marvel;
 using namespace std;
 using namespace Eigen;
@@ -126,8 +126,8 @@ int main(int argc, char** argv){
     cout <<" times size is " <<  times.size() << endl;
     // assert(pairs.size() == 0);
     vector<size_t> if_response(num_nods, false);
-    Eigen::Map<size_t , pair<size_t, size_t>> candidates;
-    Eigen::Map<size_t, double> get_time;
+    map<size_t , pair<size_t, size_t>> candidates;
+    map<size_t, double> get_time;
     
     for(size_t j = 0; j < pairs.size(); ++j){
       unsigned int mesh_id1, face_id1, mesh_id2, face_id2;{

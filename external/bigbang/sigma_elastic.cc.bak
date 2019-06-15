@@ -24,8 +24,8 @@ void vox_SF_jac(double *jac, const double *epsilon);
 extern "C" void vox_dfdpf_(double *jac, const double *PF, const double *U, const double *VT, const double *G);
 
 static inline void QuadratureGradOperator(const double *HinvXH, double *Op) {
-  Eigen::Map<const Matrix<double, 8, 3>> Dm(HinvXH);
-  Eigen::Map<Matrix<double, 24, 9>> rtn(Op);
+  Map<const Matrix<double, 8, 3>> Dm(HinvXH);
+  Map<Matrix<double, 24, 9>> rtn(Op);
   rtn = kroneckerProduct(Dm, Matrix3d::Identity());
 }
 
@@ -332,7 +332,7 @@ int vox_force_matching_energy::Val(const double *x, double *val) const {
 
 int vox_force_matching_energy::Gra(const double *x, double *gra) const {
   itr_matrix<const double *> X(args_num_, cube_.size(2), x);
-  Eigen::Map<VectorXd> G(gra, Nx());
+  Map<VectorXd> G(gra, Nx());
 
   matd_t F(3, 3), S(3, 3), U(3, 3), VT(3, 3), P(3, 3);
 
@@ -390,7 +390,7 @@ int vox_force_matching_energy::Gra(const double *x, double *gra) const {
     const matd_t fdiff = fint(colon())-Rf_(colon(), i);
 
     if ( !ptn_normalized_ ) {
-      G += datw_[i]*J.transpose()*Eigen::Map<const VectorXd>(&fdiff[0], fdiff.size());
+      G += datw_[i]*J.transpose()*Map<const VectorXd>(&fdiff[0], fdiff.size());
     } else {
       for (size_t r = 0; r < Rf_.size(1)/3; ++r) {
         const double normf = norm(Rf_(colon(3*r, 3*r+2), i));
@@ -398,7 +398,7 @@ int vox_force_matching_energy::Gra(const double *x, double *gra) const {
           continue;
         const double sqinv = 1.0/(normf*normf);
         const auto blockJ = J.block(3*r, 0, 3, J.cols());
-        G += datw_[i]*blockJ.transpose()*sqinv*Eigen::Map<const Vector3d>(&fdiff[3*r]);
+        G += datw_[i]*blockJ.transpose()*sqinv*Map<const Vector3d>(&fdiff[3*r]);
       }
     }
   }
@@ -502,7 +502,7 @@ size_t vox_args_smooth_energy::Nx() const {
 int vox_args_smooth_energy::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
   
-  Eigen::Map<const MatrixXd> X(x, args_num_, cube_.size(2));
+  Map<const MatrixXd> X(x, args_num_, cube_.size(2));
   
   for (auto &it : f2v_->face2hex_) {
     if ( f2v_->is_outside_face(it) )
@@ -516,8 +516,8 @@ int vox_args_smooth_energy::Val(const double *x, double *val) const {
 int vox_args_smooth_energy::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
   
-  Eigen::Map<const MatrixXd> X(x, args_num_, cube_.size(2));
-  Eigen::Map<MatrixXd> G(gra, args_num_, cube_.size(2));
+  Map<const MatrixXd> X(x, args_num_, cube_.size(2));
+  Map<MatrixXd> G(gra, args_num_, cube_.size(2));
   
   for (auto &it : f2v_->face2hex_) {
     if ( f2v_->is_outside_face(it) )

@@ -67,7 +67,7 @@ public:
       Jc.setFromTriplets(trips.begin(), trips.end());
     }
 
-    Map<Eigen::Matrix<T, -1, 1>>(gra, Nx()) += w_*Jc.transpose()*Cv;
+    Eigen::Map<Eigen::Matrix<T, -1, 1>>(gra, Nx()) += w_*Jc.transpose()*Cv;
     return 0;
   }
   int Hes(const T *x, std::vector<Eigen::Triplet<T>> *hes) const {
@@ -97,7 +97,7 @@ class linearization_wrapper : public Functional<T>
 public:
   linearization_wrapper(const std::shared_ptr<Functional<T>> &f, const double *x)
       : dim_(f->Nx()) {
-    x0_ = Map<const Eigen::Matrix<T, -1, 1>>(x, dim_);
+    x0_ = Eigen::Map<const Eigen::Matrix<T, -1, 1>>(x, dim_);
 
     val_x0_ = 0;
     f->Val(x, &val_x0_);
@@ -114,13 +114,13 @@ public:
     return dim_;
   }
   int Val(const double *x, double *val) const {
-    const Eigen::Matrix<T, -1, 1> dx = Map<const Eigen::Matrix<T, -1, 1>>(x, dim_)-x0_;
+    const Eigen::Matrix<T, -1, 1> dx = Eigen::Map<const Eigen::Matrix<T, -1, 1>>(x, dim_)-x0_;
     *val += val_x0_+gra_x0_.dot(dx)+0.5*dx.dot(hes_x0_*dx);
     return 0;
   }
   int Gra(const double *x, double *gra) const {
-    const Eigen::Matrix<T, -1, 1> dx = Map<const Eigen::Matrix<T, -1, 1>>(x, dim_)-x0_;
-    Map<Eigen::Matrix<T, -1, 1>>(gra, dim_) += hes_x0_*dx+gra_x0_;
+    const Eigen::Matrix<T, -1, 1> dx = Eigen::Map<const Eigen::Matrix<T, -1, 1>>(x, dim_)-x0_;
+    Eigen::Map<Eigen::Matrix<T, -1, 1>>(gra, dim_) += hes_x0_*dx+gra_x0_;
     return 0;
   }
   int Hes(const double *x, std::vector<Eigen::Triplet<T>> *hes) const {
@@ -265,7 +265,7 @@ public:
     return fdim;
   }
   int Val(const T *x, T *val) const {
-    Map<Eigen::Matrix<T, -1, 1>> v(val, Nf());
+    Eigen::Map<Eigen::Matrix<T, -1, 1>> v(val, Nf());
     size_t offset = 0;
     for (auto &c : buffer_) {
       if ( c.get() ) {

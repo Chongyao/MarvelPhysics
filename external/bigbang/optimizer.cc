@@ -24,7 +24,7 @@ uncons_newton_solver::uncons_newton_solver(const shared_ptr<Functional<double>> 
 }
 
 int uncons_newton_solver::optimize(double *x, optimize_callback *cb) {
-  Eigen::Map<VectorXd> X(x, dim_);
+  Map<VectorXd> X(x, dim_);
   VectorXd xstar = X, dx(dim_), grad(dim_), xnew(dim_);
 
   const size_t maxits = opts_.get<size_t>("maxits.value", 1000);
@@ -92,7 +92,7 @@ int newton_solve(double *x, const size_t dim, const pfunc &f, boost::property_tr
     return __LINE__;
   }
   
-  Eigen::Map<VectorXd> X(x, dim);
+  Map<VectorXd> X(x, dim);
   VectorXd xstar = X, dx(dim), grad(dim), xnew(dim);
   SparseMatrix<double> H(dim, dim);
 
@@ -163,7 +163,7 @@ int newton_solve_with_constrained_dofs(double *x, const size_t dim, const pfunc 
   // SimplicialCholesky<SparseMatrix<double>> sol;
   // sol.setMode(SimplicialCholeskyLDLT);
   CholmodSimplicialLLT<SparseMatrix<double>> sol;
-  Eigen::Map<VectorXd> X(x, dim);
+  Map<VectorXd> X(x, dim);
   VectorXd xstar = X, dx, Dx(dim), xnew(dim);
   
   for (size_t iter = 0; iter < args.max_iter; ++iter) {

@@ -26,12 +26,12 @@ void lineSDF::Val(const double *x, double *val) const {
 
 void lineSDF::Gra(const double *x, double *gra) const {
   Vector2d X(x);
-  Eigen::Map<Vector2d> G(gra);
+  Map<Vector2d> G(gra);
   G = 2*(X-C_).dot(N_)*N_;
 }
 
 void lineSDF::Hes(const double *x, double *hes) const {
-  Eigen::Map<Matrix2d> H(hes);
+  Map<Matrix2d> H(hes);
   H = 2*N_*N_.transpose();
 }
 //===============================================================================
@@ -50,13 +50,13 @@ void circleSDF::Val(const double *x, double *val) const {
 
 void circleSDF::Gra(const double *x, double *gra) const {
   Vector2d X(x);
-  Eigen::Map<Vector2d> G(gra);
+  Map<Vector2d> G(gra);
   G = 2*(X-C_-R_*(X-C_)/(X-C_).norm());
 }
 
 void circleSDF::Hes(const double *x, double *hes) const {
   Vector2d X(x);
-  Eigen::Map<Matrix2d> H(hes);
+  Map<Matrix2d> H(hes);
   Vector2d J = (X-C_)/(X-C_).norm();
   H = 2*J*J.transpose();
 }
@@ -76,12 +76,12 @@ void planeSDF::Val(const double *x, double *val) const {
 
 void planeSDF::Gra(const double *x, double *gra) const {
   Vector3d X(x);
-  Eigen::Map<Vector3d> G(gra);
+  Map<Vector3d> G(gra);
   G = 2*(X-C_).dot(N_)*N_;
 }
 
 void planeSDF::Hes(const double *x, double *hes) const {
-  Eigen::Map<Matrix3d> H(hes);
+  Map<Matrix3d> H(hes);
   H = 2*N_*N_.transpose();
 }
 //===============================================================================
@@ -100,13 +100,13 @@ void sphereSDF::Val(const double *x, double *val) const {
 
 void sphereSDF::Gra(const double *x, double *gra) const {
   Vector3d X(x);
-  Eigen::Map<Vector3d> G(gra);
+  Map<Vector3d> G(gra);
   G = 2*(X-C_-R_*(X-C_)/(X-C_).norm());
 }
 
 void sphereSDF::Hes(const double *x, double *hes) const {
   Vector3d X(x);
-  Eigen::Map<Matrix3d> H(hes);
+  Map<Matrix3d> H(hes);
   Vector3d J = (X-C_)/(X-C_).norm();
   H = 2*J*J.transpose();
 }
@@ -134,7 +134,7 @@ void torusSDF::Val(const double *x, double *val) const {
 }
 
 void torusSDF::Gra(const double *x, double *gra) const {
-  Eigen::Map<Vector3d> G(gra);
+  Map<Vector3d> G(gra);
   double d = 0;
   torus_sdf_(&d, x, C_.data(), N_.data(), &r_, &R_);
   Vector3d g;
@@ -143,7 +143,7 @@ void torusSDF::Gra(const double *x, double *gra) const {
 }
 
 void torusSDF::Hes(const double *x, double *hes) const {
-  Eigen::Map<Matrix3d> H(hes);
+  Map<Matrix3d> H(hes);
   Vector3d g;
   torus_sdf_jac_(g.data(), x, C_.data(), N_.data(), &r_, &R_);
   H = 2*g*g.transpose();
@@ -172,7 +172,7 @@ void cylinderSDF::Val(const double *x, double *val) const {
 }
 
 void cylinderSDF::Gra(const double *x, double *gra) const {
-  Eigen::Map<Vector3d> G(gra);
+  Map<Vector3d> G(gra);
   double d = 0;
   cylinder_sdf_(&d, x, C_.data(), N_.data(), &R_);
   Vector3d g;
@@ -181,7 +181,7 @@ void cylinderSDF::Gra(const double *x, double *gra) const {
 }
 
 void cylinderSDF::Hes(const double *x, double *hes) const {
-  Eigen::Map<Matrix3d> H(hes);
+  Map<Matrix3d> H(hes);
   Vector3d g;
   cylinder_sdf_jac_(g.data(), x, C_.data(), N_.data(), &R_);
   H = 2*g*g.transpose();
@@ -213,7 +213,7 @@ int geom_contact_energy::Val(const double *x, double *val) const {
 
 int geom_contact_energy::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<MatrixXd> G(gra, rd_, dim_/rd_);
+  Map<MatrixXd> G(gra, rd_, dim_/rd_);
   for (size_t i = 0; i < dim_/rd_; ++i) {
     for (size_t j = 0; j < objs_.size(); ++j) {
       if ( !objs_[j].get() )

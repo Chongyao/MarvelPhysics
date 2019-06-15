@@ -23,13 +23,13 @@ public:
     return dim_;
   }
   int Val(const double *x, double *val) const {
-    Map<const Vec> X(x, dim_);
+    Eigen::Map<const Vec> X(x, dim_);
     *val += 0.5*w_*X.squaredNorm();
     return 0;
   }
   int Gra(const double *x, double *gra) const {
-    Map<const Vec> X(x, dim_);
-    Map<Vec> G(gra, dim_);
+    Eigen::Map<const Vec> X(x, dim_);
+    Eigen::Map<Vec> G(gra, dim_);
     G += w_*X;
     return 0;
   }
@@ -70,7 +70,7 @@ public:
     return szA_+szB_;
   }
   int Val(const double *w, double *val) const {
-    Map<const Mat> A(w, dimH_, dimI_+1), B(w+szA_, dimO_, dimH_+1);
+    Eigen::Map<const Mat> A(w, dimH_, dimI_+1), B(w+szA_, dimO_, dimH_+1);
     Vec layer_hid = Vec::Ones(dimH_+1), layer_out;
     for (size_t i = 0; i < in_.cols(); ++i) {
       layer_hid.head(dimH_) = A*in_.col(i);
@@ -81,8 +81,8 @@ public:
     return 0;
   }
   int Gra(const double *w, double *gra) const {
-    Map<const Mat> A(w, dimH_, dimI_+1), B(w+szA_, dimO_, dimH_+1);
-    Map<Mat> gA(gra, dimH_, dimI_+1), gB(gra+szA_, dimO_, dimH_+1);
+    Eigen::Map<const Mat> A(w, dimH_, dimI_+1), B(w+szA_, dimO_, dimH_+1);
+    Eigen::Map<Mat> gA(gra, dimH_, dimI_+1), gB(gra+szA_, dimO_, dimH_+1);
     Vec layer_hid = Vec::Ones(dimH_+1), layer_hid_df = Vec::Zero(dimH_+1), layer_out;
     for (size_t i = 0; i < in_.cols(); ++i) {
       layer_hid.head(dimH_) = layer_hid_df.head(dimH_) = A*in_.col(i);      
@@ -149,7 +149,7 @@ public:
   }
   void predict(const Vec &x, Vec &y) {
     const size_t szA = dimH_*(dimI_+1);
-    Map<const Mat> A(W_.data(), dimH_, dimI_+1), B(W_.data()+szA, dimO_, dimH_+1);
+    Eigen::Map<const Mat> A(W_.data(), dimH_, dimI_+1), B(W_.data()+szA, dimO_, dimH_+1);
     Vec x1 = Vec::Ones(dimI_+1), layer_hid = Vec::Ones(dimH_+1);
     x1.head(x.size()) = x;
     layer_hid.head(dimH_) = A*x1;

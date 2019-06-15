@@ -143,7 +143,7 @@ int basis_builder::extend(const shared_ptr<Functional<double>> &energy,
   cout << "[INFO] solve modal derivatives..." << endl;
   const size_t dim = energy->Nx();
   ASSERT(dim == U.rows());
-  Eigen::Map<const VectorXd> X0(x0, dim);
+  Map<const VectorXd> X0(x0, dim);
 
   const double dx = 0.1;
   vector<SparseMatrix<double>> Hijk(dim);

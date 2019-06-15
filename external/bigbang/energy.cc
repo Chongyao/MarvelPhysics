@@ -228,7 +228,7 @@ implicit_avf::implicit_avf(const mati_t &cell, const matd_t &nods,
   for (size_t i = 0; i < invM_.rows(); ++i)
     invM_.coeffRef(i, i) = 1.0/M_.coeff(i, i);
   
-  xn_ = Eigen::Map<const VectorXd>(&nods[0], dim_);
+  xn_ = Map<const VectorXd>(&nods[0], dim_);
   vn_.setZero(dim_);
   fn_.setZero(dim_);
   Ep_->Gra(xn_.data(), fn_.data());
@@ -239,7 +239,7 @@ size_t implicit_avf::Nx() const {
 }
 
 int implicit_avf::Val(const double *x, double *val) const {
-  Eigen::Map<const VectorXd> X(x, dim_);
+  Map<const VectorXd> X(x, dim_);
 
   const VectorXd dv = X-xn_-h_*vn_+h2_/12*invM_*fn_;
   double v1 = dv.dot(M_*dv);
@@ -254,8 +254,8 @@ int implicit_avf::Val(const double *x, double *val) const {
 }
 
 int implicit_avf::Gra(const double *x, double *gra) const {
-  Eigen::Map<const VectorXd> X(x, dim_);
-  Eigen::Map<VectorXd> G(gra, dim_);
+  Map<const VectorXd> X(x, dim_);
+  Map<VectorXd> G(gra, dim_);
 
   const VectorXd g1 = 2*M_*(X-xn_-h_*vn_+h2_/12*invM_*fn_);
 
@@ -270,7 +270,7 @@ int implicit_avf::Gra(const double *x, double *gra) const {
 }
 
 int implicit_avf::Hes(const double *x, vector<Triplet<double>> *hes) const {
-  Eigen::Map<const VectorXd> X(x, dim_);
+  Map<const VectorXd> X(x, dim_);
 
   const VectorXd half_x = (X+xn_)/2;
   vector<Triplet<double>> trips;
@@ -289,16 +289,16 @@ int implicit_avf::Hes(const double *x, vector<Triplet<double>> *hes) const {
 
 void implicit_avf::Init(const double *x0, const double *v0) {
   if ( x0 != nullptr ) {
-    xn_ = Eigen::Map<const VectorXd>(x0, dim_);
+    xn_ = Map<const VectorXd>(x0, dim_);
     fn_.setZero(dim_);
     Ep_->Gra(xn_.data(), fn_.data());
   }
   if ( v0 != nullptr )
-    vn_ = Eigen::Map<const VectorXd>(v0, dim_);
+    vn_ = Map<const VectorXd>(v0, dim_);
 }
 
 void implicit_avf::Update(const double *x) {
-   Eigen::Map<const VectorXd> X(x, dim_);
+   Map<const VectorXd> X(x, dim_);
    vn_ = (2*(X-xn_)/h_-vn_).eval();
    xn_ = X;
    fn_.setZero(dim_);
@@ -309,14 +309,14 @@ momentum_potential_imp_euler::momentum_potential_imp_euler(const mati_t &cell, c
                                                            const double rho, const double h, const double w)
   : rho_(rho), h_(h), w_(w), dim_(nods.size()) {
   calc_mass_matrix(cell, nods, rho, nods.size(1), &M_, true);
-  xn_ = Eigen::Map<const VectorXd>(&nods[0], dim_);
+  xn_ = Map<const VectorXd>(&nods[0], dim_);
   vn_.setZero(dim_);
 }
 
 momentum_potential_imp_euler::momentum_potential_imp_euler(const matd_t &nods, const SparseMatrix<double> &M,
                                                            const double h, const double w)
     : h_(h), w_(w), dim_(nods.size()), M_(M) {
-  xn_ = Eigen::Map<const VectorXd>(&nods[0], dim_);
+  xn_ = Map<const VectorXd>(&nods[0], dim_);
   vn_.setZero(dim_);
 }
 
@@ -326,7 +326,7 @@ size_t momentum_potential_imp_euler::Nx() const {
 
 int momentum_potential_imp_euler::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const VectorXd> X(x, dim_);
+  Map<const VectorXd> X(x, dim_);
   VectorXd dv = (X-xn_)/h_-vn_;
   *val += w_*0.5*dv.dot(M_*dv);
   return 0;
@@ -334,8 +334,8 @@ int momentum_potential_imp_euler::Val(const double *x, double *val) const {
 
 int momentum_potential_imp_euler::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const VectorXd> X(x, dim_);
-  Eigen::Map<VectorXd> g(gra, dim_);
+  Map<const VectorXd> X(x, dim_);
+  Map<VectorXd> g(gra, dim_);
   g += w_*M_*((X-xn_)/h_-vn_)/h_;
   return 0;
 }
@@ -352,13 +352,13 @@ int momentum_potential_imp_euler::Hes(const double *x, vector<Triplet<double>> *
 
 void momentum_potential_imp_euler::Init(const double *x0, const double *v0) {
   if ( x0 != nullptr )
-    xn_ = Eigen::Map<const VectorXd>(x0, dim_);
+    xn_ = Map<const VectorXd>(x0, dim_);
   if ( v0 != nullptr )
-    vn_ = Eigen::Map<const VectorXd>(v0, dim_);
+    vn_ = Map<const VectorXd>(v0, dim_);
 }
 
 void momentum_potential_imp_euler::Update(const double *x) {
-  Eigen::Map<const VectorXd> X(x, dim_);
+  Map<const VectorXd> X(x, dim_);
   vn_ = (X-xn_)/h_;
   xn_ = X;
 }
@@ -371,7 +371,7 @@ momentum_potential_bdf2::momentum_potential_bdf2(const mati_t &cell, const matd_
                                                  const double rho, const double h, const double w)
   : rho_(rho), h_(h), w_(w), dim_(nods.size()) {
   calc_mass_matrix(cell, nods, rho, nods.size(1), &M_, false);
-  xn_ = Eigen::Map<const VectorXd>(&nods[0], dim_);
+  xn_ = Map<const VectorXd>(&nods[0], dim_);
   xnn_ = xn_;
   vn_.setZero(dim_);
   vnn_.setZero(dim_);
@@ -380,7 +380,7 @@ momentum_potential_bdf2::momentum_potential_bdf2(const mati_t &cell, const matd_
 momentum_potential_bdf2::momentum_potential_bdf2(const matd_t &nods, const SparseMatrix<double> &M,
                                                  const double h, const double w)
     : h_(h), w_(w), dim_(nods.size()), M_(M) {
-  xn_ = Eigen::Map<const VectorXd>(&nods[0], dim_);
+  xn_ = Map<const VectorXd>(&nods[0], dim_);
   xnn_ = xn_;
   vn_.setZero(dim_);
   vnn_.setZero(dim_);  
@@ -392,7 +392,7 @@ size_t momentum_potential_bdf2::Nx() const {
 
 int momentum_potential_bdf2::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const VectorXd> X(x, dim_);
+  Map<const VectorXd> X(x, dim_);
   VectorXd dv = 1.5/h_*X-2.0/h_*xn_+0.5/h_*xnn_-4.0/3*vn_+1.0/3*vnn_;
   *val += 0.5*w_*dv.dot(M_*dv);
   return 0;
@@ -400,8 +400,8 @@ int momentum_potential_bdf2::Val(const double *x, double *val) const {
 
 int momentum_potential_bdf2::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const VectorXd> X(x, dim_);
-  Eigen::Map<VectorXd> g(gra, dim_);
+  Map<const VectorXd> X(x, dim_);
+  Map<VectorXd> g(gra, dim_);
   g += w_*1.5/h_*M_*(1.5/h_*X-2.0/h_*xn_+0.5/h_*xnn_-4.0/3*vn_+1.0/3*vnn_);
   return 0;
 }
@@ -419,17 +419,17 @@ int momentum_potential_bdf2::Hes(const double *x, vector<Triplet<double>> *hes) 
 
 void momentum_potential_bdf2::Init(const double *x0, const double *v0) {
   if ( v0 != nullptr ) {
-    vn_ = Eigen::Map<const VectorXd>(v0, dim_);
+    vn_ = Map<const VectorXd>(v0, dim_);
     vnn_ = vn_;
   }
   if ( x0 != nullptr ) {
-    xn_ = Eigen::Map<const VectorXd>(x0, dim_);
+    xn_ = Map<const VectorXd>(x0, dim_);
     xnn_ = xn_-vn_*h_;
   }
 }
 
 void momentum_potential_bdf2::Update(const double *x) {
-  Eigen::Map<const VectorXd> X(x, dim_);
+  Map<const VectorXd> X(x, dim_);
   vnn_ = vn_;
   vn_ = (3*X-4*xn_+xnn_)/(2*h_);
   xnn_ = xn_;
@@ -464,7 +464,7 @@ size_t gravitational_potential::Nx() const {
 
 int gravitational_potential::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const MatrixXd> X(x, rd_, dim_/rd_);
+  Map<const MatrixXd> X(x, rd_, dim_/rd_);
 
   for (size_t i = 0; i < X.cols(); ++i)
     *val += w_*9.8*M_.coeff(i, i)*X(direction_, i);
@@ -474,7 +474,7 @@ int gravitational_potential::Val(const double *x, double *val) const {
 
 int gravitational_potential::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<MatrixXd> g(gra, rd_, dim_/rd_);
+  Map<MatrixXd> g(gra, rd_, dim_/rd_);
 
   for (size_t i = 0; i < g.cols(); ++i)
     g(direction_, i) += w_*9.8*M_.coeff(i, i);
@@ -637,9 +637,9 @@ static void get_voigt_strain(const double *x, const double *Dm, double *strain) 
 
 static void tri_linear_stress(double *P, const double *x, const double *Dm,
                               const double *lam, const double *mu) {
-  Eigen::Map<const Matrix<double, 2, 3>> X(x);
-  Eigen::Map<const Matrix2d> DM(Dm);
-  Eigen::Map<Matrix2d> PS(P);
+  Map<const Matrix<double, 2, 3>> X(x);
+  Map<const Matrix2d> DM(Dm);
+  Map<Matrix2d> PS(P);
   Matrix2d Ds;
   Ds.col(0) = X.col(1)-X.col(0);
   Ds.col(1) = X.col(2)-X.col(0);
@@ -650,9 +650,9 @@ static void tri_linear_stress(double *P, const double *x, const double *Dm,
 
 static void tri_stvk_stress(double *P, const double *x, const double *Dm,
                             const double *lam, const double *mu) {
-  Eigen::Map<const Matrix<double, 2, 3>> X(x);
-  Eigen::Map<const Matrix2d> DM(Dm);
-  Eigen::Map<Matrix2d> PS(P);
+  Map<const Matrix<double, 2, 3>> X(x);
+  Map<const Matrix2d> DM(Dm);
+  Map<Matrix2d> PS(P);
   Matrix2d Ds;
   Ds.col(0) = X.col(1)-X.col(0);
   Ds.col(1) = X.col(2)-X.col(0);
@@ -3110,7 +3110,7 @@ size_t positional_potential::Nx() const {
 }
 
 int positional_potential::Val(const double *x, double *val) const {
-  Eigen::Map<const MatrixXd> X(x, rd_, dim_/rd_);
+  Map<const MatrixXd> X(x, rd_, dim_/rd_);
   
   if ( rd_ == 3 ) {
     RETURN_WITH_COND_TRUE(w_ == 0.0 || fixed3d_.empty());
@@ -3134,8 +3134,8 @@ int positional_potential::Val(const double *x, double *val) const {
 }
 
 int positional_potential::Gra(const double *x, double *gra) const {
-  Eigen::Map<const MatrixXd> X(x, rd_, dim_/rd_);
-  Eigen::Map<MatrixXd> G(gra, rd_, dim_/rd_);
+  Map<const MatrixXd> X(x, rd_, dim_/rd_);
+  Map<MatrixXd> G(gra, rd_, dim_/rd_);
   
   if ( rd_ == 3 ) {
     RETURN_WITH_COND_TRUE(w_ == 0.0 || fixed3d_.empty());
@@ -3845,10 +3845,10 @@ tet_arap_energy::tet_arap_energy(const mati_t &tets, const matd_t &nods, const d
 #pragma omp parallel for
   for (size_t i = 0; i < tets_.size(2); ++i) {
     matd_t basis = nods(colon(), tets_(colon(1, 3), i))-nods(colon(), tets_(0, i))*ones<double>(1, 3);
-    Eigen::Map<Matrix3d> B(basis.begin());
-    Eigen::Map<Matrix3d>(&D_(0, i)) = B.inverse();
+    Map<Matrix3d> B(basis.begin());
+    Map<Matrix3d>(&D_(0, i)) = B.inverse();
     vol_[i] = std::fabs(B.determinant())/6.0;
-    Eigen::Map<Matrix3d>(&R_(0, i)) = Matrix3d::Identity();
+    Map<Matrix3d>(&R_(0, i)) = Matrix3d::Identity();
   }
 }
 
@@ -3903,9 +3903,9 @@ void tet_arap_energy::LocalSolve(const double *x) {
   for (size_t i = 0; i < tets_.size(2); ++i) {
     matd_t Ds = X(colon(), tets_(colon(1, 3), i))-X(colon(), tets_(0, i))*ones<double>(1, 3);
     matd_t df = Ds*itr_matrix<const double *>(3, 3, &D_(0, i));
-    Eigen::Map<Matrix3d> F(df.begin());
+    Map<Matrix3d> F(df.begin());
     JacobiSVD<Matrix3d> svd(F, ComputeFullU|ComputeFullV);
-    Eigen::Map<Matrix3d>(&R_(0, i)) = svd.matrixU()*svd.matrixV().transpose();
+    Map<Matrix3d>(&R_(0, i)) = svd.matrixU()*svd.matrixV().transpose();
   }
 }
 
@@ -4175,8 +4175,8 @@ size_t low_pass_filter_energy::Nx() const {
 
 int low_pass_filter_energy::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const MatrixXd> X(x, 3, dim_/3);
-  Eigen::Map<const MatrixXd> Q(ref_, 3, dim_/3);
+  Map<const MatrixXd> X(x, 3, dim_/3);
+  Map<const MatrixXd> Q(ref_, 3, dim_/3);
   for (auto &arr : pat_) {
     Vector3d lhs = Vector3d::Zero(), rhs = Vector3d::Zero();
     for (auto &elem: arr) {
@@ -4191,9 +4191,9 @@ int low_pass_filter_energy::Val(const double *x, double *val) const {
 
 int low_pass_filter_energy::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const MatrixXd> X(x, 3, dim_/3);
-  Eigen::Map<const MatrixXd> Q(ref_, 3, dim_/3);
-  Eigen::Map<MatrixXd> G(gra, 3, dim_/3);
+  Map<const MatrixXd> X(x, 3, dim_/3);
+  Map<const MatrixXd> Q(ref_, 3, dim_/3);
+  Map<MatrixXd> G(gra, 3, dim_/3);
   for (auto &arr : pat_) {
     Vector3d lhs = Vector3d::Zero(), rhs = Vector3d::Zero();
     for (auto &elem : arr) {
@@ -4238,7 +4238,7 @@ size_t cosserat_stretch_energy::Nx() const {
 }
 
 int cosserat_stretch_energy::Val(const double *xq, double *val) const {
-  Eigen::Map<const VectorXd> X(xq, r_size_+q_size_);
+  Map<const VectorXd> X(xq, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     Matrix<double, 3, 2> rr;
     rr.col(0) = X.segment<3>(3*rod_[i]);
@@ -4251,8 +4251,8 @@ int cosserat_stretch_energy::Val(const double *xq, double *val) const {
 }
 
 int cosserat_stretch_energy::Gra(const double *xq, double *gra) const {
-  Eigen::Map<const VectorXd> X(xq, r_size_+q_size_);
-  Eigen::Map<VectorXd> G(gra, r_size_+q_size_);
+  Map<const VectorXd> X(xq, r_size_+q_size_);
+  Map<VectorXd> G(gra, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     Matrix<double, 3, 2> rr;
     rr.col(0) = X.segment<3>(3*rod_[i]);
@@ -4266,7 +4266,7 @@ int cosserat_stretch_energy::Gra(const double *xq, double *gra) const {
 }
 
 int cosserat_stretch_energy::Hes(const double *xq, vector<Triplet<double>> *hes) const {
-  Eigen::Map<const VectorXd> X(xq, r_size_+q_size_);
+  Map<const VectorXd> X(xq, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     Matrix<double, 3, 2> rr;
     rr.col(0) = X.segment<3>(3*rod_[i]);
@@ -4308,7 +4308,7 @@ size_t cosserat_bend_energy::Nx() const {
 }
 
 int cosserat_bend_energy::Val(const double *xq, double *val) const {
-  Eigen::Map<const VectorXd> X(xq, r_size_+q_size_);
+  Map<const VectorXd> X(xq, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     Matrix<double, 4, 2> qq;
     qq.col(0) = X.segment<4>(r_size_+4*i);
@@ -4322,8 +4322,8 @@ int cosserat_bend_energy::Val(const double *xq, double *val) const {
 }
 
 int cosserat_bend_energy::Gra(const double *xq, double *gra) const {
-  Eigen::Map<const VectorXd> X(xq, r_size_+q_size_);
-  Eigen::Map<VectorXd> G(gra, r_size_+q_size_);
+  Map<const VectorXd> X(xq, r_size_+q_size_);
+  Map<VectorXd> G(gra, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     Matrix<double, 4, 2> qq;
     qq.col(0) = X.segment<4>(r_size_+4*i);
@@ -4338,7 +4338,7 @@ int cosserat_bend_energy::Gra(const double *xq, double *gra) const {
 }
 
 int cosserat_bend_energy::Hes(const double *xq, vector<Triplet<double>> *hes) const {
-  Eigen::Map<const VectorXd> X(xq, r_size_+q_size_);
+  Map<const VectorXd> X(xq, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     Matrix<double, 4, 2> qq;
     qq.col(0) = X.segment<4>(r_size_+4*i);
@@ -4371,7 +4371,7 @@ size_t cosserat_couple_energy::Nx() const {
 }
 
 int cosserat_couple_energy::Val(const double *xq, double *val) const {
-  Eigen::Map<const VectorXd> XQ(xq, r_size_+q_size_);
+  Map<const VectorXd> XQ(xq, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     VectorXd rq = VectorXd::Zero(10);
     rq.segment<3>(0) = XQ.segment<3>(3*rod_[i]);
@@ -4385,8 +4385,8 @@ int cosserat_couple_energy::Val(const double *xq, double *val) const {
 }
 
 int cosserat_couple_energy::Gra(const double *xq, double *gra) const {
-  Eigen::Map<const VectorXd> XQ(xq, r_size_+q_size_);
-  Eigen::Map<VectorXd> G(gra, r_size_+q_size_);
+  Map<const VectorXd> XQ(xq, r_size_+q_size_);
+  Map<VectorXd> G(gra, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     VectorXd rq = VectorXd::Zero(10);
     rq.segment<3>(0) = XQ.segment<3>(3*rod_[i]);
@@ -4402,7 +4402,7 @@ int cosserat_couple_energy::Gra(const double *xq, double *gra) const {
 }
 
 int cosserat_couple_energy::Hes(const double *xq, vector<Triplet<double>> *hes) const {
-  Eigen::Map<const VectorXd> XQ(xq, r_size_+q_size_);
+  Map<const VectorXd> XQ(xq, r_size_+q_size_);
   for (size_t i = 0; i < elem_num_; ++i) {
     VectorXd rq = VectorXd::Zero(10);
     rq.segment<3>(0) = XQ.segment<3>(3*rod_[i]);

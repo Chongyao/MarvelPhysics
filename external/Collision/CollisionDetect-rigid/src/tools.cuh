@@ -203,7 +203,7 @@ inline int evalOptimalBlockSize(cudaFuncAttributes attribs, cudaFuncCache cacheP
 #include <map>
 using namespace std;
 
-typedef Eigen::Map<void *, int> FUNC_INT_MAP;
+typedef map<void *, int> FUNC_INT_MAP;
 static  FUNC_INT_MAP blkSizeTable;
 
 inline int getBlkSize(void *func)

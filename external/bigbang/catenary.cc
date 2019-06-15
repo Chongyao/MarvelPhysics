@@ -240,14 +240,14 @@ size_t catenary_grav::Nx() const {
 
 int catenary_grav::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const VectorXd> X(x, dim_);
+  Map<const VectorXd> X(x, dim_);
   *val += w_*X.dot(m_.asDiagonal()*g_);
   return 0;
 }
 
 int catenary_grav::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<VectorXd> G(gra, dim_);
+  Map<VectorXd> G(gra, dim_);
   G += w_*m_.asDiagonal()*g_;
   return 0;
 }
@@ -265,7 +265,7 @@ size_t catenary_handle::Nx() const {
 
 int catenary_handle::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const MatrixXd> X(x, 3, dim_/3);
+  Map<const MatrixXd> X(x, 3, dim_/3);
   for (size_t i = 0; i < indices_.size(); ++i) {
     if ( moves_[i]->valid() )
       *val += 0.5*w_*(X.col(indices_[i])-moves_[i]->move()).squaredNorm();
@@ -275,8 +275,8 @@ int catenary_handle::Val(const double *x, double *val) const {
 
 int catenary_handle::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Eigen::Map<const MatrixXd> X(x, 3, dim_/3);
-  Eigen::Map<MatrixXd> G(gra, 3, dim_/3);
+  Map<const MatrixXd> X(x, 3, dim_/3);
+  Map<MatrixXd> G(gra, 3, dim_/3);
   for (size_t i = 0; i < indices_.size(); ++i) {
     if ( moves_[i]->valid() )
       G.col(indices_[i]) += w_*(X.col(indices_[i])-moves_[i]->move());

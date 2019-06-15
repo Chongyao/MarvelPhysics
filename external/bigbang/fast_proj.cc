@@ -100,7 +100,7 @@ int inext_cloth_solver::precompute() {
 }
 
 int inext_cloth_solver::advance(double *x) {
-  Eigen::Map<VectorXd> X(x, dim_);
+  Map<VectorXd> X(x, dim_);
   // implicit integration
   VectorXd xstar = X;
   VectorXd fi = VectorXd::Zero(dim_); {
@@ -124,7 +124,7 @@ int inext_cloth_solver::advance(double *x) {
 }
 
 int inext_cloth_solver::symplectic_integrate(double *x) {
-  Eigen::Map<VectorXd> Xstar(x, dim_);
+  Map<VectorXd> Xstar(x, dim_);
   VectorXd force = VectorXd::Zero(dim_); {
     energy_->Gra(x, &force[0]);
   }
@@ -134,7 +134,7 @@ int inext_cloth_solver::symplectic_integrate(double *x) {
 int inext_cloth_solver::fast_project(double *x) {
   ASSERT(args_.option == 0);
 //  UmfPackLU<SparseMatrix<double>> lu_solver;
-  Eigen::Map<VectorXd> Xstar(x, dim_);
+  Map<VectorXd> Xstar(x, dim_);
   for (size_t iter = 0; iter < args_.maxiter; ++iter) {
     VectorXd cv(constraint_->Nf()); {
       cv.setZero();
