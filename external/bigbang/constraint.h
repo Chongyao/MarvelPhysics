@@ -112,8 +112,8 @@ public:
   }
 private:
   const size_t dim_, rd_;
-  std::unordered_map<size_t, Eigen::Vector3d> fixed3d_;
-  std::unordered_map<size_t, Eigen::Vector2d> fixed2d_;
+  std::unordered_Eigen::Map<size_t, Eigen::Vector3d> fixed3d_;
+  std::unordered_Eigen::Map<size_t, Eigen::Vector2d> fixed2d_;
 };
 
 class axis_restrict_constraint : public Constraint<double>

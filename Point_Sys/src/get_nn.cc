@@ -17,7 +17,7 @@ spatial_hash::spatial_hash(const MatrixXd &points_, const size_t &nn_num_):point
   //set hash parameter
   size_t table_size = size_t(floor(pow(points.cols(), 0.5)));
   //build hash_map
-  points_hash = unordered_multimap<Vector3i,size_t>(table_size);
+  points_hash = unordered_multiEigen::Map<Vector3i,size_t>(table_size);
   hash_NNN();
 }
 

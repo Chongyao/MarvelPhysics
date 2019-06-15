@@ -148,7 +148,7 @@ int main(int argc, char** argv){
   VectorXd solution = VectorXd::Zero(3 * dim);
   VectorXd displace_search = VectorXd::Zero(3 * dim);
   double d1dtdt = 1 / delt_t /delt_t, d1dt = 1 / delt_t;
-  Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
+  Eigen::Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
 
 
   MatrixXd points_now;
@@ -160,7 +160,7 @@ int main(int argc, char** argv){
     // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
 
     //newtown iter
-    Map<VectorXd> displace_plus(displace.data(), 3*dim);
+    Eigen::Map<VectorXd> displace_plus(displace.data(), 3*dim);
     for(size_t newton_i = 0; newton_i < 20; ++newton_i){
       cout << "newton iter is " << newton_i << endl;
       dat_str.set_zero();
@@ -208,7 +208,7 @@ int main(int argc, char** argv){
       
       //implicit time integral
       dat_str.hes_.setFromTriplets(dat_str.hes_trips.begin(), dat_str.hes_trips.end());
-      // cout <<  (Map<VectorXd> (dat_str.hes_.valuePtr(), dat_str.hes_.nonZeros()).array() != 0).count() << 3 *dim * 3 * dim <<  endl;
+      // cout <<  (Eigen::Map<VectorXd> (dat_str.hes_.valuePtr(), dat_str.hes_.nonZeros()).array() != 0).count() << 3 *dim * 3 * dim <<  endl;
              
       // cout << "[INFO]>>>>>>>>>>>>>>>>>>>LLT<<<<<<<<<<<<<<<<<<" << endl;
       SimplicialLLT<SparseMatrix<double>> llt;

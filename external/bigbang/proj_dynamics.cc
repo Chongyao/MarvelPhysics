@@ -109,7 +109,7 @@ static vector<double> g_size;
 static const int SEQ_SIZE = 5;
 int proj_dyn_spring_solver::advance_eta(double *x) const {
   ASSERT(args_.method == 6);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X, dx(dim_), xnew(dim_);
   const auto fms = dynamic_pointer_cast<fast_mass_spring>(impebf_[1]);
   for (size_t iter = 0; iter < args_.maxiter; ++iter) {
@@ -160,7 +160,7 @@ int proj_dyn_spring_solver::advance_eta(double *x) const {
 
 int proj_dyn_spring_solver::advance_alpha(double *x) const { /// @brief Direct
   ASSERT(args_.method == 0);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X;
   const auto fms = dynamic_pointer_cast<fast_mass_spring>(impebf_[1]);
   // iterate solve
@@ -202,7 +202,7 @@ int proj_dyn_spring_solver::advance_alpha(double *x) const { /// @brief Direct
 
 int proj_dyn_spring_solver::advance_zeta(double *x) const { /// @brief Direct+Chebyshev
   ASSERT(args_.method == 5);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X, prev_xstar = xstar, curr_xstar(dim_), dx(dim_);
   const auto fms = dynamic_pointer_cast<fast_mass_spring>(impebf_[1]);
   static const size_t S = 10;
@@ -252,7 +252,7 @@ int proj_dyn_spring_solver::advance_zeta(double *x) const { /// @brief Direct+Ch
 
 int proj_dyn_spring_solver::advance_epsilon(double *x) const { /// @brief Jacobi+Chebyshev
   ASSERT(args_.method == 4);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X, prev_xstar = xstar, curr_xstar(dim_), dx(dim_);
   const auto fms = dynamic_pointer_cast<fast_mass_spring>(impebf_[1]);
   static const size_t S = 10;
@@ -301,13 +301,13 @@ int proj_dyn_spring_solver::advance_epsilon(double *x) const { /// @brief Jacobi
 
 int proj_dyn_spring_solver::advance_beta(double *x) const { /// @brief Kovalsky15
   ASSERT(args_.method == 1);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   auto fms = dynamic_pointer_cast<fast_mass_spring>(impebf_[1]);
   const size_t fdim = fms->aux_dim();
 
   VectorXd xstar = X, jac(dim_), eta(dim_);
   VectorXd z(fdim), n(fdim);
-  Map<const VectorXd> Pz(fms->get_aux_var(), fdim);
+  Eigen::Map<const VectorXd> Pz(fms->get_aux_var(), fdim);
   double d0 = 0;
   const SparseMatrix<double>& S = fms->get_df_mat();
   VectorXd next_step(fdim);
@@ -360,7 +360,7 @@ int proj_dyn_spring_solver::advance_beta(double *x) const { /// @brief Kovalsky1
 
 int proj_dyn_spring_solver::advance_gamma(double *x) const { /// @brief MINE
   ASSERT(args_.method == 2);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X, prev_xstar = xstar, curr_xstar(dim_);
   const auto fms = dynamic_pointer_cast<fast_mass_spring>(impebf_[1]);
   VectorXd dx = VectorXd::Zero(dim_), rhs(dim_);
@@ -424,10 +424,10 @@ int proj_dyn_spring_solver::advance_gamma(double *x) const { /// @brief MINE
 
 int proj_dyn_spring_solver::advance_delta(double *x) const { /// @brief Chebyshev on $d$
   ASSERT(args_.method == 3);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X;
   const auto fms = dynamic_pointer_cast<fast_mass_spring>(impebf_[1]);
-  Map<VectorXd> aux_var(fms->d_.begin(), fms->d_.size());
+  Eigen::Map<VectorXd> aux_var(fms->d_.begin(), fms->d_.size());
   VectorXd prev_aux_var = aux_var, curr_aux_var(fms->aux_dim());
   static const size_t S = 10;
   static const double rho = args_.sr, gamma = 0.75;
@@ -581,7 +581,7 @@ int proj_dyn_tet_solver::advance(double *x) const {
 
 int proj_dyn_tet_solver::advance_alpha(double *x) const { /// @brief Direct
   ASSERT(args_.method == 0);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X;
   const auto arap = dynamic_pointer_cast<tet_arap_energy>(ebf_[1]);
   // iterate solve
@@ -624,7 +624,7 @@ int proj_dyn_tet_solver::advance_alpha(double *x) const { /// @brief Direct
 
 int proj_dyn_tet_solver::advance_beta(double *x) const { /// @brief Direct+Chebyshev
   ASSERT(args_.method == 1);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X, prev_xstar = xstar, curr_xstar(dim_), dx(dim_);
   const auto arap = dynamic_pointer_cast<tet_arap_energy>(ebf_[1]);
   static const size_t S = 10;
@@ -668,7 +668,7 @@ int proj_dyn_tet_solver::advance_beta(double *x) const { /// @brief Direct+Cheby
 
 int proj_dyn_tet_solver::advance_gamma(double *x) const { /// @brief Jacobi+Chebyshev
   ASSERT(args_.method == 2);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X, prev_xstar = xstar, dx(dim_), curr_xstar(dim_);
   const auto arap = dynamic_pointer_cast<tet_arap_energy>(ebf_[1]);
   static const size_t S = 10;
@@ -713,7 +713,7 @@ int proj_dyn_tet_solver::advance_gamma(double *x) const { /// @brief Jacobi+Cheb
 
 int proj_dyn_tet_solver::advance_delta(double *x) const { ///@brief Chebyshev on R
   ASSERT(args_.method == 3);
-  Map<VectorXd> X(x, dim_);
+  Eigen::Map<VectorXd> X(x, dim_);
   VectorXd xstar = X, jac = VectorXd::Zero(dim_);
   const auto arap = dynamic_pointer_cast<tet_arap_energy>(ebf_[1]);
   VectorXd aux, prev_aux, curr_aux;

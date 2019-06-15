@@ -688,7 +688,7 @@ void fine_quad_patch::optimize_basis(matd_t &basisXY) {
 //   ip_cons = make_shared<full_patch_interp_cons>(*this, power, pt_);
 
 //   //-> rest shape reconstruction constraint
-//   const MatrixXd rest_shape = Map<const MatrixXd>(&REST_[0], REST_.size(), 1);
+//   const MatrixXd rest_shape = Eigen::Map<const MatrixXd>(&REST_[0], REST_.size(), 1);
 //   shared_ptr<Constraint<double>> re_cons;
 //   re_cons = make_shared<full_patch_interp_cons>(*this, power, pt_, &rest_shape);
 
@@ -927,7 +927,7 @@ int stencil_prolongate_patch(const matd_t &nods_H, const quad_stencil* ptr_sten,
   const matd_t &adjc_rest = ptr_sten->adjc_rest_;
   matd_t u0 = trans(R)*nods_H-adjc_rest;
   matd_t Pu(ptr_patch->REST_.size(1), ptr_patch->REST_.size(2));
-  Map<VectorXd>(&Pu[0], Pu.size()) = (*ptr_patch->Pro_)*Map<const VectorXd>(&u0[0], u0.size());
+  Eigen::Map<VectorXd>(&Pu[0], Pu.size()) = (*ptr_patch->Pro_)*Eigen::Map<const VectorXd>(&u0[0], u0.size());
   nods_h = R*(ptr_patch->REST_+Pu);
   cell_h = ptr_patch->cell_;
 
@@ -1146,7 +1146,7 @@ int stencil_nonconforming_d2::Val(const double *x, double *val) const {
 
       const matd_t u_H = trans(R)*x_H-rest_H_(colon(), sten->adjc_elem_);
       matd_t u_h(patch->REST_.size(1), patch->REST_.size(2));
-      Map<VectorXd>(&u_h[0], u_h.size()) = P*Map<const VectorXd>(&u_H[0], u_H.size());
+      Eigen::Map<VectorXd>(&u_h[0], u_h.size()) = P*Eigen::Map<const VectorXd>(&u_H[0], u_H.size());
       xi_h = R*(patch->REST_+u_h);      
     }
     
@@ -1161,13 +1161,13 @@ int stencil_nonconforming_d2::Val(const double *x, double *val) const {
 
       const matd_t u_H = trans(R)*x_H-rest_H_(colon(), sten->adjc_elem_);
       matd_t u_h(patch->REST_.size(1), patch->REST_.size(2));
-      Map<VectorXd>(&u_h[0], u_h.size()) = P*Map<const VectorXd>(&u_H[0], u_H.size());
+      Eigen::Map<VectorXd>(&u_h[0], u_h.size()) = P*Eigen::Map<const VectorXd>(&u_H[0], u_H.size());
       xj_h = R*(patch->REST_+u_h);
     }
 
     const SparseMatrix<double> K(K_[p]->asDiagonal());
-    *val += 0.5*w_*elem_bnd_len_[p]*(K*SI*Map<const VectorXd>(&xi_h[0], xi_h.size())-
-                                     K*SJ*Map<const VectorXd>(&xj_h[0], xj_h.size())).squaredNorm();
+    *val += 0.5*w_*elem_bnd_len_[p]*(K*SI*Eigen::Map<const VectorXd>(&xi_h[0], xi_h.size())-
+                                     K*SJ*Eigen::Map<const VectorXd>(&xj_h[0], xj_h.size())).squaredNorm();
   }
   
   return 0;
@@ -1193,7 +1193,7 @@ int stencil_nonconforming_d2::Gra(const double *x, double *gra) const {
 
       const matd_t u_H = trans(Ri)*x_H-rest_H_(colon(), sten->adjc_elem_);
       matd_t u_h(patch->REST_.size(1), patch->REST_.size(2));
-      Map<VectorXd>(&u_h[0], u_h.size()) = P*Map<const VectorXd>(&u_H[0], u_H.size());
+      Eigen::Map<VectorXd>(&u_h[0], u_h.size()) = P*Eigen::Map<const VectorXd>(&u_H[0], u_H.size());
       xi_h = Ri*(patch->REST_+u_h);      
     }
     
@@ -1208,13 +1208,13 @@ int stencil_nonconforming_d2::Gra(const double *x, double *gra) const {
 
       const matd_t u_H = trans(Rj)*x_H-rest_H_(colon(), sten->adjc_elem_);
       matd_t u_h(patch->REST_.size(1), patch->REST_.size(2));
-      Map<VectorXd>(&u_h[0], u_h.size()) = P*Map<const VectorXd>(&u_H[0], u_H.size());
+      Eigen::Map<VectorXd>(&u_h[0], u_h.size()) = P*Eigen::Map<const VectorXd>(&u_H[0], u_H.size());
       xj_h = Rj*(patch->REST_+u_h);
     }
 
     const SparseMatrix<double> K(K_[p]->asDiagonal());
-    const VectorXd resd = K*(Si*Map<const VectorXd>(&xi_h[0], xi_h.size())
-                            -Sj*Map<const VectorXd>(&xj_h[0], xj_h.size()));
+    const VectorXd resd = K*(Si*Eigen::Map<const VectorXd>(&xi_h[0], xi_h.size())
+                            -Sj*Eigen::Map<const VectorXd>(&xj_h[0], xj_h.size()));
     
     VectorXd gI, gJ;
     {
@@ -1524,7 +1524,7 @@ void fine_hexs_patch::modal_analysis() {
     for (size_t j = 0; j < nods_.size(2); ++j) {
       disp(colon(), j) = cross(Id(colon(), i), nods_(colon(), j)-bc);
     }
-    rot_b.col(i) = Map<const VectorXd>(&disp[0], disp.size());
+    rot_b.col(i) = Eigen::Map<const VectorXd>(&disp[0], disp.size());
   }
 
   // const matd_t bbc = nods_*ones<double>(nods_.size(2), 1)/nods_.size(2);
@@ -1837,7 +1837,7 @@ int stencil_prolongate_patch(const matd_t &nods_H, const hexs_stencil* ptr_sten,
   const matd_t &adjc_rest = ptr_sten->adjc_rest_;
   matd_t u0 = trans(R)*nods_H-adjc_rest;
   matd_t Pu(ptr_patch->REST_.size(1), ptr_patch->REST_.size(2));
-  Map<VectorXd>(&Pu[0], Pu.size()) = (*ptr_patch->Pro_)*Map<const VectorXd>(&u0[0], u0.size());
+  Eigen::Map<VectorXd>(&Pu[0], Pu.size()) = (*ptr_patch->Pro_)*Eigen::Map<const VectorXd>(&u0[0], u0.size());
   nods_h = R*(ptr_patch->REST_+Pu);
   cell_h = ptr_patch->cell_;
 
@@ -1950,7 +1950,7 @@ stencil_nonconforming_d3::stencil_nonconforming_d3(const mati_t &hexs_H, const m
       // //-> integral area
       // elem_bnd_len_.push_back(area*bnd_faces.size(2));
 
-      unordered_map<size_t, size_t> bnd_to_local;
+      unordered_Eigen::Map<size_t, size_t> bnd_to_local;
       for (size_t cnt = 0; cnt < shared_nd_pnt.size(); ++cnt)
         bnd_to_local.insert(make_pair(shared_nd_pnt[cnt], cnt));
       VectorXi node_count = VectorXi::Zero(3*shared_nd_pnt.size());
@@ -2061,7 +2061,7 @@ int stencil_nonconforming_d3::Val(const double *x, double *val) const {
 
       const matd_t u_H = trans(R)*x_H-rest_H_(colon(), sten->adjc_elem_);
       matd_t u_h(patch->REST_.size(1), patch->REST_.size(2));
-      Map<VectorXd>(&u_h[0], u_h.size()) = P*Map<const VectorXd>(&u_H[0], u_H.size());
+      Eigen::Map<VectorXd>(&u_h[0], u_h.size()) = P*Eigen::Map<const VectorXd>(&u_H[0], u_H.size());
       xi_h = R*(patch->REST_+u_h);      
     }
     
@@ -2076,7 +2076,7 @@ int stencil_nonconforming_d3::Val(const double *x, double *val) const {
 
       const matd_t u_H = trans(R)*x_H-rest_H_(colon(), sten->adjc_elem_);
       matd_t u_h(patch->REST_.size(1), patch->REST_.size(2));
-      Map<VectorXd>(&u_h[0], u_h.size()) = P*Map<const VectorXd>(&u_H[0], u_H.size());
+      Eigen::Map<VectorXd>(&u_h[0], u_h.size()) = P*Eigen::Map<const VectorXd>(&u_H[0], u_H.size());
       xj_h = R*(patch->REST_+u_h);
     }
 
@@ -2114,8 +2114,8 @@ int stencil_nonconforming_d3::Val(const double *x, double *val) const {
 
     VectorXd metric = K_[p]->cwiseProduct(*A_[p]);
     const SparseMatrix<double> K(metric.asDiagonal());
-    adjc_sten_E_[p] = 0.5*w_*(K*SI*Map<const VectorXd>(&xi_h[0], xi_h.size())-
-                                               K*SJ*Map<const VectorXd>(&xj_h[0], xj_h.size())).squaredNorm();
+    adjc_sten_E_[p] = 0.5*w_*(K*SI*Eigen::Map<const VectorXd>(&xi_h[0], xi_h.size())-
+                                               K*SJ*Eigen::Map<const VectorXd>(&xj_h[0], xj_h.size())).squaredNorm();
     *val += adjc_sten_E_[p];
   
   }
@@ -2144,7 +2144,7 @@ int stencil_nonconforming_d3::Gra(const double *x, double *gra) const {
 
       const matd_t u_H = trans(Ri)*x_H-rest_H_(colon(), sten->adjc_elem_);
       matd_t u_h(patch->REST_.size(1), patch->REST_.size(2));
-      Map<VectorXd>(&u_h[0], u_h.size()) = P*Map<const VectorXd>(&u_H[0], u_H.size());
+      Eigen::Map<VectorXd>(&u_h[0], u_h.size()) = P*Eigen::Map<const VectorXd>(&u_H[0], u_H.size());
       xi_h = Ri*(patch->REST_+u_h);      
     }
     
@@ -2159,7 +2159,7 @@ int stencil_nonconforming_d3::Gra(const double *x, double *gra) const {
 
       const matd_t u_H = trans(Rj)*x_H-rest_H_(colon(), sten->adjc_elem_);
       matd_t u_h(patch->REST_.size(1), patch->REST_.size(2));
-      Map<VectorXd>(&u_h[0], u_h.size()) = P*Map<const VectorXd>(&u_H[0], u_H.size());
+      Eigen::Map<VectorXd>(&u_h[0], u_h.size()) = P*Eigen::Map<const VectorXd>(&u_H[0], u_H.size());
       xj_h = Rj*(patch->REST_+u_h);
     }
 
@@ -2185,8 +2185,8 @@ int stencil_nonconforming_d3::Gra(const double *x, double *gra) const {
 
     VectorXd metric = K_[p]->cwiseProduct(*A_[p]);
     const SparseMatrix<double> K(metric.asDiagonal());
-    const VectorXd resd = K*(Si*Map<const VectorXd>(&xi_h[0], xi_h.size())
-                            -Sj*Map<const VectorXd>(&xj_h[0], xj_h.size()));
+    const VectorXd resd = K*(Si*Eigen::Map<const VectorXd>(&xi_h[0], xi_h.size())
+                            -Sj*Eigen::Map<const VectorXd>(&xj_h[0], xj_h.size()));
     
     VectorXd gI, gJ;
     {
@@ -2421,7 +2421,7 @@ int stencil_nonconforming_d3::Hes(const double *x, vector<Triplet<double>> *hes)
   
 // matd_t disp_H = 0.5*ones<double>(rd, basis_pnt_.size());
 // matd_t disp_h = zeros<double>(rd, verts_num);
-// Map<VectorXd>(&disp_h[0], disp_h.size()) = P*Map<const VectorXd>(&disp_H[0], disp_H.size());
+// Eigen::Map<VectorXd>(&disp_h[0], disp_h.size()) = P*Eigen::Map<const VectorXd>(&disp_H[0], disp_H.size());
 
 // static int count = 0;
 // char outf[256];

@@ -55,7 +55,7 @@ class BaseElas : public Functional<T, dim_>{
   size_t Nx() const {return all_dim_;}
     
   int Val(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
-    Map<const Eigen::Matrix<T, -1 ,-1>> deformed(x, dim_, num_nods_ );
+    Eigen::Map<const Eigen::Matrix<T, -1 ,-1>> deformed(x, dim_, num_nods_ );
     T myval = 0;
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
@@ -98,7 +98,7 @@ class BaseElas : public Functional<T, dim_>{
       }
 
       //save gra
-      const Map<Matrix<T, dim_, num_per_cell_> > gra_x_based_reshape(gra_x_based.data());
+      const Eigen::Map<Matrix<T, dim_, num_per_cell_> > gra_x_based_reshape(gra_x_based.data());
       for(size_t p = 0; p < num_per_cell_; ++p){
         data->save_gra(cells_(p, cell_id), gra_x_based_reshape.col(p));
       }

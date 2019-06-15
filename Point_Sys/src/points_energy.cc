@@ -148,7 +148,7 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
 
 
 int point_sys::calc_defo_gra(const double *x, dat_ptr &data) const{
-  Map<const Matrix<double, Dynamic, Dynamic> > _x(x, 3, dim_);
+  Eigen::Map<const Matrix<double, Dynamic, Dynamic> > _x(x, 3, dim_);
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d one_du = Matrix3d::Ones();

@@ -41,7 +41,7 @@ int vtk2surf(const MatrixXi &tets, MatrixXi &surf){
     return false;
   };
   //bool is false if it has opposite tet
-  auto faces = map<Vector3i, bool, decltype(comp)>(comp);
+  auto faces = Eigen::Map<Vector3i, bool, decltype(comp)>(comp);
   vector<Vector3i> surfs_vec;
   
   auto insert = [&](const size_t &p, const size_t &q, const size_t &r)->bool{

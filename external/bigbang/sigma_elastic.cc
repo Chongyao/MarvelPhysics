@@ -26,8 +26,8 @@ void vox_SF_jac(double *jac, const double *epsilon);
 extern "C" void vox_dfdpf_(double *jac, const double *PF, const double *U, const double *VT, const double *G);
 
 static inline void QuadratureGradOperator(const double *HinvXH, double *Op) {
-  Map<const Matrix<double, 8, 3>> Dm(HinvXH);
-  Map<Matrix<double, 24, 9>> rtn(Op);
+  Eigen::Map<const Matrix<double, 8, 3>> Dm(HinvXH);
+  Eigen::Map<Matrix<double, 24, 9>> rtn(Op);
   rtn = kroneckerProduct(Dm, Matrix3d::Identity());
 }
 
@@ -346,9 +346,9 @@ int vox_force_matching_energy::Val(const double *x, double *val) const {
       K.setFromTriplets(trips.begin(), trips.end());
       solvers_[i]->compute(K);
       ASSERT(!std::isnan(K.sum()));
-      deltaX = solvers_[i]->solve(Map<const VectorXd>(&fdiff[0], fdiff.size()));
+      deltaX = solvers_[i]->solve(Eigen::Map<const VectorXd>(&fdiff[0], fdiff.size()));
     } else if ( metric_ == "identity" ) {
-      deltaX = Map<const VectorXd>(&fdiff[0], fdiff.size());
+      deltaX = Eigen::Map<const VectorXd>(&fdiff[0], fdiff.size());
     } else {
       cerr << "[ERROR] not supported metric!" << endl;
       exit(EXIT_FAILURE);
@@ -364,7 +364,7 @@ int vox_force_matching_energy::Val(const double *x, double *val) const {
 
 int vox_force_matching_energy::Gra(const double *x, double *gra) const {
   itr_matrix<const double *> X(args_num_, cube_.size(2), x);
-  Map<VectorXd> G(gra, Nx());
+  Eigen::Map<VectorXd> G(gra, Nx());
 
   // for each data sample
   #pragma omp parallel for
@@ -425,10 +425,10 @@ int vox_force_matching_energy::Gra(const double *x, double *gra) const {
     VectorXd deltaX;
     
     if ( metric_ == "invK2" ) {
-      deltaX = solvers_[i]->solve(Map<const VectorXd>(&fdiff[0], fdiff.size()));
+      deltaX = solvers_[i]->solve(Eigen::Map<const VectorXd>(&fdiff[0], fdiff.size()));
       deltaX = solvers_[i]->solve(deltaX.eval());
     } else if ( metric_ == "identity" ) {
-      deltaX = Map<const VectorXd>(&fdiff[0], fdiff.size());
+      deltaX = Eigen::Map<const VectorXd>(&fdiff[0], fdiff.size());
     } else {
       cerr << "[ERROR] not supported metric!" << endl;
       exit(EXIT_FAILURE);
@@ -542,7 +542,7 @@ size_t vox_args_smooth_energy::Nx() const {
 int vox_args_smooth_energy::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
   
-  Map<const MatrixXd> X(x, args_num_, cube_.size(2));
+  Eigen::Map<const MatrixXd> X(x, args_num_, cube_.size(2));
   
   for (auto &it : f2v_->face2hex_) {
     if ( f2v_->is_outside_face(it) )
@@ -556,8 +556,8 @@ int vox_args_smooth_energy::Val(const double *x, double *val) const {
 int vox_args_smooth_energy::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
   
-  Map<const MatrixXd> X(x, args_num_, cube_.size(2));
-  Map<MatrixXd> G(gra, args_num_, cube_.size(2));
+  Eigen::Map<const MatrixXd> X(x, args_num_, cube_.size(2));
+  Eigen::Map<MatrixXd> G(gra, args_num_, cube_.size(2));
   
   for (auto &it : f2v_->face2hex_) {
     if ( f2v_->is_outside_face(it) )

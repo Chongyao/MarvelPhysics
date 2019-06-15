@@ -50,7 +50,7 @@ public:
   size_t edges_num() const;
   size_t query_edge_idx(const size_t p, const size_t q) const;
   size_t query_edge_idx(const std::vector<size_t> &ab) const;
-  std::map<std::vector<size_t>, size_t> edge2idx_;
+  std::Eigen::Map<std::vector<size_t>, size_t> edge2idx_;
 };
 
 class vox_edges
@@ -60,7 +60,7 @@ public:
   size_t edges_num() const;
   size_t query_edge_idx(const size_t p, const size_t q) const;
   size_t query_edge_idx(const std::vector<size_t> &ab) const;
-  std::map<std::vector<size_t>, size_t> edge2idx_;
+  std::Eigen::Map<std::vector<size_t>, size_t> edge2idx_;
 };
 
 class vox_faces
@@ -70,8 +70,8 @@ public:
   size_t faces_num() const;
   size_t query_face_idx(const size_t p, const size_t q, const size_t m, const size_t n) const;
   size_t query_face_idx(const std::vector<size_t> &abcd) const;
-  std::map<std::vector<size_t>, size_t> face2idx_;
-  std::map<std::vector<size_t>, std::vector<size_t>> face2vox_;
+  std::Eigen::Map<std::vector<size_t>, size_t> face2idx_;
+  std::Eigen::Map<std::vector<size_t>, std::vector<size_t>> face2vox_;
 };
 
 /* 3D cube */

@@ -89,11 +89,11 @@ bool point_response(const double* const obstacle,
              // double* const res_pos, double* const res_velo,
              const double& friction = 0, const double& res = 1){
   
-  Map<const MatrixXd> obstacle_(obstacle, 3, 3);
-  Map<const Vector3d> pre_pos_(pre_pos);
-  Map<Vector3d> next_pos_(next_pos);
-  Map<Vector3d> next_velo_(next_velo);
-  Map<const Vector3d> pre_velo_(pre_velo);
+  Eigen::Map<const MatrixXd> obstacle_(obstacle, 3, 3);
+  Eigen::Map<const Vector3d> pre_pos_(pre_pos);
+  Eigen::Map<Vector3d> next_pos_(next_pos);
+  Eigen::Map<Vector3d> next_velo_(next_velo);
+  Eigen::Map<const Vector3d> pre_velo_(pre_velo);
   
   Vector3d res_pos_ = next_pos_;
   Vector3d res_velo_ = next_velo_;
@@ -152,11 +152,11 @@ bool imp_response(const double* const obstacle,const double time,
                   const double* const pre_pos, double* const next_pos,
                   double* response_force,
                   const double& friction = 0, const double& res = 1){
-  Map<const Matrix3d> obstacle_(obstacle);
-  Map<const Vector3d> pre_pos_(pre_pos);
-  Map<Vector3d> next_pos_(next_pos);
+  Eigen::Map<const Matrix3d> obstacle_(obstacle);
+  Eigen::Map<const Vector3d> pre_pos_(pre_pos);
+  Eigen::Map<Vector3d> next_pos_(next_pos);
 
-  Map<Vector3d> force(response_force);
+  Eigen::Map<Vector3d> force(response_force);
 
   double area;
   //TODO:can pre_store to speed up
@@ -195,13 +195,13 @@ bool imp_response2(const double* const obstacle,const double time,
                    const double* const pre_velo, double* const next_velo,
                   double* response_force,
                   const double& friction = 0, const double& res = 1){
-  Map<const Matrix3d> obstacle_(obstacle);
-  Map<const Vector3d> pre_pos_(pre_pos);
-  Map<Vector3d> next_velo_(next_velo);
-  Map<const Vector3d> pre_velo_(pre_velo);
-  Map<Vector3d> next_pos_(next_pos);
+  Eigen::Map<const Matrix3d> obstacle_(obstacle);
+  Eigen::Map<const Vector3d> pre_pos_(pre_pos);
+  Eigen::Map<Vector3d> next_velo_(next_velo);
+  Eigen::Map<const Vector3d> pre_velo_(pre_velo);
+  Eigen::Map<Vector3d> next_pos_(next_pos);
 
-  Map<Vector3d> force(response_force);
+  Eigen::Map<Vector3d> force(response_force);
 
   double area;
   //TODO:can pre_store to speed up
