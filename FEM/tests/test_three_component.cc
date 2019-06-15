@@ -6,13 +6,10 @@ using namespace std;
 using namespace Eigen;
 using namespace marvel;
 
-using CSTTT = linear_csttt<double, 3>;
+using CSTTT = stvk<double, 3>;
 using BASIS = basis_func<double, 3, 1, 4>;
 using QDRT = quadrature<double, 3, 1, 4>;
-double other_val(const Ref<MatrixXd> X,  const Ref<Matrix3d> D, const double volume, const double lam, const double miu){
-  const double  tt1 = -X(1,1), tt2 = -X(2,1) ,tt3 = -X(3,1);
-  return volume *(0.5*lam*pow((0.5*(2*D(3,3)*(X(3,4)+tt3)+2*D(2,3)*(X(3,3)+tt3)+2*D(1,3)*(X(3,2)+tt3))+0.5*(2*(X(2,4)+tt2)*D(3,2)+2*D(2,2)*(X(2,3)+tt2)+2*D(1,2)*(X(2,2)+tt2))+0.5*(2*(X(1,4)+tt1)*D(3,1)+2*(X(1,3)+tt1)*D(2,1)+2*D(1,1)*(X(1,2)+tt1))-3),2)+miu*(pow((D(3,3)*X(3,4)+D(2,3)*X(3,3)-X(3,1)*D(3,3)+D(1,3)*X(3,2)-D(2,3)*X(3,1)-D(1,3)*X(3,1)-1),2)+0.5*pow((D(3,2)*X(3,4)+D(2,2)*X(3,3)+X(2,4)*D(3,3)-X(2,1)*D(3,3)+D(1,2)*X(3,2)-X(3,1)*D(3,2)-D(2,2)*X(3,1)-D(1,2)*X(3,1)+D(2,3)*X(2,3)-X(2,1)*D(2,3)+D(1,3)*X(2,2)-D(1,3)*X(2,1)),2)+0.5*pow((D(3,1)*X(3,4)+D(2,1)*X(3,3)+X(1,4)*D(3,3)-X(1,1)*D(3,3)+D(1,1)*X(3,2)-D(3,1)*X(3,1)-D(2,1)*X(3,1)-D(1,1)*X(3,1)+X(1,3)*D(2,3)-X(1,1)*D(2,3)+X(1,2)*D(1,3)-X(1,1)*D(1,3)),2)+pow((X(2,4)*D(3,2)-X(2,1)*D(3,2)+D(2,2)*X(2,3)+D(1,2)*X(2,2)-X(2,1)*D(2,2)-D(1,2)*X(2,1)-1),2)+0.5*pow((X(1,4)*D(3,2)-X(1,1)*D(3,2)+X(2,4)*D(3,1)-X(2,1)*D(3,1)+D(2,1)*X(2,3)+D(1,1)*X(2,2)+X(1,3)*D(2,2)-X(1,1)*D(2,2)-D(2,1)*X(2,1)-D(1,1)*X(2,1)+D(1,2)*X(1,2)-X(1,1)*D(1,2)),2)+pow((X(1,4)*D(3,1)-X(1,1)*D(3,1)+X(1,3)*D(2,1)-X(1,1)*D(2,1)+D(1,1)*X(1,2)-D(1,1)*X(1,1)-1),2)));
-}
+
 int main(){
 
 
@@ -41,6 +38,7 @@ int main(){
   constexpr double Ym = 4000, Pr = 0.45;
   double mu, lam;
   compute_lame_coeffs(Ym, Pr, mu, lam);
+    // lam= 0;
 
   double val = CSTTT::val(F, lam, mu);
   cout  << "val is " <<  val * jac_det / 6 << endl;

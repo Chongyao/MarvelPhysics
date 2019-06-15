@@ -28,7 +28,7 @@ int main(int argc, char** argv){
   constexpr  double rho = 5;
   constexpr  double Young = 5000.0;
   constexpr  double poi = 0.45;
-  constexpr  double gravity = 9.8;
+  constexpr  double gravity = 0;
   constexpr  double dt = 0.01;
   const      double w_pos = 1e4;
   const      size_t num_frame = 100;
@@ -40,7 +40,13 @@ int main(int argc, char** argv){
   read_fixed_verts_from_csv(cons_file_path, cons);
   cout << "constrint " << cons.size() << " points" << endl;
 
-
+  //read rotated points
+  size_t center = 94;
+  vector<size_t> rotate(0);
+  const char* rotate_file_path = argv[4];
+  cout << rotate_file_path << endl;
+  read_fixed_verts_from_csv(rotate_file_path, rotate);
+  cout << "rorate " << rotate.size() << " points" << endl;  
   
   
   //calc mass vector
@@ -59,6 +65,13 @@ int main(int argc, char** argv){
   cout << "assemble energy" << endl;
 
 
+  //give velocity
+  Vector3d w = Vector3d::Zero(); w(0) = 10;
+  for(size_t i = 0; i < rotate.size(); ++i){
+    size_t rot_id = rotate[i];
+    Vector3d r = nods.col(rot_id) - nods.col(center);
+    dynamic_pointer_cast<momentum<3>>(ebf[KIN])->vk_.segment<3>(rot_id * 3) = r.cross(w);
+  }
   
   
   
@@ -85,6 +98,14 @@ int main(int argc, char** argv){
     imp_euler.solve(new_nods.data());
     xk = new_nods;
     dynamic_pointer_cast<momentum<3>>(ebf[KIN])->update_location_and_velocity(new_nods.data());
+    //give velocity
+    Vector3d w = Vector3d::Zero(); w(0) = 10;
+    for(size_t i = 0; i < rotate.size(); ++i){
+    size_t rot_id = rotate[i];
+    Vector3d r = nods.col(rot_id) - nods.col(center);
+    dynamic_pointer_cast<momentum<3>>(ebf[KIN])->vk_.segment<3>(rot_id * 3) = r.cross(w);
+
+    }
 
     const string filename = outdir  + "/frame_" + to_string(f_id) + ".vtk";
     tet_mesh_write_to_vtk(filename.c_str(), nods, tets);

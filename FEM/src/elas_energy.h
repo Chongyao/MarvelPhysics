@@ -77,7 +77,7 @@ class BaseElas : public Functional<T, dim_>{
   int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
     Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
 
-    // #pragma omp parallel for
+    #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
       T jac_det;
@@ -110,7 +110,7 @@ class BaseElas : public Functional<T, dim_>{
   }
   int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
     Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
-    // #pragma omp parallel for
+    #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
       T jac_det;
