@@ -12,8 +12,8 @@
 #include <chrono>
 #include <limits>
 
-#include "coll_response.h"
-#include "coll_wrapper.h"
+#include "coll_wrapper/coll_response.h"
+#include "coll_wrapper/coll_wrapper.h"
 using namespace marvel;
 using namespace std;
 using namespace Eigen;

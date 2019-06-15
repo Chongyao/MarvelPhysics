@@ -12,7 +12,7 @@
 #include <chrono>
 #include <limits>
 #include <Collision/CollisionDetect-rigid/src/Collision_eigen.h>
-#include "coll_response.h"
+#include "coll_wrapper/coll_response.h"
 using namespace marvel;
 using namespace std;
 using namespace Eigen;

@@ -30,7 +30,7 @@
 
 #include "vtk2surf.h"
 
-#include "coll_wrapper.h"
+#include "coll_wrapper/coll_wrapper.h"
 #include "implicit_euler.h"
 using namespace marvel;
 using namespace std;
