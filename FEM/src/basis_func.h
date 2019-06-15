@@ -33,7 +33,7 @@ class basis_func<T, 3, 1, 4>{
     for(int i = 0; i < 3; i++)
       Dm.col(i) = rest.col(i) - rest.col(3);
     Dm_inv = Dm.inverse();
-    Jac_det = Dm.determinant();
+    Jac_det = fabs(Dm.determinant());
   }
 
   static void get_def_gra(const Eigen::Matrix<T, 3, 1>&PNT, const T* const x, const Matrix<T, 3, 3>& Dm_inv, Eigen::Matrix<T, 3, 3> & def_gra) {

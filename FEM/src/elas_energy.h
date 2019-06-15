@@ -60,7 +60,6 @@ class BaseElas : public Functional<T, dim_>{
     #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
-      T jac_det;
       
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
@@ -68,7 +67,7 @@ class BaseElas : public Functional<T, dim_>{
       
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
-        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * qdrt::WGT_[qdrt_id] * jac_det);
+        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * qdrt::WGT_[qdrt_id] * Jac_det[cell_id][qdrt_id]);
       }
     }
 
@@ -81,8 +80,6 @@ class BaseElas : public Functional<T, dim_>{
     // #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
-      T jac_det;
-      // Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
       
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
@@ -97,7 +94,7 @@ class BaseElas : public Functional<T, dim_>{
         basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
         // basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         gra_F_based = csttt::gra(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        gra_x_based += Ddef_Dx[cell_id].transpose() * gra_F_based * qdrt::WGT_[qdrt_id] * jac_det;
+        gra_x_based += Ddef_Dx[cell_id].transpose() * gra_F_based * qdrt::WGT_[qdrt_id] * Jac_det[cell_id][qdrt_id];
       }
 
       //save gra
@@ -115,8 +112,6 @@ class BaseElas : public Functional<T, dim_>{
     // #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
-      T jac_det;
-      // Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
       
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
@@ -130,7 +125,7 @@ class BaseElas : public Functional<T, dim_>{
         basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
         // basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        hes_x_based += Ddef_Dx[cell_id].transpose() * hes_F_based * Ddef_Dx[cell_id] * qdrt::WGT_[qdrt_id] * jac_det;
+        hes_x_based += Ddef_Dx[cell_id].transpose() * hes_F_based * Ddef_Dx[cell_id] * qdrt::WGT_[qdrt_id] * Jac_det[cell_id][qdrt_id];
       }
 
       //save hes
