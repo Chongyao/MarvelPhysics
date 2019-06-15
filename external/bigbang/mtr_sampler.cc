@@ -32,17 +32,17 @@ static void lmder_cb(int *m, int *n, double *x, double *fvec, double *fjac, int 
   assert(*m == 2 && *n == 2);
   
   const double *VERT_AND_POS = *(double**)(n+1);
-  Map<const MatrixXd> VP(VERT_AND_POS, 2, 5);
+  Eigen::Map<const MatrixXd> VP(VERT_AND_POS, 2, 5);
 
   Vector4d ws;
   Matrix<double, 4, 2> ws_jac;
   
   if ( *iflag == 1 ) {
     quad4_shape_func_val_(ws.data(), x);
-    Map<VectorXd>(fvec, 2) = VP.topLeftCorner(2, 4)*ws-VP.col(4);
+    Eigen::Map<VectorXd>(fvec, 2) = VP.topLeftCorner(2, 4)*ws-VP.col(4);
   } else if ( *iflag == 2 ) {
     quad4_shape_func_jac_(ws_jac.data(), x);
-    Map<MatrixXd>(fjac, 2, 2) = VP.topLeftCorner(2, 4)*ws_jac;
+    Eigen::Map<MatrixXd>(fjac, 2, 2) = VP.topLeftCorner(2, 4)*ws_jac;
   }
 }
 
@@ -50,17 +50,17 @@ static void lmder_cb2(int *m, int *n, double *x, double *fvec, double *fjac, int
   assert(*m == 3 && *n == 3);
   
   const double *VERT_AND_POS = *(double**)(n+1);
-  Map<const MatrixXd> VP(VERT_AND_POS, 3, 9);
+  Eigen::Map<const MatrixXd> VP(VERT_AND_POS, 3, 9);
 
   Matrix<double, 8, 1> ws;
   Matrix<double, 8, 3> ws_jac;
 
   if ( *iflag == 1 ) {
     hex8_shape_func_(ws.data(), x);
-    Map<VectorXd>(fvec, 3) = VP.topLeftCorner(3, 8)*ws-VP.col(8);
+    Eigen::Map<VectorXd>(fvec, 3) = VP.topLeftCorner(3, 8)*ws-VP.col(8);
   } else if ( *iflag == 2 ) {
     hex8_shape_func_jac_(ws_jac.data(), x);
-    Map<MatrixXd>(fjac, 3, 3) = VP.topLeftCorner(3, 8)*ws_jac;
+    Eigen::Map<MatrixXd>(fjac, 3, 3) = VP.topLeftCorner(3, 8)*ws_jac;
   }
 }
 

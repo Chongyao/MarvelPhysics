@@ -73,7 +73,7 @@ size_t full_partition_to_unity_cons::Nf() const {
   return verts_num_;
 }
 int full_partition_to_unity_cons::Val(const double *x, double *val) const {
-  Map<const MatrixXd> X(x, basis_num_, verts_num_);
+  Eigen::Map<const MatrixXd> X(x, basis_num_, verts_num_);
   for (size_t j = 0; j < X.cols(); ++j)
     val[j] = X.col(j).sum()-1;
   return 0;
@@ -243,7 +243,7 @@ size_t elemwise_polyharm_energy::Nx() const {
   return basis_num_*verts_num_;
 }
 int elemwise_polyharm_energy::Val(const double *x, double *val) const {
-  Map<const MatrixXd> X(x, basis_num_, verts_num_);
+  Eigen::Map<const MatrixXd> X(x, basis_num_, verts_num_);
 
   for (size_t i = 0; i < X.rows(); ++i) {
     for (const auto &pG : G_) {
@@ -255,8 +255,8 @@ int elemwise_polyharm_energy::Val(const double *x, double *val) const {
   return 0;
 }
 int elemwise_polyharm_energy::Gra(const double *x, double *gra) const {
-  Map<const MatrixXd> X(x, basis_num_, verts_num_);
-  Map<MatrixXd> G(gra, basis_num_, verts_num_);
+  Eigen::Map<const MatrixXd> X(x, basis_num_, verts_num_);
+  Eigen::Map<MatrixXd> G(gra, basis_num_, verts_num_);
     
   for (size_t i = 0; i < X.rows(); ++i) {
     for (const auto &pG : G_) {
@@ -600,7 +600,7 @@ size_t full_aug_anis_smooth_energy::Nx() const {
 }
 int full_aug_anis_smooth_energy::Val(const double *x, double *val) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Map<const MatrixXd> X(x, basis_num_, Nx()/basis_num_);
+  Eigen::Map<const MatrixXd> X(x, basis_num_, Nx()/basis_num_);
   for (size_t i = 0; i < nods_sz1_*nods_sz1_; ++i) {
     for (size_t j = 0; j < basis_num_; ++j) {
       const VectorXd f = X.block(j, i*verts_num_, 1, verts_num_).transpose();
@@ -611,8 +611,8 @@ int full_aug_anis_smooth_energy::Val(const double *x, double *val) const {
 }
 int full_aug_anis_smooth_energy::Gra(const double *x, double *gra) const {
   RETURN_WITH_COND_TRUE(w_ == 0.0);
-  Map<const MatrixXd> X(x, basis_num_, Nx()/basis_num_);
-  Map<MatrixXd> G(gra, basis_num_, Nx()/basis_num_);
+  Eigen::Map<const MatrixXd> X(x, basis_num_, Nx()/basis_num_);
+  Eigen::Map<MatrixXd> G(gra, basis_num_, Nx()/basis_num_);
   for (size_t i = 0; i < nods_sz1_*nods_sz1_; ++i) {
     for (size_t j = 0; j < basis_num_; ++j) {
       const VectorXd f = X.block(j, i*verts_num_, 1, verts_num_).transpose();
@@ -652,7 +652,7 @@ size_t full_anis_PoU_cons::Nf() const {
   return verts_num_*nods_sz1_;
 }
 int full_anis_PoU_cons::Val(const double *x, double *val) const {
-  Map<const MatrixXd> X(x, basis_num_, verts_num_*nods_sz1_);
+  Eigen::Map<const MatrixXd> X(x, basis_num_, verts_num_*nods_sz1_);
   for (size_t j = 0; j < X.cols(); ++j)
     val[j] = X.col(j).sum()-1;
   return 0;
@@ -683,7 +683,7 @@ size_t full_aug_anis_PoU_cons::Nf() const {
   return verts_num_*nods_sz1_*nods_sz1_;
 }
 int full_aug_anis_PoU_cons::Val(const double *x, double *val) const {
-  Map<const MatrixXd> X(x, basis_num_, Nx()/basis_num_);
+  Eigen::Map<const MatrixXd> X(x, basis_num_, Nx()/basis_num_);
   for (size_t m = 0; m < nods_sz1_; ++m) {
     for (size_t n = 0; n < nods_sz1_; ++n) {
       const size_t id = m*nods_sz1_+n;

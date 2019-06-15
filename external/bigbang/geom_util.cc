@@ -143,7 +143,7 @@ void remove_extra_verts(mati_t &cell, matd_t &node, mati_t *new2orig_mapping) {
   matrixst used_node_mat(used_node_idx.size(),1);
   std::copy(used_node_idx.begin(), used_node_idx.end(), used_node_mat.begin());
 
-  map<size_t,size_t> p2p;
+  Eigen::Map<size_t,size_t> p2p;
 
   matrixd new_node(node.size(1), used_node_mat.size());
   for(size_t pi = 0; pi < used_node_mat.size(); ++pi){

@@ -153,7 +153,7 @@ int stable_polor_decomp(double *dF) {
     q=Quaterniond(AngleAxisd(w,(1.0/w)*omega))*q;
     q.normalize();
   }
-  Map<Matrix3d> R(dF);
+  Eigen::Map<Matrix3d> R(dF);
   R = q.matrix();
   return 0;  
 }

@@ -394,7 +394,7 @@ public:
 private:
   const size_t r_size_, q_size_;
   double w_;
-  std::unordered_map<size_t, Eigen::Vector3d> fixed_;
+  std::unordered_Eigen::Map<size_t, Eigen::Vector3d> fixed_;
 };
 //==============================================================================
 cosserat_solver::cosserat_solver(const Matrix3Xd &rest, const rod_material &param)

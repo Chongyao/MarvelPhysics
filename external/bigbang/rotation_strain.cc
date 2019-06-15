@@ -211,11 +211,11 @@ int rs2euc_energy::Val(const double *x, double *val) const {
     disp = u_(colon(), tets_(colon(), i));
     x_to_df(df.data(), &vert[0], &Dm_(0, i));
     u_to_rs(rs.data(), &disp[0], &Dm_(0, i));
-    *val += 0.5*vol_[i]*(Map<const Matrix3d>(df.data())
+    *val += 0.5*vol_[i]*(Eigen::Map<const Matrix3d>(df.data())
                          -vec3_to_skew_symm<vec3, Matrix3d>(rs.head(3)).exp()
                          *(Id_+vec6_to_symm<vec6, Matrix3d>(rs.tail(6)))
                          ).squaredNorm();
-    // *val += 0.5*vol_[i]*(Map<const Matrix3d>(df.data())
+    // *val += 0.5*vol_[i]*(Eigen::Map<const Matrix3d>(df.data())
     //                      -vec3_to_skew_symm<vec3, Matrix3d>(rs.head(3)).exp()
     //                       *vec6_to_symm<vec6, Matrix3d>(rs.tail(6)).exp()
     //                      ).squaredNorm();
@@ -235,9 +235,9 @@ int rs2euc_energy::Gra(const double *x, double *gra) const {
     x_to_df(df.data(), &vert[0], &Dm_(0, i));
     x_to_df_jac(G.data(), nullptr, &Dm_(0, i));
     u_to_rs(rs.data(), &disp[0], &Dm_(0, i));
-    // Matrix3d tm = Map<const Matrix3d>(df.data())
+    // Matrix3d tm = Eigen::Map<const Matrix3d>(df.data())
     //     -vec3_to_skew_symm<vec3, Matrix3d>(rs.head(3)).exp()*vec6_to_symm<vec6, Matrix3d>(rs.tail(6)).exp();
-    Matrix3d tm = Map<const Matrix3d>(df.data())
+    Matrix3d tm = Eigen::Map<const Matrix3d>(df.data())
         -vec3_to_skew_symm<vec3, Matrix3d>(rs.head(3)).exp()*(Id_+vec6_to_symm<vec6, Matrix3d>(rs.tail(6)));
     vec12 g = vol_[i]*G.transpose()*flatten<vec9, Matrix3d>(tm);
     Grad(colon(), tets_(colon(), i)) += itr_matrix<const double *>(3, 4, g.data());

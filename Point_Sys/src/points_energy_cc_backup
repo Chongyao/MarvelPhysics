@@ -286,7 +286,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
   // vector<Triplet<double>> TripletList;
   
-  // unordered_map<pair<size_t,size_t>, double, pair_hash> mytriplet;
+  // unordered_Eigen::Map<pair<size_t,size_t>, double, pair_hash> mytriplet;
 
   //TODO: estimate entries
   dat_str.hes_trips.reserve(99999);

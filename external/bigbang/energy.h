@@ -424,8 +424,8 @@ public:
 private:
   const size_t dim_, rd_;
   double w_;
-  std::unordered_map<size_t, Eigen::Vector3d> fixed3d_;
-  std::unordered_map<size_t, Eigen::Vector2d> fixed2d_;
+  std::unordered_Eigen::Map<size_t, Eigen::Vector3d> fixed3d_;
+  std::unordered_Eigen::Map<size_t, Eigen::Vector2d> fixed2d_;
 };
 
 class spring_potential : public Functional<double>
@@ -518,7 +518,7 @@ public:
 private:
   const size_t dim_;
   double w_;
-  std::unordered_map<std::pair<size_t, size_t>, size_t, pair_hash> ijp_;
+  std::unordered_Eigen::Map<std::pair<size_t, size_t>, size_t, pair_hash> ijp_;
   Eigen::SparseMatrix<double> S_, JtS_;
 };
 
