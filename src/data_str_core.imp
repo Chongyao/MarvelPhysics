@@ -1,5 +1,5 @@
 #include "data_str_core.h"
-
+#include <iostream>
 using namespace std;
 using namespace Eigen;
 namespace marvel{
@@ -13,6 +13,7 @@ template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::set_zero(){
   val_ = 0;
   gra_.setZero();
+  trips.resize(0);
   if(if_pre_compute_hes_)
     this->set_zero_after_pre_compute();
   else
@@ -47,6 +48,15 @@ int dat_str_core<T, dim_>::save_val(const T& val){
   return 0;
 }
 
+template <typename T, size_t dim_>
+int dat_str_core<T, dim_>::setFromTriplets(){
+  hes_.setZero();
+  hes_.setFromTriplets(trips.begin(), trips.end());
+  cout << "setfrom triples" << endl;
+  
+}
+
+
 //>>>>>>>>>>>>>>>>>>save gra<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<,
 template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::save_gra(const Eigen::Matrix<T, Eigen::Dynamic, 1>& gra){
@@ -79,7 +89,7 @@ int dat_str_core<T, dim_>::set_zero_after_pre_compute(){
   if_pre_compute_hes_ = true;
   hes_.makeCompressed();
   for (int k=0; k<hes_.outerSize(); ++k)
-    for (SparseMatrix<double>::InnerIterator it(hes_,k); it; ++it)
+    for (typename SparseMatrix<T>::InnerIterator it(hes_,k); it; ++it)
     {
       it.valueRef() = 0;
     }
@@ -96,7 +106,8 @@ int dat_str_core<T, dim_>::save_hes(const size_t&m, const size_t& n, const Eigen
       for(size_t col = 0; col < dim_; ++col){
         for(size_t row = 0; row < dim_; ++row){
           if(loc_hes(row, col)){
-            hes_.coeffRef(m * dim_ + row, n * dim_ + col) += loc_hes(row, col);
+            // hes_.coeffRef(m * dim_ + row, n * dim_ + col) += loc_hes(row, col);
+            trips.push_back(Triplet<T>(m * dim_ + row, n * dim_ + col, loc_hes(row, col)));
           }
                      
         }
@@ -121,7 +132,11 @@ template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::save_hes(const size_t& row, const size_t& col, const T& value){
   if(!if_pre_compute_hes_){
     #pragma omp critical
-    hes_.coeffRef(row, col) += value;      
+    {
+      trips.push_back(Triplet<T>(row, col, value));
+    }
+
+    // hes_.coeffRef(row, col) += value;      
   }
   else{
     #pragma omp atomic

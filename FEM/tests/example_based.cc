@@ -19,12 +19,12 @@ int main(int argc, char** argv){
   
   MatrixXd nods(1, 1);
   MatrixXi tets(1, 1);
-  tet_mesh_read_from_vtk(filename, nods, tets);
+  tet_mesh_read_from_vtk<double>(filename, nods, tets);
   const size_t num_nods = nods.cols();
   cout <<"V"<< nods.rows() << " " << nods.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
   
   MatrixXd nods_example;
-  tet_mesh_read_from_vtk(example_file, nods_example, tets);
+  tet_mesh_read_from_vtk<double>(example_file, nods_example, tets);
   cout <<"V"<< nods_example.rows() << " " << nods_example.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
   
 

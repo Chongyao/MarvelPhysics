@@ -26,7 +26,7 @@ class newton_iter{
 };
 
 template class newton_iter<double, 3>;
-
+template class newton_iter<float, 3>;
   
 }
 

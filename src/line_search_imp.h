@@ -14,14 +14,14 @@ T line_search(const T& val_init, const T& down,
   Eigen::Map<const Matrix<T, -1, 1>> pk(_pk, dim_ * data->get_dof());
   
   cout << "[INFO] linesearch:" << endl;
-  const double c = 1e-4, c2 = 0.9;
+  const T c = 1e-4, c2 = 0.9;
 
-  double Val_upbound, Val_func, down_new =0;
+  T Val_upbound, Val_func, down_new =0;
 
-  VectorXd xk_post(xk.rows(), xk.cols());
-  VectorXd gra_tmp(xk.rows(), xk.cols());
+  Matrix<T, -1, 1> xk_post(xk.rows(), xk.cols());
+  Matrix<T, -1, 1> gra_tmp(xk.rows(), xk.cols());
   
-  auto cal_val = [&](const double alp)->double{
+  auto cal_val = [&](const T alp)->T{
     data->set_zero();
     xk_post = xk + alp * pk;
     energy->Val(xk_post.data(), data);
@@ -35,19 +35,19 @@ T line_search(const T& val_init, const T& down,
   
 
 
-  auto zoom = [&](double alpha_low, double alpha_high, double val_low)->double{
-    double alpha_star = alpha_high;
+  auto zoom = [&](T alpha_low, T alpha_high, T val_low)->T{
+    T alpha_star = alpha_high;
     size_t count_j = 1;
     do{
-      double alpha_j = 0.5 * (alpha_low + alpha_high);
-      double val_j = cal_val(alpha_j);
+      T alpha_j = 0.5 * (alpha_low + alpha_high);
+      T val_j = cal_val(alpha_j);
       if(val_j > val_init + c * alpha_j * down || val_j > val_low){
         alpha_high = alpha_j;
       }
               
       else{
         cal_gra();
-        double deri = pk.dot(gra_tmp);
+        T deri = pk.dot(gra_tmp);
         if(fabs(deri) <= -c2 * down){
           alpha_star = alpha_j;
           break;
@@ -67,7 +67,7 @@ T line_search(const T& val_init, const T& down,
 
     return alpha_star;
   };
-  double val_now, val_before = val_init, alpha_now = 1, alpha_before = 0, alpha_fin, alpha_max = 2;
+  T val_now, val_before = val_init, alpha_now = 1, alpha_before = 0, alpha_fin, alpha_max = 2;
   size_t count = 1;
   do{
 
@@ -77,7 +77,7 @@ T line_search(const T& val_init, const T& down,
       break;
     }
     cal_gra();
-    double deri = pk.dot(gra_tmp);          
+    T deri = pk.dot(gra_tmp);          
     if(fabs(deri) <= -c2 * down){
       alpha_fin = alpha_now;
       break;

@@ -14,6 +14,7 @@ class dat_str_core{
   int hes_reserve(const Eigen::VectorXi& nnzs);
   int hes_compress();
   int hes_add_diag(const size_t& time);
+  int setFromTriplets();
   
   int save_val(const T& val);
   int save_gra(const Eigen::Matrix<T, Eigen::Dynamic, 1>& gra);
@@ -51,10 +52,12 @@ class dat_str_core{
   Eigen::SparseMatrix<T> hes_;
   Eigen::Matrix<T, Eigen::Dynamic, 1> all_one_;
   bool if_pre_compute_hes_{false};
+  std::vector<Eigen::Triplet<T>> trips;
 
 };
 
 template class dat_str_core<double, 3>;
+template class dat_str_core<float, 3>;
 }
 
 #include "data_str_core.imp"

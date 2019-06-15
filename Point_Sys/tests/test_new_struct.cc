@@ -129,19 +129,19 @@ int main(int argc, char** argv){
   cout << "constrint " << cons.size() << " points" << endl;
 
   
-  ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);
+  ebf[CONS] = std::make_shared<position_constraint<double, 3>>(dim, pt.get<double>("position_weig"), cons);
     
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
   const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
-  ebf[GRAV] = make_shared<gravity_energy<3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
+  ebf[GRAV] = make_shared<gravity_energy<double, 3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
   
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
   double delt_t = pt.get<double>("time_step");
   // momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
-  ebf[MOME] = make_shared<momentum<3>>(dim, mass_vector, delt_t);
+  ebf[MOME] = make_shared<momentum<double, 3>>(dim, mass_vector, delt_t);
 
   
   // cout << "[INFO]>>>>>>>>>>>>>>>>>>>Collision<<<<<<<<<<<<<<<<<<" << endl;
@@ -181,7 +181,7 @@ int main(int argc, char** argv){
     imp_euler.solve(displace.data());
     
     
-    dynamic_pointer_cast<momentum<3>>(ebf[MOME])->update_location_and_velocity(displace.data());
+    dynamic_pointer_cast<momentum<double, 3>>(ebf[MOME])->update_location_and_velocity(displace.data());
     auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(i) + ".obj"; 
    auto point_filename = outdir + "/" + mesh_name + "_points_" + to_string(i) + ".vtk";
 

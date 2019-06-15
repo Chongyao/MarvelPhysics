@@ -13,7 +13,7 @@ template<typename T, size_t dim_, size_t order_, size_t num_per_cell_>
 class basis_func{
  public:
 
-  static void calc_InvDm_Det(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X, double& Jac_det, Matrix<T, dim_, dim_>& Dm_inv);
+  static void calc_InvDm_Det(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X, T& Jac_det, Matrix<T, dim_, dim_>& Dm_inv);
   static void get_def_gra(const Eigen::Matrix<T, dim_, 1>&PNT, const T* const x, const T* const X, Eigen::Matrix<T, dim_, dim_> & def_gra) ;
   static void get_Ddef_Dx(const Eigen::Matrix<T, dim_, 1>&PNT, const T* const x, const T* const X, const Eigen::Matrix<T, dim_, dim_>& def_gra, Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_>& Ddef_Dx);
   static void get_Ddef_Dx(const T* const X, Eigen::Matrix<T, 9, 12>& Ddef_Dx);
@@ -25,7 +25,7 @@ class basis_func<T, 3, 1, 4>{
   //TODO:DX_D can be calculated once
  public:
 
-  static void calc_InvDm_Det(const Eigen::Matrix<T, 3, 1>& PNT, const T* X, double& Jac_det, Matrix<T, 3, 3>& Dm_inv) {
+  static void calc_InvDm_Det(const Eigen::Matrix<T, 3, 1>& PNT, const T* X, T& Jac_det, Matrix<T, 3, 3>& Dm_inv) {
     Dm_inv.setZero();
 
     const Eigen::Map<const Matrix<T, 3, 4>> rest(X);

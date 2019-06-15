@@ -25,8 +25,8 @@ int point_write_to_vtk(const char *path, const double *nods, const size_t num_po
 int point_vector_append2vtk(const bool is_append, const char* path, const Eigen::MatrixXd &vectors, const size_t num_vecs, const char* vector_name);
 int point_scalar_append2vtk(const bool is_append, const char* path, const Eigen::VectorXd &scalars, const size_t num_sca, const char* scalar_name);
 
-
-int tet_mesh_read_from_vtk(const char* filename,  Eigen::MatrixXd& nods, Eigen::MatrixXi & tets,  double*   mtr= nullptr){
+template<typename T>
+int tet_mesh_read_from_vtk(const char* filename,  Eigen::Matrix<T, -1, -1>& nods, Eigen::MatrixXi & tets,  T*   mtr= nullptr){
   std::ifstream ifs(filename);
   if(ifs.fail()) {
     std::cerr << "[info] " << "can not open file" << filename << std::endl;
@@ -43,8 +43,8 @@ int tet_mesh_read_from_vtk(const char* filename,  Eigen::MatrixXd& nods, Eigen::
     ifs >> str;
     if(str == "POINTS"){
       ifs >> point_num >> str;
-      nods.derived().resize(3, point_num);
-      double item;
+      nods.resize(3, point_num);
+      T item;
       for(size_t i = 0;i < point_num; ++i){
         for(size_t j = 0;j < 3; ++j){
           ifs >> nods(j, i);
@@ -84,8 +84,8 @@ int tet_mesh_read_from_vtk(const char* filename,  Eigen::MatrixXd& nods, Eigen::
 
 
 
-  std::vector<double> tmp;
-  double mtrval;
+  std::vector<T> tmp;
+  T mtrval;
   if ( mtr != nullptr ) {
     
     while ( !ifs.eof() ) {
@@ -101,7 +101,7 @@ int tet_mesh_read_from_vtk(const char* filename,  Eigen::MatrixXd& nods, Eigen::
 
     if ( tmp.size() > 0 ) {
       assert(tmp.size() % tets.cols() == 0);
-      Eigen::Map<Eigen::MatrixXd>mtr_mat(mtr, tets.cols(), tmp.size()/tets.cols());
+      Eigen::Map<Eigen::Matrix<T, -1, -1>>mtr_mat(mtr, tets.cols(), tmp.size()/tets.cols());
       std::copy(tmp.begin(), tmp.end(), mtr_mat.data());
       mtr_mat.transposeInPlace();
     }
