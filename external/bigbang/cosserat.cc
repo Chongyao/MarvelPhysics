@@ -147,7 +147,7 @@ public:
     return r_size_+q_size_;
   }
   int Val(const double *x, double *val) const {
-    Map<const VectorXd> X(x, r_size_+q_size_);
+    Eigen::Map<const VectorXd> X(x, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       Matrix<double, 3, 2> rr;
       rr.col(0) = X.segment<3>(3*i);
@@ -159,8 +159,8 @@ public:
     return 0;
   }
   int Gra(const double *x, double *gra) const {
-    Map<const VectorXd> X(x, r_size_+q_size_);
-    Map<VectorXd> G(gra, r_size_+q_size_);
+    Eigen::Map<const VectorXd> X(x, r_size_+q_size_);
+    Eigen::Map<VectorXd> G(gra, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       Matrix<double, 3, 2> rr;
       rr.col(0) = X.segment<3>(3*i);
@@ -173,7 +173,7 @@ public:
     return 0;
   }
   int Hes(const double *x, vector<Triplet<double>> *hes) const {
-    Map<const VectorXd> X(x, r_size_+q_size_);
+    Eigen::Map<const VectorXd> X(x, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       Matrix<double, 3, 2> rr;
       rr.col(0) = X.segment<3>(3*i);
@@ -221,7 +221,7 @@ public:
     return r_size_+q_size_;
   }
   int Val(const double *x, double *val) const {
-    Map<const VectorXd> X(x, r_size_+q_size_);
+    Eigen::Map<const VectorXd> X(x, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       Matrix<double, 4, 2> qq;
       qq.col(0) = X.segment<4>(r_size_+4*i);
@@ -233,8 +233,8 @@ public:
     return 0;
   }
   int Gra(const double *x, double *gra) const {
-    Map<const VectorXd> X(x, r_size_+q_size_);
-    Map<VectorXd> G(gra, r_size_+q_size_);
+    Eigen::Map<const VectorXd> X(x, r_size_+q_size_);
+    Eigen::Map<VectorXd> G(gra, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       Matrix<double, 4, 2> qq;
       qq.col(0) = X.segment<4>(r_size_+4*i);
@@ -247,7 +247,7 @@ public:
     return 0;
   }
   int Hes(const double *x, vector<Triplet<double>> *hes) const {
-    Map<const VectorXd> X(x, r_size_+q_size_);
+    Eigen::Map<const VectorXd> X(x, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       Matrix<double, 4, 2> qq;
       qq.col(0) = X.segment<4>(r_size_+4*i);
@@ -286,7 +286,7 @@ public:
     return r_size_+q_size_;
   }
   int Val(const double *x, double *val) const {
-    Map<const VectorXd> XQ(x, r_size_+q_size_);
+    Eigen::Map<const VectorXd> XQ(x, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       VectorXd rq = VectorXd::Zero(10);
       rq.segment<3>(0) = XQ.segment<3>(3*i);
@@ -299,8 +299,8 @@ public:
     return 0;
   }
   int Gra(const double *x, double *gra) const {
-    Map<const VectorXd> XQ(x, r_size_+q_size_);
-    Map<VectorXd> G(gra, r_size_+q_size_);
+    Eigen::Map<const VectorXd> XQ(x, r_size_+q_size_);
+    Eigen::Map<VectorXd> G(gra, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       VectorXd rq = VectorXd::Zero(10);
       rq.segment<3>(0) = XQ.segment<3>(3*i);
@@ -315,7 +315,7 @@ public:
     return 0;
   }
   int Hes(const double *x, vector<Triplet<double>> *hes) const {
-    Map<const VectorXd> XQ(x, r_size_+q_size_);
+    Eigen::Map<const VectorXd> XQ(x, r_size_+q_size_);
     for (size_t i = 0; i < elem_num_; ++i) {
       VectorXd rq = VectorXd::Zero(10);
       rq.segment<3>(0) = XQ.segment<3>(3*i);
@@ -349,15 +349,15 @@ public:
     return r_size_+q_size_;
   }
   int Val(const double *x, double *val) const {
-    Map<const VectorXd> X(x, r_size_+q_size_);
+    Eigen::Map<const VectorXd> X(x, r_size_+q_size_);
     for (auto &elem : fixed_) {
       *val += 0.5*w_*(X.segment<3>(3*elem.first)-elem.second).squaredNorm();
     }
     return 0;
   }
   int Gra(const double *x, double *gra) const {
-    Map<const VectorXd> X(x, r_size_+q_size_);
-    Map<VectorXd> G(gra, r_size_+q_size_);
+    Eigen::Map<const VectorXd> X(x, r_size_+q_size_);
+    Eigen::Map<VectorXd> G(gra, r_size_+q_size_);
     for (auto &elem : fixed_) {
       G.segment<3>(3*elem.first) += w_*(X.segment<3>(3*elem.first)-elem.second);
     }

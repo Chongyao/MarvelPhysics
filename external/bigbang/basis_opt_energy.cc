@@ -1196,8 +1196,8 @@ int full_anis_to_iso_cons::Hes(const double *x, const size_t off, vector<vector<
 //   return 2*basis_num_1d_*vert_num_1d_;
 // }
 // int kronecker_delta_energy::Val(const double *x, double *val) const {
-//   Eigen::Map<const Eigen::MatrixXd> basisX(x,        basis_num_1d_, vert_num_1d_);
-//   Eigen::Map<const Eigen::MatrixXd> basisY(x+Nx()/2, basis_num_1d_, vert_num_1d_);
+//   Map<const Eigen::MatrixXd> basisX(x,        basis_num_1d_, vert_num_1d_);
+//   Map<const Eigen::MatrixXd> basisY(x+Nx()/2, basis_num_1d_, vert_num_1d_);
 //   for (size_t j = 0; j < loc_.size(); ++j) {
 //     *val += 0.5*w_*(basisX.col(loc_[j])-Id_.col(j)).squaredNorm();
 //     *val += 0.5*w_*(basisY.col(loc_[j])-Id_.col(j)).squaredNorm();
@@ -1205,10 +1205,10 @@ int full_anis_to_iso_cons::Hes(const double *x, const size_t off, vector<vector<
 //   return 0;
 // }
 // int kronecker_delta_energy::Gra(const double *x, double *gra) const {
-//   Eigen::Map<const Eigen::MatrixXd> basisX(x,        basis_num_1d_, vert_num_1d_);
-//   Eigen::Map<const Eigen::MatrixXd> basisY(x+Nx()/2, basis_num_1d_, vert_num_1d_);
-//   Eigen::Map<Eigen::MatrixXd> gradX(gra,        basis_num_1d_, vert_num_1d_);
-//   Eigen::Map<Eigen::MatrixXd> gradY(gra+Nx()/2, basis_num_1d_, vert_num_1d_);
+//   Map<const Eigen::MatrixXd> basisX(x,        basis_num_1d_, vert_num_1d_);
+//   Map<const Eigen::MatrixXd> basisY(x+Nx()/2, basis_num_1d_, vert_num_1d_);
+//   Map<Eigen::MatrixXd> gradX(gra,        basis_num_1d_, vert_num_1d_);
+//   Map<Eigen::MatrixXd> gradY(gra+Nx()/2, basis_num_1d_, vert_num_1d_);
 //   for (size_t j = 0; j < loc_.size(); ++j) {
 //     gradX.col(loc_[j]) += w_*(basisX.col(loc_[j])-Id_.col(j));
 //     gradY.col(loc_[j]) += w_*(basisY.col(loc_[j])-Id_.col(j));
@@ -1236,15 +1236,15 @@ int full_anis_to_iso_cons::Hes(const double *x, const size_t off, vector<vector<
 //   return 2*vert_num_1d_*basis_num_1d_;
 // }
 // int partition_to_unity_energy::Val(const double *x, double *val) const {
-//   Eigen::Map<const Eigen::MatrixXd> X(x, basis_num_1d_, 2*vert_num_1d_);
+//   Map<const Eigen::MatrixXd> X(x, basis_num_1d_, 2*vert_num_1d_);
 //   for (size_t j = 0; j < X.cols(); ++j) {
 //     *val += 0.5*w_*pow(X.col(j).sum()-1, 2);
 //   }
 //   return 0;
 // }
 // int partition_to_unity_energy::Gra(const double *x, double *gra) const {
-//   Eigen::Map<const Eigen::MatrixXd> X(x, basis_num_1d_, 2*vert_num_1d_);
-//   Eigen::Map<Eigen::MatrixXd> G(gra, basis_num_1d_, 2*vert_num_1d_);
+//   Map<const Eigen::MatrixXd> X(x, basis_num_1d_, 2*vert_num_1d_);
+//   Map<Eigen::MatrixXd> G(gra, basis_num_1d_, 2*vert_num_1d_);
 //   for (size_t j = 0; j < X.cols(); ++j) {
 //     G.col(j) += w_*(X.col(j).sum()-1)*Eigen::VectorXd::Ones(X.rows());
 //   }

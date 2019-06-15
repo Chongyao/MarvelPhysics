@@ -178,7 +178,7 @@ int main(int argc, char** argv){
       PS.Val(displace.data(), dat_str);
       PS.Gra(displace.data(), dat_str);
       MatrixXd one_hes = (dat_str->get_gra() - gra_now) / delt_x;
-      hes_dif.col(i) = Map<VectorXd>(one_hes.data(), 3*dim);
+      hes_dif.col(i) = Eigen::Map<VectorXd>(one_hes.data(), 3*dim);
       displace(i) -= delt_x;
     }
     cout << -hes_dif <<endl << endl;

@@ -580,12 +580,12 @@ public:
     return dim_;
   }
   int Val(const double *x, double *val) const {
-    Eigen::Map<const Eigen::VectorXd> X(x, dim_);
+    Map<const Eigen::VectorXd> X(x, dim_);
     *val += -w_*fext_.dot(X);
     return 0;
   }
   int Gra(const double *x, double *gra) const {
-    Eigen::Map<Eigen::VectorXd> G(gra, dim_);
+    Map<Eigen::VectorXd> G(gra, dim_);
     G += -w_*fext_;
     return 0;
   }

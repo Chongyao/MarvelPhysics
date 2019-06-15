@@ -143,7 +143,7 @@ int read_sparse_matrix(const char *path, Eigen::SparseMatrix<T> &mat) {
   ifs.read((char *)&val[0], val.size()*sizeof(T));
   ifs.close();
   
-  mat = Eigen::Map<Eigen::SparseMatrix<T>>(rows, cols, nnz, &ptr[0], &idx[0], &val[0]);
+  mat = Map<Eigen::SparseMatrix<T>>(rows, cols, nnz, &ptr[0], &idx[0], &val[0]);
 
   return 0;
 }

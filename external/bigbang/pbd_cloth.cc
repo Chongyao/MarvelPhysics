@@ -220,7 +220,7 @@ int pbd_cloth_solver::project_constraints(vec_t &x, const size_t iter_num) {
 }
 
 int pbd_cloth_solver::advance() {
-  Map<VectorXd> X(nods_.begin(), nods_.size());
+  Eigen::Map<VectorXd> X(nods_.begin(), nods_.size());
   VectorXd Xstar = X;
   vel_ += h_*Minv_.asDiagonal()*fext_;
   /// --------------------

@@ -10,8 +10,8 @@ T line_search(const T& val_init, const T& down,
               const std::shared_ptr<Functional<T, dim_>>& energy,
               std::shared_ptr<dat_str_core<T, dim_>>& data,
               const T* const _xk, const T* const _pk){
-  Map<const Matrix<T, -1, 1>> xk(_xk, dim_ * data->get_dof());
-  Map<const Matrix<T, -1, 1>> pk(_pk, dim_ * data->get_dof());
+  Eigen::Map<const Matrix<T, -1, 1>> xk(_xk, dim_ * data->get_dof());
+  Eigen::Map<const Matrix<T, -1, 1>> pk(_pk, dim_ * data->get_dof());
   
   cout << "[INFO] linesearch:" << endl;
   const double c = 1e-4, c2 = 0.9;

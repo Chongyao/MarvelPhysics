@@ -48,13 +48,13 @@ public:
     return dim_;
   }
   int Val(const double *x, double *val) const {
-    Map<const VectorXd> X(x, dim_);
+    Eigen::Map<const VectorXd> X(x, dim_);
     *val += 0.5*w_*(X.dot(Gx_.transpose()*K_*Gx_*X)+X.dot(Gy_.transpose()*K_*Gy_*X));
     return 0;
   }
   int Gra(const double *x, double *gra) const {
-    Map<const VectorXd> X(x, dim_);
-    Map<VectorXd> G(gra, dim_);
+    Eigen::Map<const VectorXd> X(x, dim_);
+    Eigen::Map<VectorXd> G(gra, dim_);
     G += w_*(Gx_.transpose()*K_*Gx_*X+Gy_.transpose()*K_*Gy_*X);
     return 0;
   }
