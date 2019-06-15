@@ -15,12 +15,18 @@ using TET_ELAS = BaseElas<double, 3, 4, 1, 1, stvk, basis_func, quadrature>;
 int main(int argc, char** argv){
   std::cout.precision(10);
   const char* filename = argv[1];
+  const char* example_file = argv[4];
   
   MatrixXd nods(1, 1);
   MatrixXi tets(1, 1);
   tet_mesh_read_from_vtk(filename, nods, tets);
   const size_t num_nods = nods.cols();
   cout <<"V"<< nods.rows() << " " << nods.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
+  
+  MatrixXd nods_example;
+  tet_mesh_read_from_vtk(example_file, nods_example, tets);
+  cout <<"V"<< nods_example.rows() << " " << nods_example.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
+  
 
   const string outdir = argv[3];
   
@@ -39,29 +45,24 @@ int main(int argc, char** argv){
   // if ( boost::filesystem::exists(cons_file_path) )
   read_fixed_verts_from_csv(cons_file_path, cons);
   cout << "constrint " << cons.size() << " points" << endl;
+  
 
 
-  
-  
   //calc mass vector
   VectorXd mass_vec(nods.rows() * num_nods);
 
   calc_mass_vector<double>(nods, tets, rho, mass_vec);
   cout <<"total mass is "<< mass_vec.sum() << endl;
   cout << "build energy" << endl;
-  enum energy_type{ELAS, GRAV, KIN, POS};
+  enum energy_type{EXAMPLE, ELAS, GRAV, KIN, POS};
   vector<shared_ptr<Functional<double, 3>>> ebf(POS + 1);{
     ebf[ELAS] = make_shared<TET_ELAS>(nods, tets, Young, poi);
+    ebf[EXAMPLE] = make_shared<TET_ELAS>(nods_example, tets, Young * 0, poi);
     ebf[GRAV] = make_shared<gravity_energy<3>>(num_nods, 1, gravity, mass_vec, 'z');
     ebf[KIN] = make_shared<momentum<3>>(nods.data(), num_nods, mass_vec, dt);
     ebf[POS] = make_shared<position_constraint<3>>(nods.data(), num_nods, w_pos, cons);
     }
   cout << "assemble energy" << endl;
-
-
-  
-  
-  
   shared_ptr<Functional<double, 3>> energy;
   try {
     energy = make_shared<energy_t<double, 3>>(ebf);
@@ -71,11 +72,13 @@ int main(int argc, char** argv){
     exit(EXIT_FAILURE);
   }
 
+  
+  
   //Sovle
   const string filename_tmp = outdir  + "/frame_origin.vtk";
   tet_mesh_write_to_vtk(filename_tmp.c_str(), nods, tets);
   shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<dat_str_core<double, 3>>(num_nods);
-  newton_iter<double, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false);
+  newton_iter<double, 3> imp_euler(dat_str, energy, dt, 3, 1e-4, true, false);
   
   Map<VectorXd> xk(nods.data(), nods.size() );
   VectorXd new_nods = xk;

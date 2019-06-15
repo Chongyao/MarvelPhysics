@@ -78,8 +78,9 @@ class momentum : public  Functional<double, dim_>{
   int Hes(const double *disp, data_ptr<dim_> &data) const ;
   int update_location_and_velocity(const double *new_dispk_ptr);
   size_t Nx() const;
- private:
+
   Eigen::VectorXd vk_, dispk_;
+ private:
   const size_t dof_;
   Eigen::VectorXd mass_vec_;
   const double dt_;
