@@ -38,7 +38,6 @@ class BaseElas : public Functional<T, dim_>{
       all_dim_(nods.size()), num_nods_(nods.cols()), num_cells_(cells.cols()) ,
       nods_(nods), cells_(cells), all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)){
     
-
     static_assert(std::is_base_of<elas_csttt<T, dim_>, csttt>::value, "CSTTT must derive from elas_csttt");
     static_assert(std::is_base_of<basis_func<T, dim_, bas_order_, num_per_cell_>, basis>::value, "BASIS must derive from basis_func");
     static_assert(std::is_base_of<quadrature<T, dim_, num_qdrt_, num_per_cell_>, qdrt>::value, "GAUS must derive from gaus_quad");
@@ -49,6 +48,8 @@ class BaseElas : public Functional<T, dim_>{
     mtr_.resize(2, cells_.cols());
     mtr_.row(0) = Eigen::Matrix<T, 1, -1>::Ones(cells_.cols()) * lambda;
     mtr_.row(1) = Eigen::Matrix<T, 1, -1>::Ones(cells_.cols()) * mu;
+
+    PreComputation();
   }
   
   size_t Nx() const {return all_dim_;}
@@ -66,7 +67,7 @@ class BaseElas : public Functional<T, dim_>{
       //TODO:considering the order of basis
       
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, jac_det);
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
         data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * qdrt::WGT_[qdrt_id] * jac_det);
       }
     }
@@ -81,7 +82,7 @@ class BaseElas : public Functional<T, dim_>{
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
       T jac_det;
-      Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
+      // Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
       
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
@@ -93,10 +94,10 @@ class BaseElas : public Functional<T, dim_>{
       //TODO:considering the order of basis
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, jac_det);
-        basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
+        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
+        // basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         gra_F_based = csttt::gra(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        gra_x_based += Ddef_Dx.transpose() * gra_F_based * qdrt::WGT_[qdrt_id] * jac_det;
+        gra_x_based += Ddef_Dx[cell_id].transpose() * gra_F_based * qdrt::WGT_[qdrt_id] * jac_det;
       }
 
       //save gra
@@ -115,11 +116,10 @@ class BaseElas : public Functional<T, dim_>{
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       Matrix<T, dim_, dim_> def_gra;
       T jac_det;
-      Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
+      // Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx;
       
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
-
 
       Matrix<T, dim_ * num_per_cell_, 1> gra_x_based = Matrix<T, dim_ *  num_per_cell_, 1>::Zero();
       Matrix<T, dim_ * dim_, dim_ * dim_> hes_F_based; 
@@ -128,9 +128,9 @@ class BaseElas : public Functional<T, dim_>{
       //TODO:considering the order of basis
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
-        basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
+        // basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        hes_x_based += Ddef_Dx.transpose() * hes_F_based * Ddef_Dx * qdrt::WGT_[qdrt_id] * jac_det;
+        hes_x_based += Ddef_Dx[cell_id].transpose() * hes_F_based * Ddef_Dx[cell_id] * qdrt::WGT_[qdrt_id] * jac_det;
       }
 
       //save hes
@@ -147,18 +147,23 @@ class BaseElas : public Functional<T, dim_>{
 
   }
 
+protected:
   void PreComputation() {
     Dm_inv.resize(num_cells_);
     Jac_det.resize(num_cells_);
-    Eigen::Matrix<T, 3, num_per_cell_-1> Dm_inv_tmp;
+    Ddef_Dx.resize(num_cells_);
+    Eigen::Matrix<T, dim_, num_per_cell_-1> Dm_inv_tmp;
     T Jac_det_tmp;
-    for(int i = 0; i < num_cells_; i++) {
-      const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
-      for(int j = 0; j < num_qdrt_; j++) {
-        calc_InvDm_Det(qdrt::PNT_.col(qdrt_id), x_cell, Jac_det_tmp, Dm_inv_tmp);
-        Jac_det[i].push_back(Jac_det_tmp);
-        Dm_inv[i].push_back(Dm_inv_tmp);
+    Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx_tmp;
+    for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
+      const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
+      for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id) {
+        basis::calc_InvDm_Det(qdrt::PNT_.col(qdrt_id), X_cell.data(), Jac_det_tmp, Dm_inv_tmp);
+        Jac_det[cell_id].push_back(Jac_det_tmp);
+        Dm_inv[cell_id].push_back(Dm_inv_tmp);
       }
+      basis::get_Ddef_Dx(X_cell.data(), Ddef_Dx_tmp);
+      Ddef_Dx[cell_id] = Ddef_Dx_tmp;
     }
   }
   
@@ -169,10 +174,10 @@ class BaseElas : public Functional<T, dim_>{
   const Eigen::Matrix<int, num_per_cell_, -1> cells_; // elements
   Matrix<int, dim_, 1> all_rows_;
   
-private:
+private:  // precomputed values
   std::vector<std::vector<Eigen::Matrix<T, dim_, dim_>>> Dm_inv;
   std::vector<std::vector<T>> Jac_det;
-
+  std::vector<Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_>> Ddef_Dx;
   
 };
 }
