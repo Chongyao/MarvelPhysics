@@ -61,7 +61,7 @@ int calc_mass_vector(const Matrix<T, 3, -1> nods, const Matrix<int, 4, -1> cells
 
 #pragma omp parallel for
   for (size_t i = 0; i < trips.size(); ++i){
-    trips[i] = Triplet<double>(trips[i].row(), trips[i].row(), trips[i].value());
+    trips[i] = Triplet<T>(trips[i].row(), trips[i].row(), trips[i].value());
   }
 
   SparseMatrix<T> mass(num_nods, num_nods);

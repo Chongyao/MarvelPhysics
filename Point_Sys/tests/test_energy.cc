@@ -112,14 +112,14 @@ int main(int argc, char** argv){
   auto cons_file_path = indir + mesh_name +".csv";
   if ( boost::filesystem::exists(cons_file_path) ) 
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
-   ebf[CONS] = std::make_shared<position_constraint<3>>(dim, pt.get<double>("position_weig"), cons);  
+  ebf[CONS] = std::make_shared<position_constraint<double,3>>(dim, pt.get<double>("position_weig"), cons);  
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   double gravity = pt.get<double>("gravity");
   const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
-  ebf[GRAV] = make_shared<gravity_energy<3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
+  ebf[GRAV] = make_shared<gravity_energy<double, 3>>(dim, pt.get<double>("w_g"), gravity,  mass_vector, 'y');
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
-  collision<3> COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim, points_ptr);
+  collision<double, 3> COLL(pt.get<double>("w_coll"),'y', pt.get<double>("g_pos"), nods.cols(), dim, points_ptr);
 
   //energy all
   std::shared_ptr<Functional<double, 3>> energy;

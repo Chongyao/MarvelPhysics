@@ -137,17 +137,17 @@ int main(int argc, char** argv){
   if ( boost::filesystem::exists(cons_file_path) )
     read_fixed_verts_from_csv(cons_file_path.c_str(), cons);
   cout << "constrint " << cons.size() << " points" << endl;
-  ebf[CONS] = std::make_shared<position_constraint<3>>(dim, simulation_para.get<double>("position_weig"), cons);
+  ebf[CONS] = std::make_shared<position_constraint<double,3>>(dim, simulation_para.get<double>("position_weig"), cons);
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Gravity<<<<<<<<<<<<<<<<<<" << endl;
   const double gravity = common.get<double>("gravity");
   const auto mass_vector = dynamic_pointer_cast<point_sys>(ebf[POTS])->get_Mass_VectorXd();
-  ebf[GRAV] = make_shared<gravity_energy<3>>(dim, common.get<double>("gravity"), gravity,  mass_vector, 'z');
+  ebf[GRAV] = make_shared<gravity_energy<double, 3>>(dim, common.get<double>("gravity"), gravity,  mass_vector, 'z');
 
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>MOMENTUM<<<<<<<<<<<<<<<<<<" << endl;
   double delt_t = common.get<double>("time_step");
   // momentum MO(dim, PS.get_Mass_Matrix(), delt_t);
-  ebf[MOME] = make_shared<momentum<3>>(dim, mass_vector, delt_t);
+  ebf[MOME] = make_shared<momentum<double, 3>>(dim, mass_vector, delt_t);
 
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>COLLISION<<<<<<<<<<<<<<<<<<" << endl;
@@ -296,7 +296,7 @@ int main(int argc, char** argv){
     for(size_t i = 0; i < max_iter; ++i){
       cout << "iter is "<< i << endl;
       imp_euler.solve(displace.data());
-      dynamic_pointer_cast<momentum<3>>(ebf[MOME])->update_location_and_velocity(displace.data());
+      dynamic_pointer_cast<momentum<double, 3>>(ebf[MOME])->update_location_and_velocity(displace.data());
 
       if(i%iters_perframe == 0){
         auto surf_filename = outdir  + "/" + mesh_name + "_" + to_string(frame_id) + ".obj";

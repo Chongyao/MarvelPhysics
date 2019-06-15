@@ -11,14 +11,14 @@ using namespace std;
 using namespace Eigen;
 using namespace marvel;
 
-using TET_ELAS = BaseElas<double, 3, 4, 1, 1, stvk, basis_func, quadrature>;
+using TET_ELAS = BaseElas<double, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
 int main(int argc, char** argv){
   std::cout.precision(10);
   const char* filename = argv[1];
   
   MatrixXd nods(1, 1);
   MatrixXi tets(1, 1);
-  tet_mesh_read_from_vtk(filename, nods, tets);
+  tet_mesh_read_from_vtk<double>(filename, nods, tets);
   const size_t num_nods = nods.cols();
   cout <<"V"<< nods.rows() << " " << nods.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
 
@@ -52,9 +52,9 @@ int main(int argc, char** argv){
   enum energy_type{ELAS, GRAV, KIN, POS};
   vector<shared_ptr<Functional<double, 3>>> ebf(POS + 1);{
     ebf[ELAS] = make_shared<TET_ELAS>(nods, tets, Young, poi);
-    ebf[GRAV] = make_shared<gravity_energy<3>>(num_nods, 1, gravity, mass_vec, 'z');
-    ebf[KIN] = make_shared<momentum<3>>(nods.data(), num_nods, mass_vec, dt);
-    ebf[POS] = make_shared<position_constraint<3>>(nods.data(), num_nods, w_pos, cons);
+    ebf[GRAV] = make_shared<gravity_energy<double, 3>>(num_nods, 1, gravity, mass_vec, 'z');
+    ebf[KIN] = make_shared<momentum<double, 3>>(nods.data(), num_nods, mass_vec, dt);
+    ebf[POS] = make_shared<position_constraint<double, 3>>(nods.data(), num_nods, w_pos, cons);
     }
   cout << "assemble energy" << endl;
 
@@ -84,7 +84,7 @@ int main(int argc, char** argv){
     cout << "[frame " << f_id << "]" << endl;
     imp_euler.solve(new_nods.data());
     xk = new_nods;
-    dynamic_pointer_cast<momentum<3>>(ebf[KIN])->update_location_and_velocity(new_nods.data());
+    dynamic_pointer_cast<momentum<double, 3>>(ebf[KIN])->update_location_and_velocity(new_nods.data());
 
     const string filename = outdir  + "/frame_" + to_string(f_id) + ".vtk";
     tet_mesh_write_to_vtk(filename.c_str(), nods, tets);

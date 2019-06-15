@@ -91,7 +91,7 @@ class stvk : public elas_csttt<T, dim_>{
     const Matrix<T, dim_, dim_> Iden = Matrix<T, dim_, dim_>::Identity();
     Matrix<T, dim_, dim_> strain = 0.5 * (F.transpose() * F - Iden);
     Matrix<T, dim_ , dim_> gra_mat = F * (2 * mu * strain + lam * strain.trace() * Iden);
-    Map<Matrix<T, dim_ * dim_, 1>> gra_vec(gra_mat.data());
+    Eigen::Map<Matrix<T, dim_ * dim_, 1>> gra_vec(gra_mat.data());
     return std::move(gra_vec);
   }
 
