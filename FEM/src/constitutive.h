@@ -41,7 +41,7 @@ class linear_csttt : public elas_csttt<T, dim_>{
     const Matrix<T, dim_, dim_> Iden = Matrix<T, dim_, dim_>::Identity();
     Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Iden;
     Matrix<T, dim_ , dim_> gra_mat = mu * (F + F.transpose() - 2 * Iden) + lam * (F - Iden).trace() * Iden;
-    Map<Matrix<T, dim_ * dim_, 1>> gra_vec(gra_mat.data());
+    Eigen::Map<Matrix<T, dim_ * dim_, 1>> gra_vec(gra_mat.data());
     return std::move(gra_vec);
   }
 

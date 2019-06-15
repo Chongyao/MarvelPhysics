@@ -149,7 +149,7 @@ int main(int argc, char** argv){
 
   double d1dtdt = 1 / delt_t /delt_t, d1dt = 1 / delt_t;
 
-  Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
+  Eigen::Map<const VectorXd>res(dat_str.gra_.data(), 3 * dim);
   MatrixXd points_now;
   
   for(size_t i = 0; i < pt.get<size_t>("max_iter"); ++i){
@@ -157,7 +157,7 @@ int main(int argc, char** argv){
     // cout << "displace is " << endl<< displace.block(0, 0, 3, 8) << endl;
 
     //newtown iter
-    Map<VectorXd> displace_plus(displace.data(), 3*dim);
+    Eigen::Map<VectorXd> displace_plus(displace.data(), 3*dim);
 
     for(size_t newton_i = 0; newton_i < 20; ++newton_i){
       dat_str.set_zero();

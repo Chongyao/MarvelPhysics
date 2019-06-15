@@ -13,11 +13,6 @@ namespace marvel{
 
 using dat_ptr = std::shared_ptr<dat_str_core<double, 3>>;
 
-
-
-
-
-
 class point_sys : public Functional<double, 3>{
 public:
   point_sys(const Eigen::MatrixXd &points, const double &rho, const double &Young, const double &Poission, const double &vol_all, const double &kv, const std::vector<std::vector<size_t>> &friends, const Eigen::VectorXd &sup_radi );

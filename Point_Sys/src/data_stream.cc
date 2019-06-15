@@ -78,7 +78,7 @@ int energy_dat::set_zero(){
 
 //TODO:: look for a way to return a pointer to the 
 // const MatrixXd& energy_dat::ele_mat(const size_t &ele_id, const size_t &rows, const size_t &cols, MatrixXd &mat){
-//   return Map<MatrixXd>(mat.col(ele_id).data(), rows, cols);
+//   return Eigen::Map<MatrixXd>(mat.col(ele_id).data(), rows, cols);
 // }
 
 // MatrixXd& energy_dat::ele_def_gra(const size_t &ele_id){

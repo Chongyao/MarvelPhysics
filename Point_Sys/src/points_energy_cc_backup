@@ -152,7 +152,7 @@ double point_sys::kernel(const size_t &i, const size_t &j) const{
 }
 
 int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
-  Map<const Matrix<double, Dynamic, Dynamic> > _disp(disp, 3, dim_);
+  Eigen::Map<const Matrix<double, Dynamic, Dynamic> > _disp(disp, 3, dim_);
 #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
     Matrix3d one_du = Matrix3d::Ones();
@@ -166,7 +166,7 @@ int point_sys::calc_defo_gra(const double *disp, energy_dat &dat_str) const{
 
 
     //clac inverse of sys_mat by SVD
-    Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
+    Eigen::Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     
     for(size_t k = 0; k < 3; ++k){
       one_du.row(k) = inv_A * b.col(k);
@@ -207,7 +207,7 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
 
  #pragma omp parallel for 
   for(size_t i = 0; i < dim_; ++i){
-    Map<const Matrix3d> def_gra(dat_str.def_gra_.col(i).data());
+    Eigen::Map<const Matrix3d> def_gra(dat_str.def_gra_.col(i).data());
 
     //calculate strain and stress
     Matrix3d strain = def_gra.transpose()*def_gra - Matrix3d::Identity();
@@ -230,9 +230,9 @@ int point_sys::Val(const double *disp, energy_dat &dat_str)const {
 int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
  #pragma omp parallel for
   for(size_t i = 0; i < dim_; ++i){
-    Map<const Matrix3d> def_gra(dat_str.def_gra_.col(i).data());
-    Map<const Matrix3d> stress(dat_str.stress_.col(i).data());
-    Map<const Matrix3d> strain(dat_str.strain_.col(i).data());
+    Eigen::Map<const Matrix3d> def_gra(dat_str.def_gra_.col(i).data());
+    Eigen::Map<const Matrix3d> stress(dat_str.stress_.col(i).data());
+    Eigen::Map<const Matrix3d> strain(dat_str.strain_.col(i).data());
     
     //calculate Fv
     Matrix3d gra_def_gra;
@@ -248,7 +248,7 @@ int point_sys::Gra(const double *disp, energy_dat &dat_str) const{
     }
     
     //assemble Fe and Fv
-    Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
+    Eigen::Map<Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
     
     Matrix3d pre_F = vol_i_(i)*(2*def_gra*stress + kv_*(def_gra.determinant() - 1)*gra_def_gra)*inv_A;
     
@@ -286,7 +286,7 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
   
   // vector<Triplet<double>> TripletList;
   
-  // unordered_map<pair<size_t,size_t>, double, pair_hash> mytriplet;
+  // unordered_Eigen::Map<pair<size_t,size_t>, double, pair_hash> mytriplet;
 
   //TODO: estimate entries
   dat_str.hes_trips.reserve(99999);
@@ -313,10 +313,10 @@ int point_sys::Hessian(const double*disp, energy_dat &dat_str){
     Vector3d next_next_line;
     
 
-    Map<const Matrix3d> stress(dat_str.stress_.col(i).data());
-    Map<const Matrix3d> def_gra(dat_str.def_gra_.col(i).data());
-    Map<const Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
-    Map<const Matrix3d> vol_cross(dat_str.vol_cross_.col(i).data());
+    Eigen::Map<const Matrix3d> stress(dat_str.stress_.col(i).data());
+    Eigen::Map<const Matrix3d> def_gra(dat_str.def_gra_.col(i).data());
+    Eigen::Map<const Matrix3d> inv_A(dat_str.inv_A_all_.col(i).data());
+    Eigen::Map<const Matrix3d> vol_cross(dat_str.vol_cross_.col(i).data());
     double def_gra_det = def_gra.determinant();
 
     vector<Matrix3d> ela_col(3);

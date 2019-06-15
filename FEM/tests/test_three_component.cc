@@ -12,9 +12,6 @@ using QDRT = quadrature<double, 3, 1, 4>;
 
 int main(){
 
-
-
-  
   Matrix3d F;
 
   MatrixXd rest(3, 4), deformed(3, 4);
@@ -26,8 +23,14 @@ int main(){
 
   cout <<"rest is " << endl << rest << endl << "deformed is "<<endl << deformed << endl;
 
-  double jac_det = 0;
-  BASIS::get_def_gra(QDRT::PNT_, deformed.data(), rest.data(), F, jac_det);
+  Matrix3d Dm, Dm_inv;
+
+  for(int i = 0; i < 3; i++)
+    Dm.col(i) = rest.col(i) - rest.col(3);
+  Dm_inv = Dm.inverse();
+
+  double jac_det = Dm.determinant();
+  BASIS::get_def_gra(QDRT::PNT_, deformed.data(), Dm_inv, F);
   cout << "def gra is " << endl << F <<endl <<  "jac det is " << jac_det/6.0 << endl;
   Matrix<double, 9, 12> Ddef_Dx;
   BASIS::get_Ddef_Dx(QDRT::PNT_, deformed.data(), rest.data(), F, Ddef_Dx);

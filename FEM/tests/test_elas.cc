@@ -77,7 +77,7 @@ int main(int argc, char** argv){
   shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<dat_str_core<double, 3>>(num_nods);
   newton_iter<double, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false);
   
-  Map<VectorXd> xk(nods.data(), nods.size() );
+  Eigen::Map<VectorXd> xk(nods.data(), nods.size() );
   VectorXd new_nods = xk;
   
   for(size_t f_id = 0; f_id < num_frame; ++f_id){
