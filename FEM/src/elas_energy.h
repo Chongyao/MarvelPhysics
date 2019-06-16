@@ -10,7 +10,9 @@
 #include "eigen_ext.h"
 #include <iostream>
 #include <set>
+#include <fstream>
 namespace marvel{
+
 using namespace Eigen;
 using namespace std;
 
@@ -109,10 +111,9 @@ class BaseElas : public Functional<T, dim_>{
   int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
     Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
 
-
+    #pragma omp parallel for
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
 
-      {
       Matrix<T, dim_, dim_> def_gra;
       const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
@@ -133,15 +134,16 @@ class BaseElas : public Functional<T, dim_>{
         for(size_t q = 0; q < dim_ * num_per_cell_; ++q){
           const size_t I = cells_(p / dim_, cell_id) * dim_ + p%dim_;
           const size_t J = cells_(q / dim_, cell_id) * dim_ + q%dim_;
-          if(hes_x_based(p, q))
+          // if(hes_x_based(p, q))
           data->save_hes(I, J, hes_x_based(p, q));
         }
       }
-      }
     }
-    return 0;
+     return 0;
+     
 
   }
+  
 //   int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const {
 //     vector<Triplet<T>> uptrips;
 //     vector<Triplet<T>> uptrips_tmp;
@@ -160,10 +162,10 @@ class BaseElas : public Functional<T, dim_>{
 //       }
 
 //     }
-
+    
 //     Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
 //     //TODO:: FIX BUG
-
+//     #pragma omp parallel for
 //     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
 
 //       {
@@ -183,15 +185,19 @@ class BaseElas : public Functional<T, dim_>{
 //         hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
 //         hes_x_based += Ddef_Dx[cell_id].transpose() * hes_F_based * Ddef_Dx[cell_id] * qdrt::WGT_[qdrt_id] * Jac_det[cell_id][qdrt_id];
 //       }
+// #pragma omp critical(sss)
+//       {
 //       //save hes
 //       for(size_t p = 0; p < dim_ * num_per_cell_; ++p){
 //         for(size_t q = 0; q < dim_ * num_per_cell_; ++q){
 //           const size_t I = cells_(p / dim_, cell_id) * dim_ + p%dim_;
 //           const size_t J = cells_(q / dim_, cell_id) * dim_ + q%dim_;
 //           // if(hes_x_based(p, q))
-//           // data->save_hes(I, J, hes_x_based(p, q));
-//           uptrips_tmp.push_back(Triplet<T>(I, J, hes_x_based(p , q)));
+//           data->save_hes(I, J, hes_x_based(p, q));
+//           // uptrips_tmp.push_back(Triplet<T>(I, J, hes_x_based(p , q)));
+//           uptrips_tmp.push_back(Triplet<T>(I, J, 1));
 //         }
+//       }
 //       }
 //       }
 //     }
@@ -213,14 +219,17 @@ class BaseElas : public Functional<T, dim_>{
 //     cout<<"the number of nonzeros with comparison: \n"
 //         << (Eigen::Map<const Matrix<T, -1, 1>> (upspm.valuePtr(), upspm.nonZeros()).array() != 0).count()
 //         << endl;
-
-
+    
+    
 //     upspm.setZero();
 //     upspm.setFromTriplets(uptrips_tmp.begin(), uptrips_tmp.end());
 //     cout<<"the number of nonzeros with comparison: form tmp\n"
 //         << (Eigen::Map<const Matrix<T, -1, 1>> (upspm.valuePtr(), upspm.nonZeros()).array() != 0).count()
 //       << endl;
-    
+
+
+
+
 
 
 //     return 0;

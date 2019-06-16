@@ -54,7 +54,7 @@ int momentum<T, dim_>::Gra(const T *x, data_ptr<T, dim_> &data) const{
   const Matrix<T, -1, 1> acce = (_x  - dispk_) * d1dtdt_  - vk_ * d1dt_;
   // data.gra_ += mass_sparse_ * acce;
   data->save_gra(mass_vec_.cwiseProduct(acce));
-  cout << "KIN gra " << mass_vec_.cwiseProduct(acce).array().square().sum() << endl;
+
   return 0;
 }
 

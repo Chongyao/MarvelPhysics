@@ -131,9 +131,10 @@ int dat_str_core<T, dim_>::save_hes(const size_t&m, const size_t& n, const Eigen
 template <typename T, size_t dim_>
 int dat_str_core<T, dim_>::save_hes(const size_t& row, const size_t& col, const T& value){
   if(!if_pre_compute_hes_){
+
     #pragma omp critical
     {
-      trips.push_back(Triplet<T>(row, col, value));
+      trips.push_back(Triplet<T>(row, col, 1.0));
     }
 
     // hes_.coeffRef(row, col) += value;      
