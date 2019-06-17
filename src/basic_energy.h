@@ -22,7 +22,6 @@ class position_constraint : public Functional<T, dim_>{
   int Gra(const T *x, data_ptr<T, dim_> &data) const ;
   int Hes(const T *x, data_ptr<T, dim_> &data) const ;
   size_t Nx() const;
-
  private:
   Eigen::Matrix<T, -1, -1> rest_;
   const size_t dof_;
@@ -77,6 +76,7 @@ class momentum : public  Functional<T, dim_>{
   int Gra(const T *disp, data_ptr<T, dim_> &data) const ;
   int Hes(const T *disp, data_ptr<T, dim_> &data) const ;
   int update_location_and_velocity(const T *new_dispk_ptr);
+  int set_initial_velocity(const Matrix<T, dim_, 1>& velo);
   size_t Nx() const;
 
   Eigen::Matrix<T, -1, 1> vk_, dispk_;
