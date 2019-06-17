@@ -1,6 +1,6 @@
 EXE = ../../build/bin/test_elas
 
-MODEL_NAME = beam
+MODEL_NAME = beam2
 
 MODEL = ../data/$(MODEL_NAME)/$(MODEL_NAME).vtk
 FIXED = ../data/$(MODEL_NAME)/$(MODEL_NAME).csv
