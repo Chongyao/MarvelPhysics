@@ -8,14 +8,14 @@ namespace marvel{
 template<typename T, size_t dim_>
 class newton_iter{
  public:
-  
+  using SMP_TYPE = typename dat_str_core<T, dim_>::SMP_TYPE;
   newton_iter(std::shared_ptr<dat_str_core<T, dim_>>& dat_str,
               std::shared_ptr<Functional<T, dim_>>& energy,
               const T time_step = 0.01, const size_t max_iter = 20, const T tol = 1e-4, const bool if_pre_compute_hes = false, const bool if_line_search = true);
   int solve(T* x);
  protected:
   template<typename Derived, typename OtherDerived>
-  int linear_solver(const Eigen::SparseMatrix<T>* A, const Eigen::MatrixBase<Derived>& b, Eigen::MatrixBase<OtherDerived>& solution);
+  int linear_solver(const SMP_TYPE* A, const Eigen::MatrixBase<Derived>& b, Eigen::MatrixBase<OtherDerived>& solution);
   
  protected:
   const T time_step_;

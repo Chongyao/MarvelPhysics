@@ -82,7 +82,7 @@ int newton_iter<T, dim_>::solve(T* x){
       break;
 
     res_last_iter = res_value;
-    const SparseMatrix<T>* A = &dat_str_->get_hes();
+    const  SMP_TYPE*A = &dat_str_->get_hes();
     linear_solver(A, -res, solution);
     
     if(if_line_search_)
@@ -96,7 +96,7 @@ int newton_iter<T, dim_>::solve(T* x){
 
 template<typename T, size_t dim_>
 template<typename Derived, typename OtherDerived>
-int newton_iter<T, dim_>::linear_solver(const Eigen::SparseMatrix<T>* A, const Eigen::MatrixBase<Derived>& b, Eigen::MatrixBase<OtherDerived>& solution){
+int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::MatrixBase<Derived>& b, Eigen::MatrixBase<OtherDerived>& solution){
 
   
   // __TIME_BEGIN__

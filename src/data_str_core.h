@@ -5,9 +5,15 @@
 namespace marvel{
 template <typename T, size_t dim_>
 class dat_str_core{
+
+  
  public:
+
+  using SMP_TYPE = Eigen::SparseMatrix<T, Eigen::RowMajor>;
+  
   virtual ~dat_str_core() {}
   dat_str_core(const size_t& dof);
+  
 
   int set_zero();
   //!!!!!!!WARNING!!!!!!!!!:   reserve enough space 
@@ -39,20 +45,20 @@ class dat_str_core{
   
   const T get_val() const;
   const Eigen::Matrix<T, Eigen::Dynamic, 1>& get_gra() const;
-  const Eigen::SparseMatrix<T>& get_hes()const;
+  const SMP_TYPE& get_hes()const;
 
   const size_t get_dof()const;
   //TODO:add Perfect Forwardincg
   
-
  private:
   const size_t dof_;
   T val_;
   Eigen::Matrix<T, Eigen::Dynamic, 1> gra_;
-  Eigen::SparseMatrix<T> hes_;
+  SMP_TYPE hes_;
   Eigen::Matrix<T, Eigen::Dynamic, 1> all_one_;
   bool if_pre_compute_hes_{false};
   std::vector<Eigen::Triplet<T>> trips;
+
 
 };
 
