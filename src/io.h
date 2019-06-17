@@ -111,8 +111,29 @@ int tet_mesh_read_from_vtk(const char* filename,  Eigen::Matrix<T, -1, -1>& nods
 
   return 0;
 }
+template<typename FLOAT>
+int tet_mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::Matrix<FLOAT, -1, -1>> nods, const Eigen::Ref<Eigen::MatrixXi> tets, const Eigen::Matrix<FLOAT, -1,-1> *mtr=nullptr){
+  assert(tets.rows() == 4);
 
-int tet_mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::MatrixXd> nods, const Eigen::Ref<Eigen::MatrixXi> tets, const Eigen::MatrixXd *mtr=nullptr);
+  std::ofstream ofs(path);
+  if ( ofs.fail() )
+    return __LINE__;
+
+  ofs << std::setprecision(15);
+  tet2vtk(ofs, nods.data(), nods.cols(), tets.data(), tets.cols());
+  if ( mtr != nullptr ) {
+    for (int i = 0; i < mtr->rows(); ++i) {
+      const std::string mtr_name = "theta_"+std::to_string(i);
+      const Eigen::Matrix<FLOAT, 1, -1 > curr_mtr = mtr->row(i);
+      if ( i == 0 )
+        ofs << "CELL_DATA " << curr_mtr.size() << "\n";
+      vtk_data(ofs, curr_mtr.data(), curr_mtr.cols(), mtr_name.c_str(), mtr_name.c_str());
+    }
+  }
+  ofs.close();
+  return 0;
+
+}
 
 }
 

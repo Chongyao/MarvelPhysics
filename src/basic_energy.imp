@@ -177,9 +177,11 @@ int collision<T, dim_>::Val(const T *x, data_ptr<T, dim_> &data) const{
   const size_t which_axis = size_t(ground_axis_ - 'x');
   
   Eigen::Map<const Matrix<T, -1, -1>> _x(x, dim_, dof_);
+  #pragma omp parallel for
   for(size_t i = 0; i < dof_; ++i){
     const T position_now = _x(which_axis, i) + (*init_points_ptr_)(which_axis, i);
     if (( position_now - ground_pos_) < 0){
+
       data->save_val(w_coll_ * pow((ground_pos_ - position_now), 2));      
     }
 
@@ -191,6 +193,7 @@ int collision<T, dim_>::Gra(const T *x, data_ptr<T, dim_> &data) const {
   const size_t which_axis = size_t(ground_axis_ - 'x');
   
   Eigen::Map<const Matrix<T, -1, -1>> _x(x, dim_, dof_);
+#pragma omp parallel for
   for(size_t i = 0; i < dof_; ++i){
     const T position_now = _x(which_axis, i) + (*init_points_ptr_)(which_axis, i);
     if (( position_now - ground_pos_) < 0){
@@ -205,7 +208,7 @@ template<typename T, size_t dim_>
 int collision<T, dim_>::Hes(const T *x, data_ptr<T, dim_> &data) const{
   const size_t which_axis = size_t(ground_axis_ - 'x');
   Eigen::Map<const Matrix<T, -1, -1>> _x(x, dim_, dof_);
-  // #pragma omp parallel for
+  #pragma omp parallel for
   for(size_t i = 0; i < dof_; ++i){
     const T position_now = _x(which_axis, i) + (*init_points_ptr_)(which_axis, i);
     if (( position_now - ground_pos_) < 0){

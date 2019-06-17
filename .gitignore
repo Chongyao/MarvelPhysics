@@ -1,3 +1,5 @@
+*.jpg
+callgrind*
 results
 /.DS_Store
 .idea

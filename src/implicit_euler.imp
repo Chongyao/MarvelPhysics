@@ -2,6 +2,7 @@
 #include "line_search.h"
 #include "config.h"
 #include <Eigen/Core>
+#include <typeinfo>
 using namespace std;
 using namespace Eigen;
 namespace marvel{
@@ -40,9 +41,13 @@ int newton_iter<T, dim_>::solve(T* x){
   
   Eigen::Map<Matrix<T, Dynamic, 1>>X(x, dim_ * dof_);
   const Matrix<T, Dynamic, 1>& res = dat_str_->get_gra();
-  SimplicialLLT<SparseMatrix<T>> llt;
-  Matrix<T, -1, 1> solution;
+  // SimplicialLLT<SparseMatrix<T>> llt;
+  ConjugateGradient<SparseMatrix<T>, Lower|Upper> llt;
+  // llt.setTolerance(1e-10);
+  // llt.set
 
+  Matrix<T, -1, 1> solution;
+  T res_last_iter;
   
   for(size_t newton_i = 0; newton_i < max_iter_; ++newton_i){
     cout << "[INFO]>>>>>>>>>>>>>>>newton iter is " << newton_i << endl;
@@ -50,22 +55,38 @@ int newton_iter<T, dim_>::solve(T* x){
     energy_->Val(x, dat_str_);
     energy_->Gra(x, dat_str_);
    
-    __TIME_BEGIN__
+    // __TIME_BEGIN__
     energy_->Hes(x, dat_str_);
-    __TIME_END__("[INFO]Assemble hessian");
+    // __TIME_END__("[INFO]Assemble hessian");
         
     dat_str_->hes_compress();
-    
     const T res_value = res.array().abs().sum();
     cout << "[INFO]: Newton res " << res_value << endl;
     cout << "[INFO]: ALL Energy: " << dat_str_->get_val() << endl;
-    if(res_value < 1e-4){
+    T eps;{
+      if(typeid(res_value) == typeid(float))
+        eps = 1e-1;
+      else if(typeid(res_value) == typeid(double))
+        eps = 1e-4;
+      else
+        throw runtime_error("run type");
+    }
+
+      
+    if(res_value < eps){
       cout << endl;
       break;
     }
 
+    if(newton_i > 1 && fabs(res_value / res_last_iter -1) < 1e-2 )
+      break;
+
+    res_last_iter = res_value;
     //Solve linear system By Cholesky
-    __TIME_BEGIN__
+    // __TIME_BEGIN__
+
+
+    // spm = 
     llt.compute(dat_str_->get_hes());
     size_t time = 1;
     while(llt.info() != Eigen::Success){
@@ -74,8 +95,10 @@ int newton_iter<T, dim_>::solve(T* x){
       llt.compute(dat_str_->get_hes());
       time *= 2;
     }
-    solution = llt.solve(-res).eval();
-    __TIME_END__("[INFO]: Solve linear system by Cholesky");
+
+    solution = llt.solve(-res);
+
+    // __TIME_END__("[INFO]: Solve linear system by Cholesky");
 
     
     if(if_line_search_)

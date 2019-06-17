@@ -11,7 +11,9 @@
 add_executable(test_elas test_elas.cc)
 target_link_libraries(test_elas
   marvel-core
-  FEM)
+  FEM
+  blas
+  lapack)
 
 
 # add_executable(test_three_component test_three_component.cc)
