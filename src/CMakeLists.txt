@@ -1,5 +1,5 @@
 file(GLOB header *.h)
-file(GLOB source *.cc *.c *.cpp)
+file(GLOB source *.cc *.c *.cpp *.cu)
 
 # set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 # message("this is cmkae current source dir ${CMAKE_CURRENT_SOURCE_DIR}  ")

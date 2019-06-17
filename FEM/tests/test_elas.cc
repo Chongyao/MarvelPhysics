@@ -1,7 +1,10 @@
+
+#include "DEFINE_TYPE.h"
 #define EIGEN_USE_BLAS
 // #define EIGEN_USE_LAPACKE
 #include "basic_energy.h"
 #include "implicit_euler.h"
+#include "implicit_euler_gpu.h"
 #include "io.h"
 
 #include "FEM/src/elas_energy.h"
@@ -12,7 +15,8 @@
 using namespace std;
 using namespace Eigen;
 using namespace marvel;
-using FLOAT_TYPE = float;
+
+// using FLOAT_TYPE = double;
 using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
 int main(int argc, char** argv){
   Eigen::initParallel();
@@ -41,7 +45,7 @@ int main(int argc, char** argv){
   constexpr  FLOAT_TYPE gravity = 9.8;
   constexpr  FLOAT_TYPE dt = 0.01;
   const      FLOAT_TYPE w_pos = 1e4;
-  const      size_t num_frame = 1000;
+  const      size_t num_frame = 100;
 
   //read fixed points
   vector<size_t> cons(0);

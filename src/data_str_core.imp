@@ -89,7 +89,7 @@ int dat_str_core<T, dim_>::set_zero_after_pre_compute(){
   if_pre_compute_hes_ = true;
   hes_.makeCompressed();
   for (int k=0; k<hes_.outerSize(); ++k)
-    for (typename SparseMatrix<T>::InnerIterator it(hes_,k); it; ++it)
+    for (typename decltype(hes_)::InnerIterator it(hes_,k); it; ++it)
     {
       it.valueRef() = 0;
     }
@@ -160,7 +160,7 @@ const Eigen::Matrix<T, Eigen::Dynamic, 1>& dat_str_core<T, dim_>::get_gra() cons
 }
 
 template <typename T, size_t dim_>
-const Eigen::SparseMatrix<T>& dat_str_core<T, dim_>::get_hes()const{
+const typename dat_str_core<T, dim_>::SMP_TYPE & dat_str_core<T, dim_>::get_hes()const{
   return hes_;
 }
 
