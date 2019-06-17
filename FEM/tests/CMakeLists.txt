@@ -8,8 +8,17 @@
 #   marvel-core
 #   FEM)
 
-add_executable(test_elas test_elas.cc)
-target_link_libraries(test_elas
+# add_executable(test_elas test_elas.cc)
+# target_link_libraries(test_elas
+#   marvel-core
+#   FEM
+#   blas
+#   lapack)
+
+SET(CMAKE_CXX_FLAGS "-std=c++0x")
+
+add_executable(test_interp test_interp.cc)
+target_link_libraries(test_interp
   marvel-core
   FEM
   blas
