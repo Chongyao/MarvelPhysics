@@ -1,7 +1,7 @@
 #ifndef INTERPOLATE_H
 #define INTERPOLATE_H
 
-#include "nanoflann.hpp"
+#include "nanoflann/nanoflann.hpp"
 #include <Eigen/StdVector>
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
