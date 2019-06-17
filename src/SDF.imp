@@ -39,7 +39,7 @@ void planeSDF<T,dim_>::Hes(const T *x, T *hes) const {
 
 template<typename T, size_t dim_>
 void planeSDF<T,dim_>:: update_center_position(const T* delt_x){
-  Map<Matrix<T, dim_, 1>> delt_X(delt_x);
+  Map<const Matrix<T, dim_, 1>> delt_X(delt_x);
   C_ += delt_X;
 }
 //===============================================================================
