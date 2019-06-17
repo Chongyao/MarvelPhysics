@@ -58,9 +58,9 @@ int main(int argc, char** argv){
   vector<shared_ptr<Functional<double, 3>>> ebf(POS + 1);{
     ebf[ELAS] = make_shared<TET_ELAS>(nods, tets, Young, poi);
     ebf[EXAMPLE] = make_shared<TET_ELAS>(nods_example, tets, Young * 0, poi);
-    ebf[GRAV] = make_shared<gravity_energy<3>>(num_nods, 1, gravity, mass_vec, 'z');
-    ebf[KIN] = make_shared<momentum<3>>(nods.data(), num_nods, mass_vec, dt);
-    ebf[POS] = make_shared<position_constraint<3>>(nods.data(), num_nods, w_pos, cons);
+    ebf[GRAV] = make_shared<gravity_energy<double, 3>>(num_nods, 1, gravity, mass_vec, 'z');
+    ebf[KIN] = make_shared<momentum<double ,3>>(nods.data(), num_nods, mass_vec, dt);
+    ebf[POS] = make_shared<position_constraint<double ,3>>(nods.data(), num_nods, w_pos, cons);
     }
   cout << "assemble energy" << endl;
   shared_ptr<Functional<double, 3>> energy;
@@ -76,7 +76,7 @@ int main(int argc, char** argv){
   
   //Sovle
   const string filename_tmp = outdir  + "/frame_origin.vtk";
-  tet_mesh_write_to_vtk(filename_tmp.c_str(), nods, tets);
+  tet_mesh_write_to_vtk<double>(filename_tmp.c_str(), nods, tets);
   shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<dat_str_core<double, 3>>(num_nods);
   newton_iter<double, 3> imp_euler(dat_str, energy, dt, 3, 1e-4, true, false);
   
@@ -87,10 +87,10 @@ int main(int argc, char** argv){
     cout << "[frame " << f_id << "]" << endl;
     imp_euler.solve(new_nods.data());
     xk = new_nods;
-    dynamic_pointer_cast<momentum<3>>(ebf[KIN])->update_location_and_velocity(new_nods.data());
+    dynamic_pointer_cast<momentum<double, 3>>(ebf[KIN])->update_location_and_velocity(new_nods.data());
 
     const string filename = outdir  + "/frame_" + to_string(f_id) + ".vtk";
-    tet_mesh_write_to_vtk(filename.c_str(), nods, tets);
+    tet_mesh_write_to_vtk<double>(filename.c_str(), nods, tets);
   }
 
   

@@ -1,15 +1,13 @@
-
 #include "DEFINE_TYPE.h"
 #define EIGEN_USE_BLAS
-// #define EIGEN_USE_LAPACKE
 #include "basic_energy.h"
+#include "SDF.h"
 #include "implicit_euler.h"
 #include "implicit_euler_gpu.h"
 #include "io.h"
 
 #include "FEM/src/elas_energy.h"
 #include "FEM/src/mass_matrix.h"
-
 #include <iostream>
 
 using namespace std;
@@ -53,8 +51,13 @@ int main(int argc, char** argv){
   // if ( boost::filesystem::exists(cons_file_path) )
   read_fixed_verts_from_csv(cons_file_path, cons);
   cout << "constrint " << cons.size() << " points" << endl;
-
-
+  
+  //set collision
+  vector<shared_ptr<signed_dist_func<FLOAT_TYPE, 3>>>  objs(1);
+  Matrix<FLOAT_TYPE, 3, 1> plane_center;plane_center << 0.05, 0,0;
+  Matrix<FLOAT_TYPE, 3, 1> plane_normal; plane_normal << 1, 0, 0;
+  objs[0] = make_shared<planeSDF<FLOAT_TYPE,3>>(plane_center.data(), plane_normal.data());
+  
   
   
   //calc mass vector
@@ -71,8 +74,9 @@ int main(int argc, char** argv){
     ebf[GRAV] = make_shared<gravity_energy<FLOAT_TYPE, 3>>(num_nods, 1, gravity, mass_vec, 'x');
     ebf[KIN] = make_shared<momentum<FLOAT_TYPE, 3>>(nods.data(), num_nods, mass_vec, dt);
     // ebf[POS] = make_shared<position_constraint<FLOAT_TYPE, 3>>(nods.data(), num_nods, w_pos, cons);
-    // ebf[POS] = nullptr;
-    ebf[POS] = make_shared<collision<FLOAT_TYPE, 3>>(nods.cols(), 1e5, 'x', 0.05, nods.cols(), init_points_ptr);
+
+    // ebf[POS] = make_shared<collision<FLOAT_TYPE, 3>>(nods.cols(), 1e5, 'x', 0.05, nods.cols(), init_points_ptr);
+    ebf[POS] = make_shared<geom_contact_energy<FLOAT_TYPE,3>>(objs, num_nods, 1e5);
     
     }
   cout << "assemble energy" << endl;
@@ -90,6 +94,7 @@ int main(int argc, char** argv){
     exit(EXIT_FAILURE);
   }
 
+  cout << "ehrer" << endl;
   //Sovle
   const string filename_tmp = outdir  + "/frame_origin.vtk";
   // tet_mesh_write_to_vtk<FLOAT_TYPE>(filename_tmp.c_str(), nods, tets);
