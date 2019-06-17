@@ -42,7 +42,7 @@ int newton_iter<T, dim_>::solve(T* x){
   Eigen::Map<Matrix<T, Dynamic, 1>>X(x, dim_ * dof_);
   const Matrix<T, Dynamic, 1>& res = dat_str_->get_gra();
   // SimplicialLLT<SparseMatrix<T>> llt;
-  ConjugateGradient<SparseMatrix<T>, Lower|Upper> llt;
+
   // llt.setTolerance(1e-10);
   // llt.set
 
@@ -82,24 +82,8 @@ int newton_iter<T, dim_>::solve(T* x){
       break;
 
     res_last_iter = res_value;
-    //Solve linear system By Cholesky
-    // __TIME_BEGIN__
-
-
-    // spm = 
-    llt.compute(dat_str_->get_hes());
-    size_t time = 1;
-    while(llt.info() != Eigen::Success){
-      cout <<"lltinfo "<< llt.info() << endl;
-      dat_str_->hes_add_diag(time);
-      llt.compute(dat_str_->get_hes());
-      time *= 2;
-    }
-
-    solution = llt.solve(-res);
-
-    // __TIME_END__("[INFO]: Solve linear system by Cholesky");
-
+    const SparseMatrix<T>* A = &dat_str_->get_hes();
+    linear_solver(A, -res, solution);
     
     if(if_line_search_)
       X += line_search<T, dim_>(dat_str_->get_val(), static_cast<T>(res.dot(solution)), energy_, dat_str_, x, solution.data()) * solution;
@@ -109,4 +93,19 @@ int newton_iter<T, dim_>::solve(T* x){
   }
   return 0;
 }
+
+template<typename T, size_t dim_>
+template<typename Derived, typename OtherDerived>
+int newton_iter<T, dim_>::linear_solver(const Eigen::SparseMatrix<T>* A, const Eigen::MatrixBase<Derived>& b, Eigen::MatrixBase<OtherDerived>& solution){
+
+  
+  // __TIME_BEGIN__
+  ConjugateGradient<SparseMatrix<T>, Lower|Upper> cg;
+  cg.compute(*A);
+  solution = cg.solve(b);
+  // __TIME_END__("[INFO]: Solve linear system by CG");
+
+}
+
+
 }//namespace

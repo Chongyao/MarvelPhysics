@@ -13,7 +13,11 @@ class newton_iter{
               std::shared_ptr<Functional<T, dim_>>& energy,
               const T time_step = 0.01, const size_t max_iter = 20, const T tol = 1e-4, const bool if_pre_compute_hes = false, const bool if_line_search = true);
   int solve(T* x);
- private:
+ protected:
+  template<typename Derived, typename OtherDerived>
+  int linear_solver(const Eigen::SparseMatrix<T>* A, const Eigen::MatrixBase<Derived>& b, Eigen::MatrixBase<OtherDerived>& solution);
+  
+ protected:
   const T time_step_;
   const size_t max_iter_;
   const T tol_;
