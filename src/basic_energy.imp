@@ -78,7 +78,7 @@ int momentum<T, dim_>::update_location_and_velocity(const T *new_dispk_ptr) {
 
 template<typename T, size_t dim_>
 int momentum<T, dim_>:: set_initial_velocity(const Matrix<T, dim_, 1>& velo){
-  Map<Matrix<T, -1, -1>> myvelo(vk_.data(), dim_, dof_);
+  Eigen::Map<Matrix<T, -1, -1>> myvelo(vk_.data(), dim_, dof_);
   for(size_t i = 0; i < dim_; ++i){
     myvelo.row(i) = Matrix<T, 1, -1>::Ones(dof_) * velo(i);
   }

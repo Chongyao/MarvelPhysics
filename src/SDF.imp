@@ -17,29 +17,29 @@ planeSDF<T,dim_>::planeSDF(const T *center, const T *n) {
 
 template<typename T, size_t dim_>
 bool planeSDF<T,dim_>::inside(const T *x) const {
-  Map<const Matrix<T, dim_, 1>> X(x);
+  Eigen::Map<const Matrix<T, dim_, 1>> X(x);
   return (X-C_).dot(N_) < 0.0;
 }
 template<typename T, size_t dim_>
 void planeSDF<T,dim_>::Val(const T *x, T *val) const {
-  Map<const Matrix<T, dim_, 1>> X(x);
+  Eigen::Map<const Matrix<T, dim_, 1>> X(x);
   *val = pow((X-C_).dot(N_), 2);
 }
 template<typename T, size_t dim_>
 void planeSDF<T,dim_>::Gra(const T *x, T *gra) const {
-  Map<const Matrix<T, dim_, 1>> X(x);
-  Map<Matrix<T, dim_, 1>> G(gra);
+  Eigen::Map<const Matrix<T, dim_, 1>> X(x);
+  Eigen::Map<Matrix<T, dim_, 1>> G(gra);
   G = 2*(X-C_).dot(N_)*N_;
 }
 template<typename T, size_t dim_>
 void planeSDF<T,dim_>::Hes(const T *x, T *hes) const {
-  Map<Matrix<T, dim_, dim_>> H(hes);
+  Eigen::Map<Matrix<T, dim_, dim_>> H(hes);
   H = 2*N_*N_.transpose();
 }
 
 template<typename T, size_t dim_>
 void planeSDF<T,dim_>:: update_center_position(const T* delt_x){
-  Map<const Matrix<T, dim_, 1>> delt_X(delt_x);
+  Eigen::Map<const Matrix<T, dim_, 1>> delt_X(delt_x);
   C_ += delt_X;
 }
 //===============================================================================
@@ -51,33 +51,33 @@ sphereSDF<T, dim_>::sphereSDF(const T *center, const T r)
 
 template<typename T, size_t dim_>
 bool sphereSDF<T, dim_>::inside(const T *x) const {
-  Map<const Matrix<T, dim_, 1>> X(x);
+  Eigen::Map<const Matrix<T, dim_, 1>> X(x);
   return (X-C_).norm()-R_ < 0;
 }
 
 template<typename T, size_t dim_>
 void sphereSDF<T, dim_>::Val(const T *x, T* val) const {
-  Map<const Matrix<T, dim_, 1>> X(x);
+  Eigen::Map<const Matrix<T, dim_, 1>> X(x);
   *val = pow((X-C_).norm()-R_, 2);
 }
 template<typename T, size_t dim_>
 void sphereSDF<T, dim_>::Gra(const T *x, T* gra) const {
-  Map<const Matrix<T, dim_, 1>> X(x);
-  Map<Matrix<T, dim_, 1>> G(gra);
+  Eigen::Map<const Matrix<T, dim_, 1>> X(x);
+  Eigen::Map<Matrix<T, dim_, 1>> G(gra);
   G = 2*(X-C_-R_*(X-C_)/(X-C_).norm());
 }
 
 template<typename T, size_t dim_>
 void sphereSDF<T, dim_>::Hes(const T *x, T* hes) const {
-  Map<const Matrix<T, dim_, 1>> X(x);
-  Map<Matrix<T, dim_, dim_>>H(hes);
+  Eigen::Map<const Matrix<T, dim_, 1>> X(x);
+  Eigen::Map<Matrix<T, dim_, dim_>>H(hes);
   Matrix<T, dim_, 1> J = (X-C_)/(X-C_).norm();
   H = 2*J*J.transpose();
 }
 
 template<typename T, size_t dim_>
 void sphereSDF<T,dim_>:: update_center_position(const T* delt_x){
-  Map<const Matrix<T, dim_, 1>> delt_X(delt_x);
+  Eigen::Map<const Matrix<T, dim_, 1>> delt_X(delt_x);
   C_ += delt_X;
 }
 //===============================================================================
