@@ -25,16 +25,23 @@ int main(int argc, char** argv){
   const size_t num_nods = nods.cols();
   cout <<"V"<< nods.rows() << " " << nods.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
 
+  {//scale
+    nods.row(0) += Matrix<FLOAT_TYPE, 1, -1>::Ones(nods.cols()) * 10;
+    nods.row(1) += Matrix<FLOAT_TYPE, 1, -1>::Ones(nods.cols()) * 10;
+    nods.row(2) += Matrix<FLOAT_TYPE, 1, -1>::Ones(nods.cols()) * 0.5;
+    nods *= 0.05;
+  }
+
   const string outdir = argv[3];
   
   //set mtr
-  constexpr  FLOAT_TYPE rho = 10;
-  constexpr  FLOAT_TYPE Young = 1000.0;
+  constexpr  FLOAT_TYPE rho = 100;
+  constexpr  FLOAT_TYPE Young = 10000.0;
   constexpr  FLOAT_TYPE poi = 0.45;
   constexpr  FLOAT_TYPE gravity = 9.8;
   constexpr  FLOAT_TYPE dt = 0.01;
   const      FLOAT_TYPE w_pos = 1e4;
-  const      size_t num_frame = 100;
+  const      size_t num_frame = 1000;
 
   //read fixed points
   vector<size_t> cons(0);
@@ -61,7 +68,7 @@ int main(int argc, char** argv){
     ebf[KIN] = make_shared<momentum<FLOAT_TYPE, 3>>(nods.data(), num_nods, mass_vec, dt);
     // ebf[POS] = make_shared<position_constraint<FLOAT_TYPE, 3>>(nods.data(), num_nods, w_pos, cons);
     // ebf[POS] = nullptr;
-    ebf[POS] = make_shared<collision<FLOAT_TYPE, 3>>(nods.cols(), 1e5, 'x', -8, nods.cols(), init_points_ptr);
+    ebf[POS] = make_shared<collision<FLOAT_TYPE, 3>>(nods.cols(), 1e5, 'x', 0.05, nods.cols(), init_points_ptr);
     
     }
   cout << "assemble energy" << endl;
