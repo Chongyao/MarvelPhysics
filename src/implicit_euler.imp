@@ -41,14 +41,10 @@ int newton_iter<T, dim_>::solve(T* x){
   
   Eigen::Map<Matrix<T, Dynamic, 1>>X(x, dim_ * dof_);
   const Matrix<T, Dynamic, 1>& res = dat_str_->get_gra();
-  // SimplicialLLT<SparseMatrix<T>> llt;
 
-  // llt.setTolerance(1e-10);
-  // llt.set
-
-  Matrix<T, -1, 1> solution;
+  Matrix<T, -1, 1> solution(dim_ * dof_);
   T res_last_iter;
-  
+  Matrix<T, -1, 1> rhs;
   for(size_t newton_i = 0; newton_i < max_iter_; ++newton_i){
     cout << "[INFO]>>>>>>>>>>>>>>>newton iter is " << newton_i << endl;
     dat_str_->set_zero();
@@ -83,7 +79,8 @@ int newton_iter<T, dim_>::solve(T* x){
 
     res_last_iter = res_value;
     const  SMP_TYPE*A = &dat_str_->get_hes();
-    linear_solver(A, -res, solution);
+    rhs = -res;
+    linear_solver(A, rhs, solution);
     
     if(if_line_search_)
       X += line_search<T, dim_>(dat_str_->get_val(), static_cast<T>(res.dot(solution)), energy_, dat_str_, x, solution.data()) * solution;
@@ -95,10 +92,7 @@ int newton_iter<T, dim_>::solve(T* x){
 }
 
 template<typename T, size_t dim_>
-template<typename Derived, typename OtherDerived>
-int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::MatrixBase<Derived>& b, Eigen::MatrixBase<OtherDerived>& solution){
-
-  
+int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::Matrix<T, -1, 1>& b, Eigen::Matrix<T, -1, 1>& solution){
   // __TIME_BEGIN__
   ConjugateGradient<SparseMatrix<T>, Lower|Upper> cg;
   cg.compute(*A);
