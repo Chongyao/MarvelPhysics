@@ -40,7 +40,7 @@ int main(int argc, char** argv){
   constexpr  FLOAT_TYPE rho = 100;
   constexpr  FLOAT_TYPE Young = 50000.0;
   constexpr  FLOAT_TYPE poi = 0.45;
-  constexpr  FLOAT_TYPE gravity = 9.8;
+  constexpr  FLOAT_TYPE gravity = 0;
   constexpr  FLOAT_TYPE dt = 0.01;
   const      FLOAT_TYPE w_pos = 1e4;
   const      size_t num_frame = 100;
@@ -101,7 +101,7 @@ int main(int argc, char** argv){
   shared_ptr<dat_str_core<FLOAT_TYPE, 3>>  dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
   newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, true);
   
-
+  Matrix<FLOAT_TYPE, 3, 1> delt_x;delt_x << 0.01, 0, 0;
 
   
   for(size_t f_id = 0; f_id < num_frame; ++f_id){
@@ -109,6 +109,7 @@ int main(int argc, char** argv){
     imp_euler.solve(nods.data());
 
     dynamic_pointer_cast<momentum<FLOAT_TYPE, 3>>(ebf[KIN])->update_location_and_velocity(nods.data());
+    dynamic_pointer_cast<geom_contact_energy<FLOAT_TYPE, 3>>(ebf[POS])->update_center_position(0, delt_x.data());
 
     const string filename = outdir  + "/frame_" + to_string(f_id) + ".vtk";
     tet_mesh_write_to_vtk<FLOAT_TYPE>(filename.c_str(), nods, tets);

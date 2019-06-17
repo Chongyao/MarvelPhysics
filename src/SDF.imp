@@ -36,6 +36,12 @@ void planeSDF<T,dim_>::Hes(const T *x, T *hes) const {
   Map<Matrix<T, dim_, dim_>> H(hes);
   H = 2*N_*N_.transpose();
 }
+
+template<typename T, size_t dim_>
+void planeSDF<T,dim_>:: update_center_position(const T* delt_x){
+  Map<Matrix<T, dim_, 1>> delt_X(delt_x);
+  C_ += delt_X;
+}
 //===============================================================================
 
 //===============================================================================
@@ -69,6 +75,11 @@ void sphereSDF<T, dim_>::Hes(const T *x, T* hes) const {
   H = 2*J*J.transpose();
 }
 
+template<typename T, size_t dim_>
+void sphereSDF<T,dim_>:: update_center_position(const T* delt_x){
+  Map<const Matrix<T, dim_, 1>> delt_X(delt_x);
+  C_ += delt_X;
+}
 //===============================================================================
 template<typename T, size_t dim_> geom_contact_energy<T, dim_>::
 geom_contact_energy(const vector<shared_ptr<signed_dist_func<T, dim_>>> &objs,
@@ -133,6 +144,12 @@ int geom_contact_energy<T, dim_>::Hes(const T *x, data_ptr<T, dim_> &data) const
       }
     }
   }
+  return 0;
+}
+
+template<typename T, size_t dim_>
+int geom_contact_energy<T, dim_>::update_center_position(const size_t obj_id, const T* delt_x){
+  objs_[obj_id]->update_center_position(delt_x);
   return 0;
 }
 //===============================================================================

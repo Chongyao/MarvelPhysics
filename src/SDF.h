@@ -15,6 +15,7 @@ public:
   virtual void Val(const T *x, T * val) const = 0;  // return d*d
   virtual void Gra(const T *x, T * gra) const = 0;
   virtual void Hes(const T *x, T * hes) const = 0;
+  virtual void update_center_position(const T* delt_x) = 0;
 };
 template<typename T, size_t dim_>
 class planeSDF : public signed_dist_func<T, dim_>
@@ -25,6 +26,8 @@ public:
   void Val(const T *x, T *val) const;
   void Gra(const T *x, T *gra) const;
   void Hes(const T *x, T *hes) const;
+  void update_center_position(const T* delt_x);
+  
 private:
    Eigen::Matrix<T, dim_, 1> C_, N_;
 };
@@ -38,9 +41,10 @@ public:
   void Val(const T *x, T * val) const ;  // return d*d
   void Gra(const T *x, T * gra) const ;
   void Hes(const T *x, T * hes) const ;
+  void update_center_position(const T* delt_x);
 
 private:
-  const Eigen::Matrix<T, dim_, 1> C_;
+  Eigen::Matrix<T, dim_, 1> C_;
   const T R_;
 };
 
@@ -54,6 +58,7 @@ public:
   int Val(const T *x, data_ptr<T, dim_> &data) const;
   int Gra(const T *x, data_ptr<T, dim_> &data) const;
   int Hes(const T *x, data_ptr<T, dim_> &data) const;
+  int update_center_position(const size_t obj_id, const T* delt_x);
 private:
   const size_t dof_;
   const T w_;
