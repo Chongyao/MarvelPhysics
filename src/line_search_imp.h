@@ -93,7 +93,7 @@ T line_search(const T& val_init, const T& down,
     ++count;
   }while(1);
   cout<< "line search alpha is "<<  alpha_fin<<endl;        
-  return alpha_fin;
+  return alpha_fin == 0? 1 : alpha_fin;
 
 }
 // template  double line_search(const double& val_init, const double& down,

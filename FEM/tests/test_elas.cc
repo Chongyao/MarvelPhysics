@@ -15,7 +15,7 @@ using namespace Eigen;
 using namespace marvel;
 
 // using FLOAT_TYPE = double;
-using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
+using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, stvk, basis_func, quadrature>;
 int main(int argc, char** argv){
   Eigen::initParallel();
   std::cout.precision(17);
@@ -38,7 +38,7 @@ int main(int argc, char** argv){
   
   //set mtr
   constexpr  FLOAT_TYPE rho = 100;
-  constexpr  FLOAT_TYPE Young = 10000.0;
+  constexpr  FLOAT_TYPE Young = 50000.0;
   constexpr  FLOAT_TYPE poi = 0.45;
   constexpr  FLOAT_TYPE gravity = 9.8;
   constexpr  FLOAT_TYPE dt = 0.01;
@@ -54,9 +54,9 @@ int main(int argc, char** argv){
   
   //set collision
   vector<shared_ptr<signed_dist_func<FLOAT_TYPE, 3>>>  objs(1);
-  Matrix<FLOAT_TYPE, 3, 1> plane_center;plane_center << 0.05, 0,0;
-  Matrix<FLOAT_TYPE, 3, 1> plane_normal; plane_normal << 1, 0, 0;
-  objs[0] = make_shared<planeSDF<FLOAT_TYPE,3>>(plane_center.data(), plane_normal.data());
+  Matrix<FLOAT_TYPE, 3, 1> plane_center;plane_center << 0, 0.5,0.05;
+  // Matrix<FLOAT_TYPE, 3, 1> plane_normal; plane_normal << 1, 0, 0;
+  objs[0] = make_shared<sphereSDF<FLOAT_TYPE,3>>(plane_center.data(), 0.1);
   
   
   
@@ -99,7 +99,7 @@ int main(int argc, char** argv){
   const string filename_tmp = outdir  + "/frame_origin.vtk";
   // tet_mesh_write_to_vtk<FLOAT_TYPE>(filename_tmp.c_str(), nods, tets);
   shared_ptr<dat_str_core<FLOAT_TYPE, 3>>  dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
-  newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false);
+  newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, true);
   
 
 

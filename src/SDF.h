@@ -35,9 +35,9 @@ class sphereSDF : public signed_dist_func<T, dim_>
 public:
   sphereSDF(const T *center, const T r);
   bool inside(const T *x) const;
-  void Val(const T *x, T * val) const = 0;  // return d*d
-  void Gra(const T *x, T * gra) const = 0;
-  void Hes(const T *x, T * hes) const = 0;
+  void Val(const T *x, T * val) const ;  // return d*d
+  void Gra(const T *x, T * gra) const ;
+  void Hes(const T *x, T * hes) const ;
 
 private:
   const Eigen::Matrix<T, dim_, 1> C_;
