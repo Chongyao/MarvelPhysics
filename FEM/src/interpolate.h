@@ -138,7 +138,7 @@ namespace marvel {
             w = bary_op[best_t.first].block(0, 0, 4, 3) * pt + bary_op[best_t.first].col(3);
 
             if(std::fabs(w.sum()-1) > 1e-9) {
-                std::cout << "strange weight." << w.transpose();
+                // std::cout << "strange weight." << w.transpose();
                 std::cout << "sum : " << w.sum() << std::endl;
             }
             trips.push_back(Eigen::Triplet<double>(tet(0, best_t.first), pi, w[0]));
