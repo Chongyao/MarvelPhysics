@@ -13,8 +13,8 @@ extern "C"
   // b_p          : pointer to RHS vector
   // x_p          : solution (x) is returned here
   void gpucg_solve_(int* findrm_p, int *size_findrm, int* colm_p, int* size_colm, 
-                    FLOAT_TYPE* matrix_val_p, int *matrix_val_size, FLOAT_TYPE* b_p, 
-                    int* rhs_val_size, FLOAT_TYPE *x_p);
+                    double* matrix_val_p, int *matrix_val_size, double* b_p, 
+                    int* rhs_val_size, double *x_p);
   // void gpucg_solve_float(int* findrm_p, int *size_findrm, int* colm_p, int* size_colm, 
   //                   float* matrix_val_p, int *matrix_val_size, float* b_p, 
   //                   int* rhs_val_size, float *x_p);

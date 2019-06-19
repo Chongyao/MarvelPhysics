@@ -40,4 +40,12 @@ int main() {
     std::cout << "Point: " << std::endl << point << std::endl;
 
     std::cout << "Coefficient: " << std::endl << coeffient << std::endl;
+    
+    for(int i = 0; i < point.cols(); i++)
+        vertex(0, i) += 2.0;
+    
+    
+    point = coeffient * vertex;
+    std::cout << point << std::endl;
+    
 }

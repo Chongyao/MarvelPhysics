@@ -32,9 +32,31 @@ class newton_iter_gpu : public newton_iter<T, dim_>{
       }
     }
     int num_rhs = b.rows();
-
-    gpucg_solve_(&rowptr[0], &num_rowptr, &colptr[0], &num_colptr, const_cast<T*>(A->valuePtr()), &num_colptr, const_cast<T*>(b.data()), &num_rhs, solution.data());
+    
+    vector<double> val_double(num_colptr);{
+      #pragma omp parallel for 
+      for(size_t i = 0; i < num_colptr; ++i){
+        val_double[i] = A->valuePtr()[i];
+      }
+    }
+    
+    vector<double> b_double(num_rhs);{
+      #pragma omp parallel for
+      for(size_t i = 0; i < num_rhs; ++i){
+        b_double[i] = b(i);
+      }
+    }
+    vector<double> solution_double(num_rhs);
+        
+    gpucg_solve_(&rowptr[0], &num_rowptr, &colptr[0], &num_colptr, &val_double[0], &num_colptr, &b_double[0], &num_rhs, &solution_double[0]);
     cout << "done " << endl;
+    for(size_t i = 0; i < num_rhs; ++i){
+      #pragma omp parallel for
+      for(size_t i = 0; i < num_rhs; ++i){
+        solution(i) = solution_double[i];
+      }      
+    }
+
     return 0;
   }
   

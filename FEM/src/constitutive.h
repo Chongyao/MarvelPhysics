@@ -2,6 +2,7 @@
 #define FEM_CONSTITUTIVE
 #include <Eigen/Dense>
 #include <cmath>
+#include <Eigen/Geometry>
 #include <unsupported/Eigen/CXX11/Tensor>
 #include "tensor.h"
 #include <iostream>
@@ -24,6 +25,70 @@ class elas_csttt{
   
   static  Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
   hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) ;
+};
+
+template<typename T, size_t dim_>
+class arap_csttt : public elas_csttt<T, dim_>{
+ public:
+  
+  static T
+  val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+    Matrix<T, dim_, dim_> R;
+    {
+      Eigen::Matrix3d A; A=F.template cast<double>();
+        Eigen::Quaterniond q=Eigen::Quaterniond(A);
+        q.normalize();
+        for(size_t iter=0;iter<5;iter++)
+          {      
+            Eigen::Matrix3d R=q.matrix();
+            Eigen::Vector3d omega=(R.col(0).cross(A.col(0))+R.col(1).cross(A.col(1))+R.col(2).cross(A.col(2)))*(1.0/fabs(R.col(0).dot(A.col(0))+R.col(1).dot(A.col(1))+R.col(2).dot(A.col(2)))+1e-9);
+            double w=omega.norm();
+            if(w<1e-9)
+        {
+          break; 
+        }
+            q=Eigen::Quaterniond(AngleAxisd(w,(1.0/w)*omega))*q;
+            q.normalize();
+          }
+        R = q.matrix().cast<T>();
+    }
+    return lam/2*(F-R).squaredNorm();
+  }
+
+  static Matrix<T, dim_ * dim_, 1>
+  gra(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu){
+    Matrix<T, dim_, dim_> R;
+    {
+      Matrix3d A; A=F.template cast<double>();
+        Eigen::Quaterniond q=Eigen::Quaterniond(A);
+        q.normalize();
+        for(size_t iter=0;iter<5;iter++)
+          {      
+            Eigen::Matrix3d R=q.matrix();
+            Eigen::Vector3d omega=(R.col(0).cross(A.col(0))+R.col(1).cross(A.col(1))+R.col(2).cross(A.col(2)))*(1.0/fabs(R.col(0).dot(A.col(0))+R.col(1).dot(A.col(1))+R.col(2).dot(A.col(2)))+1e-9);
+            double w=omega.norm();
+            if(w<1e-9)
+        {
+          break; 
+        }
+            q=Eigen::Quaterniond(AngleAxisd(w,(1.0/w)*omega))*q;
+            q.normalize();
+          }
+        R = q.matrix().cast<T>();
+    }
+    Matrix<T, dim_*dim_, 1> gra_vec;
+    Eigen::Map<Matrix<T, dim_, dim_>>(gra_vec.data()) = lam*(F-R);
+    return std::move(gra_vec);
+  }
+
+  static Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
+  hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+    Matrix<T, dim_*dim_, dim_*dim_> hes;
+    hes.setIdentity();
+    hes *= lam;
+    return std::move(hes);
+  }
+  
 };
 
 template<typename T, size_t dim_>
@@ -156,3 +221,7 @@ class stvk : public elas_csttt<T, dim_>{
 
 }
 #endif
+
+
+
+
