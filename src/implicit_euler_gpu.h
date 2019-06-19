@@ -34,6 +34,7 @@ class newton_iter_gpu : public newton_iter<T, dim_>{
     int num_rhs = b.rows();
 
     gpucg_solve_(&rowptr[0], &num_rowptr, &colptr[0], &num_colptr, const_cast<T*>(A->valuePtr()), &num_colptr, const_cast<T*>(b.data()), &num_rhs, solution.data());
+    cout << "done " << endl;
     return 0;
   }
   

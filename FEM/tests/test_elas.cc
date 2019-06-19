@@ -40,7 +40,7 @@ int main(int argc, char** argv){
   constexpr  FLOAT_TYPE rho = 100;
   constexpr  FLOAT_TYPE Young = 5000.0;
   constexpr  FLOAT_TYPE poi = 0.45;
-  constexpr  FLOAT_TYPE gravity = 0;
+  constexpr  FLOAT_TYPE gravity = 9.8;
   constexpr  FLOAT_TYPE dt = 0.01;
   const      FLOAT_TYPE w_pos = 1e4;
   const      size_t num_frame = 1000;
@@ -60,7 +60,7 @@ int main(int argc, char** argv){
     for(size_t j = 0; j < 3; ++j){
       Matrix<FLOAT_TYPE, 3, 1> plane_normal = Matrix<FLOAT_TYPE, 3, 1>::Zero();
       plane_normal(j) = pow(-1, i) * 1;
-      objs[i * 2 + j] = make_shared<planeSDF<FLOAT_TYPE,3>>(plane_center.data(), plane_normal.data());
+      objs[i * 3 + j] = make_shared<planeSDF<FLOAT_TYPE,3>>(plane_center.data(), plane_normal.data());
     }
   }
   
@@ -82,13 +82,14 @@ int main(int argc, char** argv){
     // ebf[POS] = make_shared<position_constraint<FLOAT_TYPE, 3>>(nods.data(), num_nods, w_pos, cons);
 
     // ebf[POS] = make_shared<collision<FLOAT_TYPE, 3>>(nods.cols(), 1e5, 'x', 0.05, nods.cols(), init_points_ptr);
-    ebf[POS] = make_shared<geom_contact_energy<FLOAT_TYPE,3>>(objs, num_nods, 1e5);
+    // ebf[POS] = make_shared<geom_contact_energy<FLOAT_TYPE,3>>(objs, num_nods, 1e5);
+    ebf[POS] = nullptr;
     
     }
   cout << "assemble energy" << endl;
 
-  Matrix<FLOAT_TYPE, 3, 1> init_velo; init_velo << 1, 2, 3;
-  dynamic_pointer_cast<momentum<FLOAT_TYPE, 3>>(ebf[KIN])->set_initial_velocity(init_velo);
+  // Matrix<FLOAT_TYPE, 3, 1> init_velo; init_velo << 1, 2, 3;
+  // dynamic_pointer_cast<momentum<FLOAT_TYPE, 3>>(ebf[KIN])->set_initial_velocity(init_velo);
   
   
   
@@ -106,7 +107,7 @@ int main(int argc, char** argv){
   const string filename_tmp = outdir  + "/frame_origin.vtk";
   // tet_mesh_write_to_vtk<FLOAT_TYPE>(filename_tmp.c_str(), nods, tets);
   shared_ptr<dat_str_core<FLOAT_TYPE, 3>>  dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
-  newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, true);
+  newton_iter_gpu<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false);
   
   Matrix<FLOAT_TYPE, 3, 1> delt_x;delt_x << 0.01, 0, 0;
 
