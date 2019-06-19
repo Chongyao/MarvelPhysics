@@ -40,7 +40,7 @@ int main(int argc, char** argv){
   constexpr  FLOAT_TYPE rho = 100;
   constexpr  FLOAT_TYPE Young = 5000.0;
   constexpr  FLOAT_TYPE poi = 0.45;
-  constexpr  FLOAT_TYPE gravity = 0;
+  constexpr  FLOAT_TYPE gravity = 9.8;
   constexpr  FLOAT_TYPE dt = 0.01;
   const      FLOAT_TYPE w_pos = 1e4;
   const      size_t num_frame = 1000;
@@ -87,8 +87,8 @@ int main(int argc, char** argv){
     }
   cout << "assemble energy" << endl;
 
-  Matrix<FLOAT_TYPE, 3, 1> init_velo; init_velo << 1, 2, 3;
-  dynamic_pointer_cast<momentum<FLOAT_TYPE, 3>>(ebf[KIN])->set_initial_velocity(init_velo);
+  // Matrix<FLOAT_TYPE, 3, 1> init_velo; init_velo << 1, 2, 3;
+  // dynamic_pointer_cast<momentum<FLOAT_TYPE, 3>>(ebf[KIN])->set_initial_velocity(init_velo);
   
   
   
