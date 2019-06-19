@@ -81,7 +81,7 @@ int newton_iter<T, dim_>::solve(T* x){
     const  SMP_TYPE*A = &dat_str_->get_hes();
     rhs = -res;
     linear_solver(A, rhs, solution);
-    
+    cout << "solution " << solution.array().abs().sum() << endl;    
     if(if_line_search_)
       X += line_search<T, dim_>(dat_str_->get_val(), static_cast<T>(res.dot(solution)), energy_, dat_str_, x, solution.data()) * solution;
     else
