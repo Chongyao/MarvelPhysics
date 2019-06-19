@@ -13,7 +13,8 @@ class newton_iter{
   using SMP_TYPE = typename dat_str_core<T, dim_>::SMP_TYPE;
   newton_iter(std::shared_ptr<dat_str_core<T, dim_>>& dat_str,
               std::shared_ptr<Functional<T, dim_>>& energy,
-              const T time_step = 0.01, const size_t max_iter = 20, const T tol = 1e-4, const bool if_pre_compute_hes = false, const bool if_line_search = true);
+              const T time_step = 0.01, const size_t max_iter = 20, const T tol = 1e-4, 
+              const bool if_pre_compute_hes = false, const bool if_line_search = true, const bool if_hes_constant = false);
   virtual int solve(T* x);
   // public:
 
@@ -26,6 +27,10 @@ class newton_iter{
   const size_t dof_;
 
   const bool if_line_search_;
+  const bool if_hes_constant_{false};
+  bool has_hes_computed_{false};
+  ConjugateGradient<SparseMatrix<T>, Lower|Upper> cg;
+  SMP_TYPE constant_hes_;
 
   std::shared_ptr<dat_str_core<T, dim_>> dat_str_;
   std::shared_ptr<Functional<T, dim_>> energy_;

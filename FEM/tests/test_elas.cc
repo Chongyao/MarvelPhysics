@@ -15,7 +15,7 @@ using namespace Eigen;
 using namespace marvel;
 
 // using FLOAT_TYPE = double;
-using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, stvk, basis_func, quadrature>;
+using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, arap_csttt, basis_func, quadrature>;
 int main(int argc, char** argv){
   Eigen::initParallel();
   std::cout.precision(17);
@@ -107,7 +107,7 @@ int main(int argc, char** argv){
   const string filename_tmp = outdir  + "/frame_origin.vtk";
   // tet_mesh_write_to_vtk<FLOAT_TYPE>(filename_tmp.c_str(), nods, tets);
   shared_ptr<dat_str_core<FLOAT_TYPE, 3>>  dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
-  newton_iter_gpu<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false); 
+  newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false, true);
   
   Matrix<FLOAT_TYPE, 3, 1> delt_x;delt_x << 0.01, 0, 0;
 
