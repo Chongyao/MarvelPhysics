@@ -17,6 +17,7 @@ template<typename T, size_t dim_>
 class elas_csttt{
  public:
   // virtual ~elas_csttt(){}
+
   static T
   val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) ;
   
@@ -29,6 +30,7 @@ class elas_csttt{
 
 template<typename T, size_t dim_>
 class arap_csttt : public elas_csttt<T, dim_>{
+
  public:
   
   static T
