@@ -111,54 +111,6 @@ int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::Matrix<T
    if (!(if_hes_constant_ && has_hes_computed_))
     cg.compute(*A);
   solution = cg.solve(b);
-
-  
-  static size_t i = 0;
-  {
-
-    // std::ofstream ofs_t ("test.txt", std::ofstream::out);
-
-    // ofs_t << "lorem ipsum";
-
-    // ofs_t.close();
-
-    const string A_filename = "A" + to_string(i) + ".txt";
-    std::ofstream ofs(A_filename);
-    if ( ofs.fail() )
-      return __LINE__;
-    
-    MatrixXd A_dense = MatrixXd(*A);
-    for(size_t i = 0; i < A_dense.rows(); ++i){
-      for(size_t j = 0; j < A_dense.cols(); ++j){
-        if(A_dense(i, j)){
-          ofs << i <<" "<< j <<" "<< A_dense(i, j) << "\n";
-        }
-        
-      }
-    }
-    ofs.close();
-
-
-    
-    const string B_filename = "B" + to_string(i) + ".txt";
-    std::ofstream ofs2(B_filename);{
-      for(size_t i = 0; i < b.size(); ++i){
-        ofs2 << b(i) << "\n";
-      }
-    }
-    ofs2.close();
-
-    string X_filename = "X" + to_string(i) + ".txt";
-    std::ofstream ofs3(X_filename, std::ofstream::out);{
-      for(size_t i = 0; i < b.size(); ++i){
-        ofs3 << solution(i) << "\n";
-      }
-    }
-    ofs3.close();
-
-    ++i;
-
-  }
   // __TIME_END__("[INFO]: Solve linear system by CG");
 
 }
