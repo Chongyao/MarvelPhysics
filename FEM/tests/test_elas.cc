@@ -37,13 +37,13 @@ int main(int argc, char** argv){
   const string outdir = argv[3];
   
   //set mtr
-  constexpr  FLOAT_TYPE rho = 1;
+  constexpr  FLOAT_TYPE rho = 0.5;
   constexpr  FLOAT_TYPE Young = 8000.0;
   constexpr  FLOAT_TYPE poi = 0.45;
-  constexpr  FLOAT_TYPE gravity = 9.8;
-  constexpr  FLOAT_TYPE dt = 0.01;
+  constexpr  FLOAT_TYPE gravity = 98;
+  constexpr  FLOAT_TYPE dt = 0.1;
   const      FLOAT_TYPE w_pos = 1e4;
-  const      size_t num_frame = 1000;
+  const      size_t num_frame = 100;
 
   //read fixed points
   vector<size_t> cons(0);
@@ -53,16 +53,16 @@ int main(int argc, char** argv){
   cout << "constrint " << cons.size() << " points" << endl;
   
   //set collision
-  vector<shared_ptr<signed_dist_func<FLOAT_TYPE, 3>>>  objs(6);
-  Matrix<FLOAT_TYPE, 3, 1> plane_center;plane_center.setZero();
-  for(size_t i = 0; i < 2; ++i){
-    plane_center += Matrix<FLOAT_TYPE, 3, 1>::Ones() * i;
-    for(size_t j = 0; j < 3; ++j){
-      Matrix<FLOAT_TYPE, 3, 1> plane_normal = Matrix<FLOAT_TYPE, 3, 1>::Zero();
-      plane_normal(j) = pow(-1, i) * 1;
-      objs[i * 3 + j] = make_shared<planeSDF<FLOAT_TYPE,3>>(plane_center.data(), plane_normal.data());
-    }
-  }
+  // vector<shared_ptr<signed_dist_func<FLOAT_TYPE, 3>>>  objs(6);
+  // Matrix<FLOAT_TYPE, 3, 1> plane_center;plane_center.setZero();
+  // for(size_t i = 0; i < 2; ++i){
+  //   plane_center += Matrix<FLOAT_TYPE, 3, 1>::Ones() * i;
+  //   for(size_t j = 0; j < 3; ++j){
+  //     Matrix<FLOAT_TYPE, 3, 1> plane_normal = Matrix<FLOAT_TYPE, 3, 1>::Zero();
+  //     plane_normal(j) = pow(-1, i) * 1;
+  //     objs[i * 3 + j] = make_shared<planeSDF<FLOAT_TYPE,3>>(plane_center.data(), plane_normal.data());
+  //   }
+  // }
   
   
   
