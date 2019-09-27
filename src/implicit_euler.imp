@@ -1,6 +1,7 @@
 #include "implicit_euler.h"
 #include "line_search.h"
 #include "config.h"
+#include <fstream>
 #include <Eigen/Core>
 #include <typeinfo>
 using namespace std;
@@ -106,11 +107,11 @@ int newton_iter<T, dim_>::solve(T* x){
 
 template<typename T, size_t dim_>
 int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::Matrix<T, -1, 1>& b, Eigen::Matrix<T, -1, 1>& solution){
-  // __TIME_BEGIN__
+  __TIME_BEGIN__
    if (!(if_hes_constant_ && has_hes_computed_))
     cg.compute(*A);
   solution = cg.solve(b);
-  // __TIME_END__("[INFO]: Solve linear system by CG");
+  __TIME_END__("[INFO]: Solve linear system by CG");
 
 }
 
