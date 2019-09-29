@@ -2,7 +2,6 @@
 #define EIGEN_USE_BLAS
 #include "basic_energy.h"
 #include "implicit_euler.h"
-#include "implicit_euler_gpu.h"
 #include "io.h"
 
 #include "FEM/src/elas_energy.h"
@@ -101,10 +100,6 @@ int main(int argc, char** argv){
     exit(EXIT_FAILURE);
   }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> opt_arap
   //Sovle
   const string outdir = argv[3];
   const string filename_tmp = outdir  + "/frame_origin.vtk";
