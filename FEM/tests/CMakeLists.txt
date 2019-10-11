@@ -1,3 +1,5 @@
+SET(CMAKE_CXX_FLAGS "-std=c++0x -fopenmp")
+
 add_executable(example_based example_based.cc)
 target_link_libraries(example_based
   marvel-core
@@ -15,7 +17,7 @@ target_link_libraries(test_elas
   blas
   lapack)
 
-SET(CMAKE_CXX_FLAGS "-std=c++0x")
+
 
 add_executable(test_interp test_interp.cc)
 target_link_libraries(test_interp
