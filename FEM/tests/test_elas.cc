@@ -1,5 +1,7 @@
 #include "DEFINE_TYPE.h"
 #define EIGEN_USE_BLAS
+// #include <omp.h>
+
 #include "basic_energy.h"
 #include "implicit_euler.h"
 #include "implicit_euler_gpu.h"
@@ -19,7 +21,7 @@ using namespace marvel;
 using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
 int main(int argc, char** argv){
   Eigen::initParallel();
-  std::cout.precision(17);
+
   const char* filename = argv[1];
   
   Matrix<FLOAT_TYPE, -1, -1> nods(1, 1);
@@ -101,12 +103,8 @@ int main(int argc, char** argv){
     exit(EXIT_FAILURE);
   }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> opt_arap
   //Sovle
-  const string outdir = argv[3];
+
   const string filename_tmp = outdir  + "/frame_origin.vtk";
   shared_ptr<dat_str_core<FLOAT_TYPE, 3>>  dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
   newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false, true);
