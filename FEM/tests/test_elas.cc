@@ -1,5 +1,7 @@
 #include "DEFINE_TYPE.h"
 #define EIGEN_USE_BLAS
+// #include <omp.h>
+
 #include "basic_energy.h"
 #include "implicit_euler.h"
 #include "implicit_euler_gpu.h"
@@ -23,11 +25,7 @@ int main(int argc, char **argv)
     cin >> a;
   }
   Eigen::initParallel();
-  {
-    int n = Eigen::nbThreads();
-    cout << "thread num: " << n << endl;
-  }
-  std::cout.precision(17);
+
   const char *filename = argv[1];
 
   Matrix<FLOAT_TYPE, -1, -1> nods(1, 1);
@@ -113,7 +111,7 @@ int main(int argc, char **argv)
   }
 
   //Sovle
-  // const string outdir = argv[3];
+
   const string filename_tmp = outdir + "/frame_origin.vtk";
   shared_ptr<dat_str_core<FLOAT_TYPE, 3>> dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
   newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false, true);

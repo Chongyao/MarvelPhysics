@@ -18,7 +18,10 @@ if (${APPLE})
 else ()
     cuda_add_library(marvel-core SHARED ${source})
     target_link_libraries(marvel-core	
-    coll_rigid
+      coll_rigid
+      ${OpenMP_TARGET}
+
+
     )
 endif(${APPLE})
 

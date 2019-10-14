@@ -15,9 +15,8 @@ target_link_libraries(test_elas
   marvel-core
   FEM
   blas
-  lapack)
-
-
+  lapack
+  )
 
 add_executable(test_interp test_interp.cc)
 target_link_libraries(test_interp
