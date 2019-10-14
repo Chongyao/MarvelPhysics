@@ -20,11 +20,8 @@ using namespace marvel;
 using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
 int main(int argc, char **argv)
 {
-  {
-    int a;
-    cin >> a;
-  }
   Eigen::initParallel();
+  printf("Threads: %d\n", Eigen::nbThreads());
 
   const char *filename = argv[1];
 
