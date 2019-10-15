@@ -1,5 +1,5 @@
 file(GLOB header *.h)
-file(GLOB source *.cc *.c *.cpp *.cu)
+file(GLOB source *.cc *.c *.cpp)
 
 # set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 # message("this is cmkae current source dir ${CMAKE_CURRENT_SOURCE_DIR}  ")
@@ -13,15 +13,12 @@ file(GLOB source *.cc *.c *.cpp *.cu)
 if (${APPLE})
     add_library(marvel-core SHARED ${source})
     target_link_libraries(marvel-core	
-        # coll_rigid
+        coll_rigid
     )
 else ()
     cuda_add_library(marvel-core SHARED ${source})
     target_link_libraries(marvel-core	
-      coll_rigid
-      ${OpenMP_TARGET}
-
-
+    coll_rigid
     )
 endif(${APPLE})
 

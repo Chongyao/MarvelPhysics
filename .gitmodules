@@ -4,3 +4,6 @@
 [submodule "external/tetgen"]
 	path = external/tetgen
 	url = https://github.com/ufz/tetgen.git
+[submodule "external/cuda-samples"]
+	path = external/cuda-samples
+	url = https://github.com/NVIDIA/cuda-samples.git
