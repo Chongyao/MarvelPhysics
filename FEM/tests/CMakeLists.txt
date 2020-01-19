@@ -8,7 +8,7 @@ target_link_libraries(gen_pose
   marvel-core
   FEM)
 
-cuda_add_executable(test_elas test_elas.cc)
+add_executable(test_elas test_elas.cc)
 target_link_libraries(test_elas
   marvel-core
   FEM
