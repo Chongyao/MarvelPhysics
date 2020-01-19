@@ -101,7 +101,7 @@ int main(int argc, char** argv){
   }
 
   //Sovle
-  const string outdir = argv[3];
+
   const string filename_tmp = outdir  + "/frame_origin.vtk";
   shared_ptr<dat_str_core<FLOAT_TYPE, 3>>  dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
   newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false, true);
