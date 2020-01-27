@@ -71,6 +71,7 @@ endif (NOT ${APPLE})
 if (${APPLE})
   add_subdirectory(FEM)
   add_subdirectory(src)
+  add_subdirectory(Multigrid)
 
 else ()
   add_subdirectory(external)

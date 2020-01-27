@@ -59,10 +59,11 @@ void Adjc_graph::sparsify_one_edge(const size_t edge_id){
 }
 
 void Adjc_graph::compensate_one_edge(const size_t edge_id_ik, const size_t edge_id_jk, const double& w){
-  const auto& trip_ik = *edges_[edge_id_ik];
-  edges_[edge_id_ik] = make_shared<TPL>(trip_ik.row(), trip_ik.col(), trip_ik.value() + w);
-  const auto& trip_jk = *edges_[edge_id_jk];
-  edges_[edge_id_jk] = make_shared<TPL>(trip_jk.row(), trip_jk.col(), trip_jk.value() + w);
+  const auto& trip_ik = edges_[edge_id_ik];
+  if(trip_ik == nullptr)
+  edges_[edge_id_ik] = make_shared<TPL>(trip_ik->row(), trip_ik->col(), trip_ik->value() + w);
+  const auto& trip_jk = edges_[edge_id_jk];
+  edges_[edge_id_jk] = make_shared<TPL>(trip_jk->row(), trip_jk->col(), trip_jk->value() + w);
   return;
 }
 
@@ -82,7 +83,6 @@ bool Adjc_graph::is_connect(const size_t i, const size_t j, size_t& edge_ij)cons
 }
 
 int Adjc_graph::sparsify_one_tri(const size_t edge_id_i, const size_t edge_id_j, const size_t edge_id_k, size_t& sparsified_edge_id){
-  
   vector<pair<size_t, double>> ws;{
     ws.push_back({edge_id_i, edges_[edge_id_i]->value()});
     ws.push_back({edge_id_j, edges_[edge_id_j]->value()});
@@ -91,7 +91,6 @@ int Adjc_graph::sparsify_one_tri(const size_t edge_id_i, const size_t edge_id_j,
   sort(ws.begin(), ws.end(), [](const pair<size_t, double>&lhs, const pair<size_t,double>&rhs)->bool{
       return lhs.second < rhs.second;
     });
-  
   sparsify_one_edge(ws[0].first);
   compensate_one_edge(ws[1].first, ws[2].first, ws[0].second);
   sparsified_edge_id = ws[0].first;
@@ -104,13 +103,15 @@ int Adjc_graph::Sparsification(){
     const size_t num_adjc = vertices_[i]->size();
     // unordered_map<size_t, size_t> adjc_V_E;
     list<pair<size_t, size_t>>adjc_V_E;
-    for(const auto& edge_id: *(vertices_[i]))
-      adjc_V_E.push_back({edges_[edge_id]->row() == i ? edges_[edge_id]->col() : i, edge_id});
+    for(const auto& edge_id: *(vertices_[i])){
+      adjc_V_E.push_back({edges_[edge_id]->row() == i ? edges_[edge_id]->col() : edges_[edge_id]->row(), edge_id});
+    }
+      
 
     for(auto it_a = adjc_V_E.begin();it_a!= adjc_V_E.end();++it_a)
       for(auto it_b = next(it_a) ; it_b != adjc_V_E.end(); ++ it_b){
         size_t edge_id = -1;
-        if(is_connect(it_a->second, it_b->second, edge_id)){
+        if(is_connect(it_a->first, it_b->first, edge_id)){
           size_t sp_edge_id = -1;
           sparsify_one_tri(it_a->second, it_b->second, edge_id, sp_edge_id);
           if(sp_edge_id == it_a->second){
@@ -118,6 +119,7 @@ int Adjc_graph::Sparsification(){
             --it_a;
             break;
           }else if(sp_edge_id == it_b->second){
+            cout << "sp " << it_b->first << endl;
             adjc_V_E.erase(it_b);
             --it_b;
             continue;
@@ -125,6 +127,7 @@ int Adjc_graph::Sparsification(){
         }
       }
   }
+  return 0;
 }
 //===================graph========================//
 
