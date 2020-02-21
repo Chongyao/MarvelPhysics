@@ -68,8 +68,8 @@ class BaseElas : public Functional<T, dim_>{
       //TODO:considering the order of basis
       
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
-        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * qdrt::WGT_[qdrt_id] * Jac_det[cell_id][qdrt_id]);
+        basis::get_def_gra(Dphi_Dxi_[cell_id][qdrt_id], x_cell.data(), Dm_inv_[cell_id][qdrt_id], def_gra);
+        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * qdrt::WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id]);
       }
     }
 
@@ -93,10 +93,11 @@ class BaseElas : public Functional<T, dim_>{
       //TODO:considering the order of basis
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
+        // basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
+        basis::get_def_gra(Dphi_Dxi_[cell_id][qdrt_id], x_cell.data(), Dm_inv_[cell_id][qdrt_id], def_gra);
         // basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         gra_F_based = csttt::gra(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        gra_x_based += Ddef_Dx[cell_id].transpose() * gra_F_based * qdrt::WGT_[qdrt_id] * Jac_det[cell_id][qdrt_id];
+        gra_x_based += Ddef_Dx_[cell_id][qdrt_id].transpose() * gra_F_based * qdrt::WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id];
       }
 
       //save gra
@@ -125,9 +126,9 @@ class BaseElas : public Functional<T, dim_>{
 
       //TODO:considering the order of basis
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
-        basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
+        basis::get_def_gra(Dphi_Dxi_[cell_id][qdrt_id], x_cell.data(), Dm_inv_[cell_id][qdrt_id], def_gra);
         hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        hes_x_based += Ddef_Dx[cell_id].transpose() * hes_F_based * Ddef_Dx[cell_id] * qdrt::WGT_[qdrt_id] * Jac_det[cell_id][qdrt_id];
+        hes_x_based += Ddef_Dx_[cell_id][qdrt_id].transpose() * hes_F_based * Ddef_Dx_[cell_id][qdrt_id] * qdrt::WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id];
       }
       //save hes
       for(size_t p = 0; p < dim_ * num_per_cell_; ++p){
@@ -147,22 +148,31 @@ class BaseElas : public Functional<T, dim_>{
 
 protected:
   void PreComputation() {
-    Dm_inv.resize(num_cells_);
-    Jac_det.resize(num_cells_);
-    Ddef_Dx.resize(num_cells_);
+    Dm_inv_.resize(num_cells_);
+    Jac_det_.resize(num_cells_);
+    Ddef_Dx_.resize(num_cells_);
+    Dphi_Dxi_.resize(num_cells_);
+    
     Eigen::Matrix<T, dim_, num_per_cell_-1> Dm_inv_tmp;
     T Jac_det_tmp;
     Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx_tmp;
+    Eigen::Matrix<T, num_per_cell_, dim_> Dphi_Dxi_tmp;
+    
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id) {
-        basis::calc_InvDm_Det(qdrt::PNT_.col(qdrt_id), X_cell.data(), Jac_det_tmp, Dm_inv_tmp);
-        Jac_det[cell_id].push_back(Jac_det_tmp);
-        Dm_inv[cell_id].push_back(Dm_inv_tmp);
+        basis::calc_Dphi_Dxi(qdrt::PNT_.col(qdrt_id), X_cell.data(), Dphi_Dxi_tmp);
+        Dphi_Dxi_[cell_id].push_back(Dphi_Dxi_tmp);
+        
+        basis::calc_InvDm_Det(Dphi_Dxi_tmp, X_cell.data(), Jac_det_tmp, Dm_inv_tmp);
+        Jac_det_[cell_id].push_back(Jac_det_tmp);
+        Dm_inv_[cell_id].push_back(Dm_inv_tmp);
+        
+        basis::get_Ddef_Dx(Dphi_Dxi_tmp, Dm_inv_tmp, Ddef_Dx_tmp);
+        Ddef_Dx_[cell_id].push_back(Ddef_Dx_tmp);
       }
-      basis::get_Ddef_Dx(X_cell.data(), Ddef_Dx_tmp);
-      Ddef_Dx[cell_id] = Ddef_Dx_tmp;
     }
+    return;
   }
   
  private:
@@ -173,9 +183,10 @@ protected:
   Matrix<int, dim_, 1> all_rows_;
   
 private:  // precomputed values
-  std::vector<std::vector<Eigen::Matrix<T, dim_, dim_>>> Dm_inv;
-  std::vector<std::vector<T>> Jac_det;
-  std::vector<Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_>, Eigen::aligned_allocator<Eigen::Matrix<T, dim_ *dim_, dim_ * num_per_cell_>>> Ddef_Dx;
+  std::vector<std::vector<Eigen::Matrix<T, dim_, dim_>>> Dm_inv_;
+  std::vector<std::vector<T>> Jac_det_;
+  std::vector<std::vector<Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_>, Eigen::aligned_allocator<Eigen::Matrix<T, dim_ *dim_, dim_ * num_per_cell_>>>> Ddef_Dx_;
+  std::vector<std::vector<Eigen::Matrix<T, num_per_cell_, dim_>>> Dphi_Dxi_;
   
 };
 }

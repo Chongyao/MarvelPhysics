@@ -70,15 +70,7 @@ int calc_mass_vector(const Matrix<T, 3, -1> nods, const Matrix<int, 4, -1> cells
   for (size_t i = 0; i < num_nods; ++i){
     mass_vector[i] = mass.coeff(i, i);
   }
-  
-    
-
-  
-
-    
-
-    
-
+  return 0;
   
 }
 

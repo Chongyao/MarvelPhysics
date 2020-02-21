@@ -112,7 +112,7 @@ int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::Matrix<T
     cg.compute(*A);
   solution = cg.solve(b);
   __TIME_END__("[INFO]: Solve linear system by CG");
-
+  return 0;
 }
 
 
