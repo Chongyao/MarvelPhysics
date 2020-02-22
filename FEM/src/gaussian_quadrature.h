@@ -46,11 +46,14 @@ class quadrature{
     PNT_.setZero();
     WGT_.fill(1);
     vector<size_t> idx;
+    cout << "herer" << endl;
     init(idx, 0);
+    cout << "done" << endl;
   }
 
  private:
     void init(vector<size_t>& idx, size_t PNT_id){
+      cout <<PNT_id << endl;
     if(idx.size() == dim_){
       for(size_t i = 0; i < dim_; ++i){
         PNT_(i, PNT_id) = gauss_base<T, qdrt_axis_>::P_[idx[i]];
@@ -60,7 +63,7 @@ class quadrature{
       for(size_t i = 0; i < qdrt_axis_; ++i){
         auto idx_next = idx;
         idx_next.push_back(i);
-        init(idx_next, PNT_id + pow(2, idx.size() - 1) * i);
+        init(idx_next, PNT_id + pow(2, idx.size()) * i);
       }
     }
     return;

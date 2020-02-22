@@ -43,7 +43,6 @@ class BaseElas : public Functional<T, dim_>{
     static_assert(std::is_base_of<elas_csttt<T, dim_>, csttt>::value, "CSTTT must derive from elas_csttt");
     static_assert(std::is_base_of<basis_func<T, dim_, bas_order_, num_per_cell_>, basis>::value, "BASIS must derive from basis_func");
     static_assert(std::is_base_of<quadrature<T, dim_, num_qdrt_, num_per_cell_>, qdrt>::value, "GAUS must derive from gaus_quad");
-
     //set mtr
     T mu, lambda;
     compute_lame_coeffs(ym, poi, mu, lambda);
