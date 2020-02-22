@@ -16,18 +16,28 @@ using namespace marvel;
 // using FLOAT_TYPE = double;
 
 using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
+using HEX_ELAS = BaseElas<FLOAT_TYPE, 3, 8, 1, 2, linear_csttt, basis_func, quadrature>;
+
 int main(int argc, char** argv){
   Eigen::initParallel();
   std::cout.precision(17);
   const char* filename = argv[1];
   
   Matrix<FLOAT_TYPE, -1, -1> nods(1, 1);
-  MatrixXi tets(1, 1);
-  tet_mesh_read_from_vtk<FLOAT_TYPE>(filename, nods, tets);
-  const size_t num_nods = nods.cols();
-  cout <<"V"<< nods.rows() << " " << nods.cols() << endl << "T " << tets.rows() << " "<< tets.cols() << endl;
+  MatrixXi cells(1, 1);
 
-  // {//scale
+  const string type = argv[4];
+  if(type  == "tet")
+    mesh_read_from_vtk<FLOAT_TYPE, 4>(filename, nods, cells);
+  else if(type == "hex")
+    mesh_read_from_vtk<FLOAT_TYPE, 8>(filename, nods, cells);
+    
+  
+
+  const size_t num_nods = nods.cols();
+  cout <<"V"<< nods.rows() << " " << nods.cols() << endl << "T " << cells.rows() << " "<< cells.cols() << endl;
+
+  // {/scale
   //   nods.row(0) += Matrix<FLOAT_TYPE, 1, -1>::Ones(nods.cols()) * 10;
   //   nods.row(1) += Matrix<FLOAT_TYPE, 1, -1>::Ones(nods.cols()) * 10;
   //   nods.row(2) += Matrix<FLOAT_TYPE, 1, -1>::Ones(nods.cols()) * 0.5;
@@ -70,13 +80,16 @@ int main(int argc, char** argv){
   
   //calc mass vector
   Matrix<FLOAT_TYPE, -1, 1> mass_vec(nods.rows() * num_nods);
-  calc_mass_vector<FLOAT_TYPE>(nods, tets, rho, mass_vec);
+  calc_mass_vector<FLOAT_TYPE>(nods, cells, rho, mass_vec);
 
   cout << "build energy" << endl;
   shared_ptr<Matrix<FLOAT_TYPE, -1, -1>> init_points_ptr  = make_shared<Matrix<FLOAT_TYPE, -1, -1>>(Matrix<FLOAT_TYPE, -1, -1>::Zero(nods.rows(), nods.cols()));
   enum energy_type{ELAS, GRAV, KIN, POS};
   vector<shared_ptr<Functional<FLOAT_TYPE, 3>>> ebf(POS + 1);{
-    ebf[ELAS] = make_shared<TET_ELAS>(nods, tets, Young, poi);
+    if(type == "tet" )
+      ebf[ELAS] = make_shared<TET_ELAS>(nods, cells, Young, poi);
+    else if(type == "hex")
+      ebf[ELAS] = make_shared<HEX_ELAS>(nods, cells, Young, poi);
 
     // ebf[ELAS] = nullptr;
     ebf[GRAV] = make_shared<gravity_energy<FLOAT_TYPE, 3>>(num_nods, 1, gravity, mass_vec, 'y');
@@ -112,7 +125,7 @@ int main(int argc, char** argv){
     dynamic_pointer_cast<momentum<FLOAT_TYPE, 3>>(ebf[KIN])->update_location_and_velocity(nods.data());
 
     const string filename = outdir  + "/frame_" + to_string(f_id) + ".vtk";
-    tet_mesh_write_to_vtk<FLOAT_TYPE>(filename.c_str(), nods, tets);
+    tet_mesh_write_to_vtk<FLOAT_TYPE>(filename.c_str(), nods, cells);
   }
   return 0;
 }

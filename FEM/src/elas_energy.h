@@ -38,7 +38,7 @@ class BaseElas : public Functional<T, dim_>{
   BaseElas(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells,
            const T& ym, const T&poi):
       all_dim_(nods.size()), num_nods_(nods.cols()), num_cells_(cells.cols()) ,
-      nods_(nods), cells_(cells), all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)){
+      nods_(nods), cells_(cells), all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)), quadrature_(){
     
     static_assert(std::is_base_of<elas_csttt<T, dim_>, csttt>::value, "CSTTT must derive from elas_csttt");
     static_assert(std::is_base_of<basis_func<T, dim_, bas_order_, num_per_cell_>, basis>::value, "BASIS must derive from basis_func");
@@ -69,7 +69,7 @@ class BaseElas : public Functional<T, dim_>{
       
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         basis::get_def_gra(Dphi_Dxi_[cell_id][qdrt_id], x_cell.data(), Dm_inv_[cell_id][qdrt_id], def_gra);
-        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * qdrt::WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id]);
+        data->save_val(csttt::val(def_gra, mtr_(0, cell_id), mtr_(1, cell_id))  * quadrature_.WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id]);
       }
     }
 
@@ -97,7 +97,7 @@ class BaseElas : public Functional<T, dim_>{
         basis::get_def_gra(Dphi_Dxi_[cell_id][qdrt_id], x_cell.data(), Dm_inv_[cell_id][qdrt_id], def_gra);
         // basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         gra_F_based = csttt::gra(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        gra_x_based += Ddef_Dx_[cell_id][qdrt_id].transpose() * gra_F_based * qdrt::WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id];
+        gra_x_based += Ddef_Dx_[cell_id][qdrt_id].transpose() * gra_F_based * quadrature_.WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id];
       }
 
       //save gra
@@ -128,7 +128,7 @@ class BaseElas : public Functional<T, dim_>{
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         basis::get_def_gra(Dphi_Dxi_[cell_id][qdrt_id], x_cell.data(), Dm_inv_[cell_id][qdrt_id], def_gra);
         hes_F_based = csttt::hes(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
-        hes_x_based += Ddef_Dx_[cell_id][qdrt_id].transpose() * hes_F_based * Ddef_Dx_[cell_id][qdrt_id] * qdrt::WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id];
+        hes_x_based += Ddef_Dx_[cell_id][qdrt_id].transpose() * hes_F_based * Ddef_Dx_[cell_id][qdrt_id] * quadrature_.WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id];
       }
       //save hes
       for(size_t p = 0; p < dim_ * num_per_cell_; ++p){
@@ -153,7 +153,7 @@ protected:
     Ddef_Dx_.resize(num_cells_);
     Dphi_Dxi_.resize(num_cells_);
     
-    Eigen::Matrix<T, dim_, num_per_cell_-1> Dm_inv_tmp;
+    Eigen::Matrix<T, dim_, dim_> Dm_inv_tmp;
     T Jac_det_tmp;
     Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx_tmp;
     Eigen::Matrix<T, num_per_cell_, dim_> Dphi_Dxi_tmp;
@@ -161,7 +161,7 @@ protected:
     for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
       const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id) {
-        basis::calc_Dphi_Dxi(qdrt::PNT_.col(qdrt_id), X_cell.data(), Dphi_Dxi_tmp);
+        basis::calc_Dphi_Dxi(quadrature_.PNT_.col(qdrt_id), X_cell.data(), Dphi_Dxi_tmp);
         Dphi_Dxi_[cell_id].push_back(Dphi_Dxi_tmp);
         
         basis::calc_InvDm_Det(Dphi_Dxi_tmp, X_cell.data(), Jac_det_tmp, Dm_inv_tmp);
@@ -181,6 +181,7 @@ protected:
   const Eigen::Matrix<T, dim_, -1> nods_; // vertices
   const Eigen::Matrix<int, num_per_cell_, -1> cells_; // elements
   Matrix<int, dim_, 1> all_rows_;
+  const qdrt quadrature_;
   
 private:  // precomputed values
   std::vector<std::vector<Eigen::Matrix<T, dim_, dim_>>> Dm_inv_;
