@@ -91,12 +91,11 @@ int mass_calculator(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<
   const Matrix<int, dim_, 1> all_rows_ = Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1);
   
   const qdrt quadrature_ = qdrt();
-
+  
 
   mass_vector.resize(num_nods);
   mass_vector.setZero();
   std::vector<Eigen::Triplet<T> > trips;
-
   #pragma omp parallel for
   for(size_t cell_id = 0; cell_id < num_cells; ++cell_id){
     const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods, all_rows_, cells.col(cell_id));
@@ -111,11 +110,15 @@ int mass_calculator(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<
       mass += quadrature_.WGT_[qdrt_id] * jac_det_tmp;
 
     }
+
     mass *= rho / num_per_cell_;
     for (size_t p = 0; p < cells.rows(); ++p) 
       for (size_t q = p; q < cells.rows(); ++q) {
+        #pragma omp critical
+        {
         trips.push_back(Triplet<T>(cells(p, cell_id), cells(q, cell_id), mass));
-        trips.push_back(Triplet<T>(cells(q, cell_id), cells(p, cell_id), mass));
+        trips.push_back(Triplet<T>(cells(q, cell_id), cells(p, cell_id), mass));              }
+
       }
   }
 
@@ -129,6 +132,7 @@ int mass_calculator(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<
   for (size_t i = 0; i < num_nods; ++i){
     mass_vector[i] = mass.coeff(i, i);
   }
+
   return 0;
 }
 
