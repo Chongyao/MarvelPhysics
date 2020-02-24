@@ -40,37 +40,34 @@ std::array<T, 2> gauss_base<T, 2>::W_ = {1.0, 1.0};
 template<typename T, size_t dim_, size_t qdrt_axis_, size_t verts_cell_>
 class quadrature{
  public:
-  Eigen::Matrix<T, dim_, qdrt_axis_> PNT_;
-  std::array<T, qdrt_axis_> WGT_;
+  Eigen::Matrix<T, dim_, -1> PNT_;
+  std::vector<T> WGT_;
   quadrature(){
+    const size_t qdrt_num = static_cast<size_t>(pow(qdrt_axis_, dim_));
+    PNT_.resize(dim_, qdrt_num);
+    WGT_.resize(qdrt_num, 1.0);
     PNT_.setZero();
-    WGT_.fill(1);
     vector<size_t> idx;
-    cout << "herer" << endl;
     init(idx, 0);
-    cout << "done" << endl;
   }
 
  private:
     void init(vector<size_t>& idx, size_t PNT_id){
-      cout <<PNT_id << endl;
-    if(idx.size() == dim_){
-      for(size_t i = 0; i < dim_; ++i){
-        PNT_(i, PNT_id) = gauss_base<T, qdrt_axis_>::P_[idx[i]];
-        WGT_[PNT_id] *= gauss_base<T, qdrt_axis_>::W_[idx[i]];
+      const size_t depth = idx.size();
+      if(idx.size() == dim_){
+        for(size_t i = 0; i < dim_; ++i){
+          PNT_(i, PNT_id) = gauss_base<T, qdrt_axis_>::P_[idx[i]];
+          WGT_[PNT_id] *= gauss_base<T, qdrt_axis_>::W_[idx[i]];
+        }
+      }else{
+        for(size_t i = 0; i < qdrt_axis_; ++i){
+          auto idx_next = idx;
+          idx_next.push_back(i);
+          init(idx_next, PNT_id + pow(2, depth) * i);
+        }
       }
-    }else{
-      for(size_t i = 0; i < qdrt_axis_; ++i){
-        auto idx_next = idx;
-        idx_next.push_back(i);
-        init(idx_next, PNT_id + pow(2, idx.size()) * i);
-      }
+      return;
     }
-    return;
-  }
-
-  
-
 };
 
 

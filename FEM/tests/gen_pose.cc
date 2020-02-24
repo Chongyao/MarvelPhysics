@@ -86,7 +86,7 @@ int main(int argc, char** argv){
 
   //Sovle
   const string filename_tmp = outdir  + "/frame_origin.vtk";
-  tet_mesh_write_to_vtk<double>(filename_tmp.c_str(), nods, tets);
+  mesh_write_to_vtk<double, 4>(filename_tmp.c_str(), nods, tets);
   shared_ptr<dat_str_core<double, 3>>  dat_str = make_shared<dat_str_core<double, 3>>(num_nods);
   newton_iter<double, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false);
   
@@ -108,7 +108,7 @@ int main(int argc, char** argv){
     }
 
     const string filename = outdir  + "/frame_" + to_string(f_id) + ".vtk";
-    tet_mesh_write_to_vtk<double>(filename.c_str(), nods, tets);
+    mesh_write_to_vtk<double, 4>(filename.c_str(), nods, tets);
   }
 
   

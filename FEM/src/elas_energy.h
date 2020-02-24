@@ -34,12 +34,9 @@ class BaseElas : public Functional<T, dim_>{
   using qdrt = QDRT<T, dim_, num_qdrt_, num_per_cell_>;
   
  public:
-  //TODO:save vol and DM 
-  BaseElas(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells,
-           const T& ym, const T&poi):
+  BaseElas(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells, const T& ym, const T&poi):
       all_dim_(nods.size()), num_nods_(nods.cols()), num_cells_(cells.cols()) ,
       nods_(nods), cells_(cells), all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)), quadrature_(){
-    
     static_assert(std::is_base_of<elas_csttt<T, dim_>, csttt>::value, "CSTTT must derive from elas_csttt");
     static_assert(std::is_base_of<basis_func<T, dim_, bas_order_, num_per_cell_>, basis>::value, "BASIS must derive from basis_func");
     static_assert(std::is_base_of<quadrature<T, dim_, num_qdrt_, num_per_cell_>, qdrt>::value, "GAUS must derive from gaus_quad");

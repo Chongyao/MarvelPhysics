@@ -111,16 +111,20 @@ int mesh_read_from_vtk(const char* filename,  Eigen::Matrix<T, -1, -1>& nods, Ei
 
   return 0;
 }
-template<typename FLOAT>
-int tet_mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::Matrix<FLOAT, -1, -1>> nods, const Eigen::Ref<Eigen::MatrixXi> tets, const Eigen::Matrix<FLOAT, -1,-1> *mtr=nullptr){
-  assert(tets.rows() == 4);
-
+template<typename FLOAT, size_t num_vert>
+int mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::Matrix<FLOAT, -1, -1>> nods, const Eigen::Ref<Eigen::MatrixXi> cells, const Eigen::Matrix<FLOAT, -1,-1> *mtr=nullptr){
+  assert(cells.rows() == num_vert);
+  
   std::ofstream ofs(path);
   if ( ofs.fail() )
     return __LINE__;
 
   ofs << std::setprecision(15);
-  tet2vtk(ofs, nods.data(), nods.cols(), tets.data(), tets.cols());
+  if(num_vert == 4)
+    tet2vtk(ofs, nods.data(), nods.cols(), cells.data(), cells.cols());
+  else if (num_vert  == 8)
+    hex2vtk(ofs, nods.data(), nods.cols(), cells.data(), cells.cols());
+  
   if ( mtr != nullptr ) {
     for (int i = 0; i < mtr->rows(); ++i) {
       const std::string mtr_name = "theta_"+std::to_string(i);

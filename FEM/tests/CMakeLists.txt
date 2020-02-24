@@ -25,7 +25,7 @@ target_link_libraries(test_interp
   lapack)
 
 
-# add_executable(test_three_component test_three_component.cc)
-# target_link_libraries(test_three_component
-#   marvel-core
-#   FEM)
+add_executable(test_three_component test_three_component.cc)
+target_link_libraries(test_three_component
+  marvel-core
+  FEM)

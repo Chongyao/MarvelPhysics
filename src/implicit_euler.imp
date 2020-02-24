@@ -72,7 +72,7 @@ int newton_iter<T, dim_>::solve(T* x){
         throw runtime_error("run type");
     }
 
-      
+    
     if(res_value < eps){
       cout << endl;
       break;
