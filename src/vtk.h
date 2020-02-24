@@ -113,12 +113,21 @@ void hex2vtk(
     os << node[i*3+0] << " " << node[i*3+1] << " " << node[i*3+2] << "\n";
 
   os << "CELLS " << hex_num << " " << hex_num*9 << "\n";
-  for(size_t i = 0; i < hex_num; ++i)
-    os << 8 << "  "
-       << hex[i*8+7] << " " << hex[i*8+5] << " "
-       << hex[i*8+4] << " " << hex[i*8+6] << " "
-       << hex[i*8+3] << " " << hex[i*8+1] << " "
-       << hex[i*8+0] << " " << hex[i*8+2] << "\n";
+  // for(size_t i = 0; i < hex_num; ++i)
+  //   os << 8 << "  "
+  //      << hex[i*8+7] << " " << hex[i*8+5] << " "
+  //      << hex[i*8+4] << " " << hex[i*8+6] << " "
+  //      << hex[i*8+3] << " " << hex[i*8+1] << " "
+  //      << hex[i*8+0] << " " << hex[i*8+2] << "\n";
+
+  for(size_t i = 0; i < hex_num; ++i){
+    os << 8 << " ";
+    for(size_t j = 0; j < 8; ++j){
+      os << hex[i * 8 + j] << " ";
+    }
+    os << "\n";
+  }
+
   os << "CELL_TYPES " << hex_num << "\n";
   for(size_t i = 0; i < hex_num; ++i)
     os << 12 << "\n";

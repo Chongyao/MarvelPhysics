@@ -40,8 +40,6 @@ else ()
   FIND_PACKAGE(CUDA ${CUDA_VERSION} REQUIRED)
   STRING (TOLOWER ${CMAKE_SYSTEM_NAME} LOWER_SYSTEM_NAME)
   SET(CUDA_TARGET_INCLUDE  ${CUDA_TOOLKIT_ROOT_DIR}-${CUDA_VERSION}/targets/${CMAKE_HOST_SYSTEM_PROCESSOR}-${LOWER_SYSTEM_NAME}/include)
-  message(${CUDA_INCLUDE_DIRS})
-  message(${CUDA_TOOLKIT_ROOT_DIR})
   #TODO: make this available for others
   SET(CUDA_CUBLAS_LIBRARIES /usr/local/cuda/lib64/libcublas.so)
   SET(CUDA_NVCC_FLAGS --compiler-options "-std=c++11")
@@ -54,6 +52,7 @@ endif (${APPLE})
 find_package(TBB REQUIRED)
 if(TBB_FOUND)
   message("-- TBB @ ${TBB_INCLUDE_DIRS}")
+
   include_directories(${TBB_INCLUDE_DIRS})
 endif(TBB_FOUND)
 
@@ -76,12 +75,14 @@ endif (NOT ${APPLE})
 if (${APPLE})
   add_subdirectory(FEM)
   add_subdirectory(src)
+  # add_subdirectory(Multigrid)
 
 else ()
   add_subdirectory(external)
   add_subdirectory(Point_Sys)
   add_subdirectory(FEM)
   add_subdirectory(src)
+  # add_subdirectory(Multigrid)
 
 endif (${APPLE})
 
