@@ -114,8 +114,11 @@ int mass_calculator(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<
     mass *= rho / num_per_cell_;
     for (size_t p = 0; p < cells.rows(); ++p) 
       for (size_t q = p; q < cells.rows(); ++q) {
-        trips.push_back(Triplet<T>(cells(p, cell_id), cells(q, cell_id), mass));
-        trips.push_back(Triplet<T>(cells(q, cell_id), cells(p, cell_id), mass));
+        #pragma omp critical
+        {
+          trips.push_back(Triplet<T>(cells(p, cell_id), cells(q, cell_id), mass));
+          trips.push_back(Triplet<T>(cells(q, cell_id), cells(p, cell_id), mass));
+        }
       }
   }
 
