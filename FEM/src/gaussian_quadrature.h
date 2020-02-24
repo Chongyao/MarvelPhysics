@@ -69,36 +69,5 @@ class quadrature{
       return;
     }
 };
-
-
-
-
-// template<typename T>
-// class quadrature<T, 3, 1, 4>{
-//  public:
-//   static Eigen::Matrix<T, 3, 1> PNT_;
-//   static std::array<T, 1> WGT_;
-// };
-
-// template<typename T>
-//  Matrix<T, 3, 1>  quadrature<T, 3, 1, 4>::PNT_ = Matrix<T, 3, 1>::Ones() / 4 ;
-
-// template<typename T>
-// std::array<T, 1> quadrature<T, 3, 1, 4>::WGT_ = {1.0/6.0};
-
-
-
-// template<typename T>
-// class quadrature<T, 3, 8, 8>{
-//  public:
-//   static Eigen::Matrix<T, 3, 8> PNT_;
-//   static std::array<T, 8> WGT_;
-// };
-
-// template <typename T>
-// Eigen::Matrix<T, 3, 8> quadrature<T, 3, 8, 8>::PNT_ = Matrix<T, 3, 1>::Zeros();
-
-
-
 }
 #endif

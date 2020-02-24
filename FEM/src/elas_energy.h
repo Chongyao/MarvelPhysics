@@ -89,9 +89,7 @@ class BaseElas : public Functional<T, dim_>{
       //TODO:considering the order of basis
       for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
         
-        // basis::get_def_gra(qdrt::PNT_.col(qdrt_id), x_cell.data(), Dm_inv[cell_id][qdrt_id], def_gra);
         basis::get_def_gra(Dphi_Dxi_[cell_id][qdrt_id], x_cell.data(), Dm_inv_[cell_id][qdrt_id], def_gra);
-        // basis::get_Ddef_Dx(qdrt::PNT_.col(qdrt_id), x_cell.data(), X_cell.data(), def_gra, Ddef_Dx);
         gra_F_based = csttt::gra(def_gra, mtr_(0, cell_id), mtr_(1, cell_id));
         gra_x_based += Ddef_Dx_[cell_id][qdrt_id].transpose() * gra_F_based * quadrature_.WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id];
       }
