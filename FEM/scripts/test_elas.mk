@@ -1,6 +1,6 @@
 EXE = ../../build/bin/test_elas
 
-MODEL_NAME = one_cube
+MODEL_NAME = cube_hex
 TYPE = hex
 MODEL = ../data/$(MODEL_NAME)/$(MODEL_NAME).vtk
 FIXED = ../data/$(MODEL_NAME)/$(MODEL_NAME).csv

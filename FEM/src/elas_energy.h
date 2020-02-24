@@ -24,22 +24,22 @@ inline void compute_lame_coeffs(const T Ym, const T Pr,
 }
 
 
-template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t num_qdrt_,
+template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,
          template<typename, size_t> class CSTTT,  // constituitive function
          template<typename, size_t, size_t, size_t > class BASIS, //  basis
          template<typename, size_t, size_t, size_t> class QDRT> //  
 class BaseElas : public Functional<T, dim_>{
   using basis = BASIS<T, dim_, bas_order_, num_per_cell_>;
   using csttt = CSTTT<T, dim_>;
-  using qdrt = QDRT<T, dim_, num_qdrt_, num_per_cell_>;
+  using qdrt = QDRT<T, dim_, qdrt_axis_, num_per_cell_>;
   
  public:
   BaseElas(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells, const T& ym, const T&poi):
       all_dim_(nods.size()), num_nods_(nods.cols()), num_cells_(cells.cols()) ,
-      nods_(nods), cells_(cells), all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)), quadrature_(){
+      nods_(nods), cells_(cells), all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)), quadrature_(), num_qdrt_(static_cast<size_t>(pow(qdrt_axis_, dim_))){
     static_assert(std::is_base_of<elas_csttt<T, dim_>, csttt>::value, "CSTTT must derive from elas_csttt");
     static_assert(std::is_base_of<basis_func<T, dim_, bas_order_, num_per_cell_>, basis>::value, "BASIS must derive from basis_func");
-    static_assert(std::is_base_of<quadrature<T, dim_, num_qdrt_, num_per_cell_>, qdrt>::value, "GAUS must derive from gaus_quad");
+    static_assert(std::is_base_of<quadrature<T, dim_, qdrt_axis_, num_per_cell_>, qdrt>::value, "GAUS must derive from gaus_quad");
     //set mtr
     T mu, lambda;
     compute_lame_coeffs(ym, poi, mu, lambda);
@@ -163,7 +163,6 @@ protected:
         basis::calc_InvDm_Det(Dphi_Dxi_tmp, X_cell.data(), Jac_det_tmp, Dm_inv_tmp);
         Jac_det_[cell_id].push_back(Jac_det_tmp);
         Dm_inv_[cell_id].push_back(Dm_inv_tmp);
-        
         basis::get_Ddef_Dx(Dphi_Dxi_tmp, Dm_inv_tmp, Ddef_Dx_tmp);
         Ddef_Dx_[cell_id].push_back(Ddef_Dx_tmp);
       }
@@ -172,12 +171,13 @@ protected:
   }
   
  private:
-  const size_t all_dim_, num_nods_, num_cells_;
+  const size_t all_dim_, num_nods_, num_cells_, num_qdrt_;
   Eigen::Matrix<T, 2, -1> mtr_;
   const Eigen::Matrix<T, dim_, -1> nods_; // vertices
   const Eigen::Matrix<int, num_per_cell_, -1> cells_; // elements
   Matrix<int, dim_, 1> all_rows_;
   const qdrt quadrature_;
+
   
 private:  // precomputed values
   std::vector<std::vector<Eigen::Matrix<T, dim_, dim_>>> Dm_inv_;

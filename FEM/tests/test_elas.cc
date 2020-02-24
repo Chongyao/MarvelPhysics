@@ -45,11 +45,11 @@ int main(int argc, char** argv){
   const string outdir = argv[3];
   
   //set mtr
-  constexpr  FLOAT_TYPE rho = 0.5;
-  constexpr  FLOAT_TYPE Young = 8000.0;
+  constexpr  FLOAT_TYPE rho = 20;
+  constexpr  FLOAT_TYPE Young = 80.0;
   constexpr  FLOAT_TYPE poi = 0.3;
-  constexpr  FLOAT_TYPE gravity = 9.8 * 0.5;
-  constexpr  FLOAT_TYPE dt = 0.1;
+  constexpr  FLOAT_TYPE gravity = 98;
+  constexpr  FLOAT_TYPE dt = 0.01;
   const      FLOAT_TYPE w_pos = 1e6;
   const      size_t num_frame = 100;
 

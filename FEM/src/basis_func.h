@@ -29,40 +29,63 @@ template<typename T>
 struct impl_Dphi_Dxi<T, 3, 1, 8>{
   static void calc_Dphi_Dxi(const Eigen::Matrix<T, 3, 1>& PNT, const T* X,  Eigen::Matrix<T, 8, 3>& Dphi_Dxi){
     Dphi_Dxi.setZero();
-    const double xi0 = PNT(0), xi1 = PNT(1), xi2 = PNT(2);
+    const T xi0 = PNT(0), xi1 = PNT(1), xi2 = PNT(2);
 
-    Map<Matrix<T, 24, 1>> jac(Dphi_Dxi.data());
-    const T
-        tt1 = 1 - xi1, tt2 = 1 - xi2,
-        tt3 = 1 + xi1, tt4 = 1 + xi2,
-        tt5 = 1 - xi0, tt6 = 1 + xi0;
+    // Map<Matrix<T, 24, 1>> jac(Dphi_Dxi.data());
+    // const T
+    //     tt1 = 1-xi1,
+    //     tt2 = 1-xi2,
+    //     tt3 = xi1+1,
+    //     tt4 = xi2+1,
+    //     tt5 = 1-xi0,
+    //     tt6 = xi0+1;
 
-    jac[0] = -(tt1*tt2)/8.0;
-    jac[1] = (tt1*tt2)/8.0;
-    jac[2] = -(tt3*tt2)/8.0;
-    jac[3] = (tt3*tt2)/8.0;
-    jac[4] = -(tt1*tt4)/8.0;
-    jac[5] = (tt1*tt4)/8.0;
-    jac[6] = -(tt3*tt4)/8.0;
-    jac[7] = (tt3*tt4)/8.0;
-    jac[8] = -(tt5*tt2)/8.0;
-    jac[9] = -(tt6*tt2)/8.0;
-    jac[10] = (tt5*tt2)/8.0;
-    jac[11] = (tt6*tt2)/8.0;
-    jac[12] = -(tt5*tt4)/8.0;
-    jac[13] = -(tt6*tt4)/8.0;
-    jac[14] = (tt5*tt4)/8.0;
-    jac[15] = (tt6*tt4)/8.0;
-    jac[16] = -(tt5*tt1)/8.0;
-    jac[17] = -(tt6*tt1)/8.0;
-    jac[18] = -(tt5*tt3)/8.0;
-    jac[19] = -(tt6*tt3)/8.0;
-    jac[20] = (tt5*tt1)/8.0;
-    jac[21] = (tt6*tt1)/8.0;
-    jac[22] = (tt5*tt3)/8.0;
-    jac[23] = (tt6*tt3)/8.0;
+    // jac[0] = -(tt1*tt2)/8.0;
+    // jac[1] = (tt1*tt2)/8.0;
+    // jac[2] = -(tt3*tt2)/8.0;
+    // jac[3] = (tt3*tt2)/8.0;
+    // jac[4] = -(tt1*tt4)/8.0;
+    // jac[5] = (tt1*tt4)/8.0;
+    // jac[6] = -(tt3*tt4)/8.0;
+    // jac[7] = (tt3*tt4)/8.0;
+    // jac[8] = -(tt5*tt2)/8.0;
+    // jac[9] = -(tt6*tt2)/8.0;
+    // jac[10] = (tt5*tt2)/8.0;
+    // jac[11] = (tt6*tt2)/8.0;
+    // jac[12] = -(tt5*tt4)/8.0;
+    // jac[13] = -(tt6*tt4)/8.0;
+    // jac[14] = (tt5*tt4)/8.0;
+    // jac[15] = (tt6*tt4)/8.0;
+    // jac[16] = -(tt5*tt1)/8.0;
+    // jac[17] = -(tt6*tt1)/8.0;
+    // jac[18] = -(tt5*tt3)/8.0;
+    // jac[19] = -(tt6*tt3)/8.0;
+    // jac[20] = (tt5*tt1)/8.0;
+    // jac[21] = (tt6*tt1)/8.0;
+    // jac[22] = (tt5*tt3)/8.0;
+    // jac[23] = (tt6*tt3)/8.0;
 
+
+    vector<double> l(3, 0);
+    vector<double> sign(3, 0);
+    for(size_t z = 0; z < 2; ++z){
+      sign[2] = z == 0 ? -1 : 1;
+      l[2] = 1 + sign[2] * xi2;
+      for(size_t y = 0; y < 2; ++y){
+        sign[1] = y == 0 ? -1 : 1;
+        l[1] = 1 + sign[1] * xi1;
+        for(size_t x = 0; x < 2; ++x){
+          sign[0] = x == 0 ? - 1 : 1;
+          l[0] = 1 + sign[0] * xi0;
+          const size_t p_id = z * 4 + y * 2 + (y == 0 ? x : 1 - x);
+          for(size_t d = 0; d < 3; ++d)
+            Dphi_Dxi(p_id, d) = sign[d] * l[(d + 1) % 3] * l[(d + 2) % 3];
+        }
+      }
+    }
     Dphi_Dxi /= 8.0;
+
+    
     return;
 
   }

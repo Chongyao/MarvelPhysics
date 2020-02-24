@@ -76,6 +76,8 @@ int mesh_read_from_vtk(const char* filename,  Eigen::Matrix<T, -1, -1>& nods, Ei
       }
       cells.resize(num_vert, true_cell_num);
       cells = tet_temp.block(0, 0, num_vert, true_cell_num);
+
+      
       break;
     }
   }
