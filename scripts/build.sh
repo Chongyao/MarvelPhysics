@@ -6,6 +6,9 @@ if [ $# -eq 0 ]; then
 elif [ $# -eq 1 ] && [ $1 == "release" ]; then
 	folder="build/release"
 	flag="-DCMAKE_BUILD_TYPE=Release"
+elif [ $# -eq 1 ] && [ $1 == "debug" ]; then
+    folder="build/debug"
+    flag="-DCMAKE_BUILD_TYPE=Debug"
 else
 	echo "unvalid arguments"
 	exit 1
@@ -17,7 +20,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 cd $folder
-make
+make -j4
 if [ $? -ne 0 ]; then
 	echo "make failed."
 	exit 1
