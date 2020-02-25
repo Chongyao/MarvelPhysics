@@ -53,7 +53,7 @@ int dat_str_core<T, dim_>::setFromTriplets(){
   hes_.setZero();
   hes_.setFromTriplets(trips.begin(), trips.end());
   cout << "setfrom triples" << endl;
-  
+  return 0;  
 }
 
 
