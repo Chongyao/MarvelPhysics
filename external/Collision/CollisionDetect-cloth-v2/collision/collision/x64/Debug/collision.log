@@ -1,0 +1,80 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(368,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
+  Compiling CUDA source file ..\..\src\collision.cu...
+  
+  F:\zz\实验室\rky\Collision\CollisionDetect-cloth\collision\collision>"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\bin\nvcc.exe" -gencode=arch=compute_30,code=\"sm_30,compute_30\" --use-local-env --cl-version 2015 -ccbin "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\x86_amd64" -x cu  -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\include" -I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v9.0\include"  -G   --keep-dir x64\Debug -maxrregcount=0  --machine 64 --compile -cudart static  -g   -D_AMD64_ -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /FS /Zi /RTC1 /MDd " -o x64\Debug\collision.cu.obj "F:\zz\实验室\rky\Collision\CollisionDetect-cloth\src\collision.cu" 
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(838): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(1772): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(2628): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(3477): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(4417): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(5319): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(6229): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(7104): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(7914): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt/device_functions.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt/device_functions.h(776): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt/device_functions.h(1636): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\device_double_functions.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\sm_20_intrinsics.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\sm_20_intrinsics.h(925): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\tools.cuh(147): warning : statement is unreachable
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(65): warning : conversion from a string literal to "char *" is deprecated
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(84): warning : invalid narrowing conversion from "int" to "unsigned int"
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(107): warning : conversion from a string literal to "char *" is deprecated
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(116): warning : invalid narrowing conversion from "int" to "unsigned int"
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\pair.cuh(17): warning : conversion from a string literal to "char *" is deprecated
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\pair.cuh(99): warning : conversion from a string literal to "char *" is deprecated
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(793): warning : a __host__ function("signed_ee_distance") redeclared with __device__, hence treated as a __host__ __device__ function
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(862): warning : variable "sd" was declared but never referenced
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1158): warning : variable "ss" was declared but never referenced
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1181): warning : variable "p" was set but never used
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1186): warning : variable "pp" was set but never used
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1191): warning : variable "q" was set but never used
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1196): warning : variable "qq" was set but never used
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(838): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(1772): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(2628): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(3477): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(4417): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(5319): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(6229): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(7104): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(7914): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt/device_functions.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt/device_functions.h(776): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt/device_functions.h(1636): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\device_double_functions.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\sm_20_intrinsics.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\sm_20_intrinsics.h(925): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\tools.cuh(147): warning : statement is unreachable
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(65): warning : conversion from a string literal to "char *" is deprecated
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(84): warning : invalid narrowing conversion from "int" to "unsigned int"
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(107): warning : conversion from a string literal to "char *" is deprecated
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(116): warning : invalid narrowing conversion from "int" to "unsigned int"
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\pair.cuh(17): warning : conversion from a string literal to "char *" is deprecated
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\pair.cuh(99): warning : conversion from a string literal to "char *" is deprecated
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(862): warning : variable "sd" was declared but never referenced
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1158): warning : variable "ss" was declared but never referenced
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1181): warning : variable "p" was set but never used
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1186): warning : variable "pp" was set but never used
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1191): warning : variable "q" was set but never used
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(1196): warning : variable "qq" was set but never used
+  collision.cu
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(84): warning C4838: 从“int”转换到“uint”需要收缩转换
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\bvh.cuh(116): warning C4838: 从“int”转换到“uint”需要收缩转换
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\pair.cuh(52): warning C4018: “>”: 有符号/无符号不匹配
+f:\zz\实验室\rky\collision\collisiondetect-cloth\src\pair.cuh(147): warning C4018: “>”: 有符号/无符号不匹配
+F:/zz/实验室/rky/Collision/CollisionDetect-cloth/src/collision.cu(109): warning C4018: “<”: 有符号/无符号不匹配
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(838): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(1772): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(2628): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(3477): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(4417): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(5319): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(6229): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(7104): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+c:\program files\nvidia gpu computing toolkit\cuda\v9.0\include\crt\math_functions.h(7914): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  collision.vcxproj -> F:\zz\实验室\rky\Collision\CollisionDetect-cloth\collision\collision\..\..\lib\collision_cloth_d.lib
