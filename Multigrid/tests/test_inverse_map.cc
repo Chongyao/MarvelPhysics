@@ -1,10 +1,11 @@
 #include "Multigrid/src/inverse_isoparametric_map.h"
+#include <iostream>
 using namespace std;
 using namespace Eigen;
 using namespace marvel;
 
 int main(int argc, char** argv){
-  MatrixXd nods(3, 8);
+  MatrixXd nods(8, 3);
   nods <<
       -1, -1, -1,
       1, -1, -1,
@@ -13,15 +14,16 @@ int main(int argc, char** argv){
       -1, -1, 1,
       1, -1, 1,
       1, 1, 1,
-      1, -1, 1;
-  VectorXi cell(8) = VectorXi::LinSpaced(8, 0, 7);
-  cout << cell << endl;
+      -1, 1, 1;
+  nods.transposeInPlace();
+  nods *= 2;
+  VectorXi cell = VectorXi::LinSpaced(8, 0, 7);
 
   Vector3d gl_coor;
-  gl_coor<< -1,-1,-1;
+  gl_coor<< 0.5, 0.2 , 0.4;
 
-  Vector3d iso_coor;
-  inverse_isoparametric_hex(gl_coor, nods.data(), iso_coor);
+  Vector3d iso_coor = inverse_isoparametric_hex(gl_coor, nods.data());
+  
   cout << iso_coor << endl;
 
   return 0;

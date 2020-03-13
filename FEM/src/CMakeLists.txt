@@ -8,7 +8,7 @@ else ()
 endif (${APPLE})
 
 target_link_libraries(FEM
-  # marvel-core
+  marvel-core
  )
 
 

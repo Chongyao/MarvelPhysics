@@ -4,16 +4,15 @@
 #include <unsupported/Eigen/KroneckerProduct>
 
 namespace marvel{
-// using namespace Eigen;
-// using namespace std;
+using namespace Eigen;
+using namespace std;
 
 template<typename T, size_t dim_, size_t order_, size_t num_per_cell_>
 struct shape_func{
-  static void calc_basis_value(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X, Eigen::Matrix<T, 8, 1>& basis_value){
+  static Eigen::Matrix<T, num_per_cell_, 1> clac_basis_value(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X){
     assert(0);
-    return;
+    return Eigen::Matrix<T, num_per_cell_, 1>::Zero();
   }
-
   static void calc_Dhpi_Dxi(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X,  Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi){
     assert(0);
     return;
@@ -32,12 +31,13 @@ struct shape_func<T, 3, 1, 4>{
 
 template<typename T>
 struct shape_func<T, 3, 1, 8>{
-  static void calc_basis_value(const Eigen::Matrix<T, 3, 3>& PNT, const T* X, Eigen::Matrix<T, 8, 1>& basis_value){
-    basis_value.setZero();
+  static Eigen::Matrix<T, 8, 1>  calc_basis_value(const Eigen::Matrix<T, 3, 1>& PNT, const T* X){
+    Eigen::Matrix<T, 8, 1> basis_value = Eigen::Matrix<T, 8, 1>::Zero();
     const T xi0 = PNT(0), xi1 = PNT(1), xi2 = PNT(2);
-    
-    std::vector<double> l(3, 0);
-    std::vector<double> sign(3, 0);
+    // vector<T> l(3, 0);
+    // vector<T> sign(3, 0);
+    T l[3];
+    T sign[3];
     for(size_t z = 0; z < 2; ++z){
       sign[2] = z == 0 ? -1 : 1;
       l[2] = 1 + sign[2] * xi2;
@@ -52,13 +52,18 @@ struct shape_func<T, 3, 1, 8>{
         }
       }
     }
-    return;
+    basis_value /= 8.0;
+    return basis_value;
+    
   }
+  
   static void calc_Dphi_Dxi(const Eigen::Matrix<T, 3, 1>& PNT, const T* X,  Eigen::Matrix<T, 8, 3>& Dphi_Dxi){
     Dphi_Dxi.setZero();
     const T xi0 = PNT(0), xi1 = PNT(1), xi2 = PNT(2);
-    std::vector<T> l(3, 0);
-    std::vector<T> sign(3, 0);
+    // vector<T> l(3, 0);
+    // vector<T> sign(3, 0);
+    T l[3];
+    T sign[3];
     for(size_t z = 0; z < 2; ++z){
       sign[2] = z == 0 ? -1 : 1;
       l[2] = 1 + sign[2] * xi2;
@@ -75,7 +80,10 @@ struct shape_func<T, 3, 1, 8>{
       }
     }
     Dphi_Dxi /= 8.0;
+
+    
     return;
+
   }
 };
 
@@ -91,16 +99,16 @@ class basis_func{
     return shape_func<T, dim_, order_, num_per_cell_>::calc_Dphi_Dxi(PNT, X, Dphi_Dxi);
   }
  
-  static void calc_InvDm_Det(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const T* X, T& Jac_det, Eigen::Matrix<T, dim_, dim_>& Dm_inv){
+  static void calc_InvDm_Det(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const T* X, T& Jac_det, Matrix<T, dim_, dim_>& Dm_inv){
     Dm_inv.setZero();
-    const Eigen::Map<const Eigen::Matrix<T, dim_, num_per_cell_>> rest(X);
-    Eigen::Matrix<T, dim_, dim_> Dm = rest * Dphi_Dxi;
+    const Eigen::Map<const Matrix<T, dim_, num_per_cell_>> rest(X);
+    Matrix<T, dim_, dim_> Dm = rest * Dphi_Dxi;
     Dm_inv = Dm.inverse();
     Jac_det = fabs(Dm.determinant());
     return;
   }
-  static void get_def_gra(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const T* const x, const Eigen::Matrix<T, dim_, dim_>& Dm_inv,  Eigen::Matrix<T, dim_, dim_> & def_gra) {
-    const Eigen::Map<const Eigen::Matrix<T, dim_, num_per_cell_>> deformed(x);
+  static void get_def_gra(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const T* const x, const Matrix<T, dim_, dim_>& Dm_inv,  Eigen::Matrix<T, dim_, dim_> & def_gra) {
+    const Eigen::Map<const Matrix<T, dim_, num_per_cell_>> deformed(x);
     def_gra = deformed * Dphi_Dxi * Dm_inv;
     return;
   }
@@ -114,9 +122,7 @@ class basis_func{
         Ddef_Dx.block(j * dim_, i * dim_, dim_, dim_) = Eigen::Matrix<T, dim_, dim_>::Identity() * Ddef_Dx_compressed(i, j);
     return;
   }
-
 };
-
 
   
 

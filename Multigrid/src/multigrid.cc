@@ -65,7 +65,7 @@ int multigrid_process::restrict(){
 }
 
 int multigrid_process::correct(){
-  assert(layer_id - 1 >= 0);
+  assert(layer_id_ - 1 >= 0);
   layers_[layer_id_ - 1]->u_
       += transfers_[layer_id_ - 1]->I_ * layers_[layer_id_]->u_;
   return 0;
