@@ -3,5 +3,6 @@
   "finest_layer":2,
   "mesh_name":"cube",
   "path":"../data/cube-vox/",
-  "gs_itrs":500
+  "gs_itrs":100,
+  "num_V":1
 }

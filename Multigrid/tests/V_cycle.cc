@@ -123,10 +123,22 @@ int main(int argc, char** argv){
     
   }
   cout << "================set layers done================" << endl;
-  vector<int> process(2 * (num_layers - 1), -1);
+  vector<int> one_V(2 * (num_layers - 1), -1);
   for(size_t i = 0; i < num_layers - 1; ++i){
-    process[i] = 1;
+    one_V[i] = 1;
   }
+
+  const size_t num_V = pt.get<size_t>("num_V", 1);
+  vector<int> process(num_V * one_V.size());
+  #pragma omp parallel for
+  for(size_t i = 0; i < num_V; ++i){
+    copy(one_V.begin(), one_V.end(), process.begin() + i * one_V.size());
+  }
+  for(auto a : process)
+    cout << a << " ";
+  cout << endl;
+
+  
   
   cout << "================set process done================" << endl;
   multigrid_process MP(process, layers, transfers);
