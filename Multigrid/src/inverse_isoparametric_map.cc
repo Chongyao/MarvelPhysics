@@ -5,7 +5,7 @@ namespace marvel{
 using namespace std;
 using namespace Eigen;
 
-Vector3d inverse_isoparametric_hex(const Eigen::VectorXd& Xp, const double* X){
+Vector3d inverse_isoparametric_hex(const Eigen::VectorXd& Xp, const double* X, double* nods_weight ){
   const Map<const Matrix<double, 3, 8>> nods(X);
   
 
@@ -23,10 +23,15 @@ Vector3d inverse_isoparametric_hex(const Eigen::VectorXd& Xp, const double* X){
     xi_now += J.lu().solve(Xp - X_now);
     
     basis_value = shape_func<double, 3, 1, 8>::calc_basis_value(xi_now, X);
+
     X_now = nods * basis_value;
     diff = (Xp - X_now).maxCoeff();
   }while(fabs(diff) > 1e-3);
-  
+
+  if (nods_weight != nullptr){
+    Map<Matrix<double, 8 , 1>> w(nods_weight);
+    w = basis_value;
+  }
   return xi_now;
 }
 

@@ -20,7 +20,7 @@ int main(int argc, char** argv){
   VectorXi cell = VectorXi::LinSpaced(8, 0, 7);
 
   Vector3d gl_coor;
-  gl_coor<< 0.5, 0.2 , 0.4;
+  gl_coor<< 0.5, -1.2 , 1;
 
   Vector3d iso_coor = inverse_isoparametric_hex(gl_coor, nods.data());
   

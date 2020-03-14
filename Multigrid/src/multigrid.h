@@ -19,6 +19,10 @@ struct transfer {
   SPM R_;
 };
 
+
+transfer get_transfer(const MatrixXd& nods_H, const MatrixXi& cells_H, const MatrixXd& nods_h, const MatrixXi& cells_h); 
+
+
 struct layer{
   layer(const SPM& A, const bool if_direct, const size_t itrs);
   int solve();
@@ -39,9 +43,9 @@ class multigrid_process{
   
   
  private:
-  int relax();
-  int restrict();
-  int correct();
+  int relax(const size_t layer_id);
+  int restrict(const size_t layer_id);
+  int correct(const size_t layer_id);
   
   std::vector<int> process_;
   VS<layer> layers_;
@@ -51,7 +55,7 @@ class multigrid_process{
   const SPM A_h_;
   const Eigen::VectorXd b_h_;
   
-  size_t layer_id_{0};
+  // size_t layer_id_{0};xo
 
   
 };

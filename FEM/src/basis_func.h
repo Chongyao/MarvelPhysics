@@ -2,7 +2,6 @@
 #define FEM_BASIS
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
-
 namespace marvel{
 using namespace Eigen;
 using namespace std;
