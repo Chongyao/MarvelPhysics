@@ -118,7 +118,7 @@ int main(int argc, char** argv){
     layers[0]->rhs_ = - dat_str->get_gra();
     #pragma omp parallel for
     for(size_t i = 1; i < num_layers; ++i){
-      layers[i] = make_shared<layer>(transfers[i - 1]->R_ * layers[i - 1]->A_ * transfers[i - 1]->I_, false, gs_itrs);      
+      layers[i] = make_shared<layer>(transfers[i - 1]->R_ * layers[i - 1]->A_ * transfers[i - 1]->I_, false, gs_itrs);
     }
     
   }

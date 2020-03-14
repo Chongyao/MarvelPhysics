@@ -25,8 +25,9 @@ int main(int argc, char** argv){
     SP_A.reserve(trips.size());
     SP_A.setFromTriplets(trips.begin(), trips.end());
   }
-  
-  VectorXd solu_gs = VectorXd::Zero(dim);
+  cout << "solution of direct " << solution << endl;
+  VectorXd solu_gs = solution;
+  cout << "residual  befor gs " << (A * solu_gs - b).norm() << endl;
   gauss_seidel_solver(SP_A, b, solu_gs, stoi(argv[2]));
   cout << "residual of gs "<< (A * solu_gs - b).norm() << endl;
   

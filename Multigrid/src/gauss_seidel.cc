@@ -9,8 +9,6 @@ using namespace Eigen;
 int gauss_seidel_solver(const Eigen::SparseMatrix<double, Eigen::RowMajor>& A, const Eigen::VectorXd& b, Eigen::VectorXd& solution, const size_t itrs){
   assert(A.rows() == A.cols()&&A.rows() == b.size());
   const size_t dof = b.size();
-  solution.resize(dof);
-  solution.setZero();
   
   const auto& first_ids = A.outerIndexPtr();
   const auto& col_ids = A.innerIndexPtr();
@@ -29,6 +27,7 @@ int gauss_seidel_solver(const Eigen::SparseMatrix<double, Eigen::RowMajor>& A, c
     }
   }
   auto solution_now_ptr = std::make_shared<Eigen::VectorXd>(solution);
+  
   auto solution_next_ptr = std::make_shared<Eigen::VectorXd>(b);
   VectorXd dig_vals(dof);{
     #pragma omp parallel for
@@ -45,12 +44,14 @@ int gauss_seidel_solver(const Eigen::SparseMatrix<double, Eigen::RowMajor>& A, c
     #pragma omp parallel for
     for(size_t i = 0; i < dof - 1; ++i){
       const size_t start = dig_ids[i] + 1, end = first_ids[i + 1];
+
       double sum = 0;
       for(size_t j = start; j < end; ++j){
         sum += solution_now(col_ids[j]) * vals[j];
       }
       solution_next(i) -= sum / vals[dig_ids[i]];
     }
+
     //loop for lower triangle part of A
     for(size_t i = 1; i < dof; ++i){
       const size_t start = first_ids[i], end = dig_ids[i];
@@ -61,6 +62,7 @@ int gauss_seidel_solver(const Eigen::SparseMatrix<double, Eigen::RowMajor>& A, c
       }
       solution_next(i) -= sum / vals[dig_ids[i]];
     }
+
     swap(solution_next, solution_now);
     ++itr_cnt;
   }while(itr_cnt < itrs);
