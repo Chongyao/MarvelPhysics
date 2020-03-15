@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <unordered_set>
+#include <set>
 
 namespace marvel{
 
@@ -23,6 +24,12 @@ class Adjc_graph{
   const size_t dof_;
   VS<std::unordered_set<size_t>> vertices_;
   VS<TPL> edges_;
+
+  enum class mark_state{fine, coarse, unmarked};
+  std::vector<mark_state> labels_;
+  std::set<size_t> unmarked_vertices_;
+
+  
  private:
   void sparsify_one_edge(const size_t edge_id);
   void compensate_one_edge(const size_t edge_id_ik, const size_t edge_id_jk, const double& w);

@@ -10,6 +10,10 @@ namespace marvel{
 Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
     :dof_(L.rows()){
   vertices_.resize(dof_, nullptr);
+  labels_.resize(dof_, mark_state::unmarked);
+  VectorXi all_v = VectorXi::LinSpaced(1, 0, dof_ - 1);
+  unmarked_vertices_.insert(all_v.data(), all_v.data() + all_v.size());
+  
   #pragma omp parallel for
   for(size_t i = 0; i < dof_; ++i){
     vertices_[i] = make_shared<unordered_set<size_t>>();
@@ -53,7 +57,13 @@ int Adjc_graph::build_mat_from_graph(vector<TPL>& trips)const{
 void Adjc_graph::sparsify_one_edge(const size_t edge_id){
   const auto& trip = *edges_[edge_id];
   vertices_[trip.row()]->erase(edge_id);
-  vertices_[trip.col()]->erase(edge_id);  
+  vertices_[trip.col()]->erase(edge_id);
+  
+  labels_[trip.row()] = mark_state::fine;
+  labels_[trip.col()] = mark_state::fine;
+  unmarked_vertices_.erase(trip.row());
+  unmarked_vertices_.erase(trip.col());
+  
   edges_[edge_id] = nullptr;
   return;
 }
@@ -126,7 +136,50 @@ int Adjc_graph::Sparsification(){
           }
         }
       }
+
+    //set unmarked neighbours as coarse
+    for(const auto& it : adjc_V_E){
+      if(labels_[it.first] == mark_state::unmarked){
+        labels_[it.first] = mark_state::coarse;
+        unmarked_vertices_.erase(it.first);
+      }
+
+    }
   }
+
+  //set unmarked vertices that have fine neighbors to coarse, else fine
+  for(const auto& v : unmarked_vertices_){
+    bool have_fine_neighbors = false;
+    for(const auto& edge_id : *(vertices_[v])){
+      const size_t neighbor = edges_[edge_id]->row() == v ? edges_[edge_id]->col() : edges_[edge_id]->row();
+      if(labels_[neighbor] == mark_state::fine){
+        have_fine_neighbors = true;
+        break;
+      }
+    }
+    labels_[v] = have_fine_neighbors ? mark_state::coarse : mark_state::fine;
+  }
+  //for any fine-fine connection, set one of the endpoints to coarse
+  for(const auto& edge_ptr : edges_)
+    if(edge_ptr != nullptr
+       && labels_[edge_ptr->row()] == mark_state::fine
+       && labels_[edge_ptr->col()] == mark_state::fine)
+      labels_[edge_ptr->row()] = mark_state::coarse;
+  
+  //Set any coarse variables connected only to coarse variable as fine
+  for(size_t i = 0; i < dof_; ++i){
+    if(labels_[i] == mark_state::fine)
+      continue;
+    size_t num_coarse_neighbors = 0;
+    for(const auto& edge_id : *(vertices_[i])){
+      const size_t neighbor = edges_[edge_id]->row() == i ? edges_[edge_id]->col() : edges_[edge_id]->row();
+      if(labels_[neighbor] == mark_state::coarse)
+        ++num_coarse_neighbors;
+    }
+    if(num_coarse_neighbors == 1)
+      labels_[i] = mark_state::fine;
+  }
+  
   return 0;
 }
 //===================graph========================//

@@ -9,7 +9,7 @@ using namespace std;
 using namespace Eigen;
 using namespace marvel;
 int main(){
-  const size_t dim = 5;
+  const size_t dim = 8;
   //construct A
   MatrixXd A = MatrixXd::Random(dim, dim);
   A = (A.transpose() * A).eval();
