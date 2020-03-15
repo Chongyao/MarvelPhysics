@@ -16,10 +16,11 @@ class Adjc_graph{
   using TPL = Eigen::Triplet<double>;
  public:
   Adjc_graph(const Eigen::MatrixXd& L);
+  Adjc_graph(const Eigen::SparseMatrix<double>& L);
   int build_mat_from_graph(Eigen::MatrixXd& L)const;
   int build_mat_from_graph(std::vector<TPL>& trips)const;
 
-  int build_reordered_mat_from_graph(std::vector<TPL>& trips) const;
+  int build_reordered_mat_from_graph(std::vector<TPL>& trips);
    
 
 
@@ -32,9 +33,11 @@ class Adjc_graph{
   enum class mark_state{fine, coarse, unmarked};
   std::vector<mark_state> labels_;
   std::set<size_t> unmarked_vertices_;
+  size_t num_coarse_{0};
 
   
  private:
+  void init();
   void sparsify_one_edge(const size_t edge_id);
   void compensate_one_edge(const size_t edge_id_ik, const size_t edge_id_jk, const double& w);
   bool is_connect(const size_t i, const size_t j, size_t& edge_ij)const;

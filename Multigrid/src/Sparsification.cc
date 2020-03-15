@@ -7,8 +7,7 @@ namespace marvel{
 
 //===================graph========================//
 //construct from a dense Matrix
-Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
-    :dof_(L.rows()){
+void Adjc_graph::init(){
   vertices_.resize(dof_, nullptr);
   labels_.resize(dof_, mark_state::unmarked);
   VectorXi all_v = VectorXi::LinSpaced(1, 0, dof_ - 1);
@@ -18,7 +17,12 @@ Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
   for(size_t i = 0; i < dof_; ++i){
     vertices_[i] = make_shared<unordered_set<size_t>>();
   }
+  return;
+}
 
+Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
+    :dof_(L.rows()){
+  init();
   size_t num_edges = 0;
   for(size_t i = 0; i < dof_; ++i){
     for(size_t j = i + 1; j < dof_; ++j){
@@ -31,6 +35,22 @@ Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
     }
   }
 }
+
+//Here soppose sum of each column in L equals to zero
+Adjc_graph::Adjc_graph(const SparseMatrix<double>& L):dof_(L.rows()){
+  init();
+  size_t num_edges = 0;
+  for(int k=0; k<L.outerSize(); ++k)
+    for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
+      if(it.index() >= k)
+        break;
+      vertices_[it.row()]->insert(num_edges);
+      vertices_[it.col()]->insert(num_edges);
+      edges_.push_back(make_shared<TPL>(it.row(), it.col(), -it.value()));
+      ++num_edges;
+    }
+}
+
 
 int Adjc_graph::build_mat_from_graph(vector<TPL>& trips)const{
   #pragma omp parallel for
@@ -185,9 +205,46 @@ int Adjc_graph::Sparsification(){
   return 0;
 }
 
-int Adjc_graph::build_reordered_mat_from_graph(std::vector<TPL>& trips) const{
+int Adjc_graph::build_reordered_mat_from_graph(std::vector<TPL>& trips){
   assert(unmarked_vertices_.size() == 0);
-  
+  VectorXi perm_vec(dof_);
+  VectorXi perm_vec_inverse(dof_);
+  size_t coarse_id = 0, fine_id = dof_ - 1;
+  for(size_t i = 0; i < dof_; ++i)
+    if(labels_[i] == mark_state::coarse){
+      perm_vec(coarse_id) = i;
+      perm_vec_inverse(i) = coarse_id;
+      ++coarse_id;
+    }else{
+      perm_vec(fine_id) = i;
+      perm_vec_inverse(i) = fine_id;
+      --fine_id;
+    }
+
+  num_coarse_ = coarse_id;
+
+
+  #pragma omp parallel for
+  for(size_t i = 0; i < edges_.size(); ++i){
+    if(edges_[i] == nullptr)
+      continue;
+    
+    vector<Triplet<double>> trips_e;
+    const auto& trip = *edges_[i];
+    const size_t
+        row_id = perm_vec_inverse(trip.row()),
+        col_id = perm_vec_inverse(trip.col());
+    
+    trips_e.push_back(TPL(row_id, col_id, -trip.value()));
+    trips_e.push_back(TPL(col_id, row_id, -trip.value()));
+    trips_e.push_back(TPL(row_id, row_id, trip.value()));
+    trips_e.push_back(TPL(col_id, col_id, trip.value()));
+
+    #pragma omp critical
+    {
+      trips.insert(trips.end(), trips_e.begin(), trips_e.end());
+    }
+  }
   return 0;
 }
 //===================graph========================//
