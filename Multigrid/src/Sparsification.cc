@@ -158,6 +158,8 @@ int Adjc_graph::Sparsification(){
       }
     }
     labels_[v] = have_fine_neighbors ? mark_state::coarse : mark_state::fine;
+    //This may cause bug
+    unmarked_vertices_.erase(v);
   }
   //for any fine-fine connection, set one of the endpoints to coarse
   for(const auto& edge_ptr : edges_)
@@ -179,6 +181,12 @@ int Adjc_graph::Sparsification(){
     if(num_coarse_neighbors == 1)
       labels_[i] = mark_state::fine;
   }
+  
+  return 0;
+}
+
+int Adjc_graph::build_reordered_mat_from_graph(std::vector<TPL>& trips) const{
+  assert(unmarked_vertices_.size() == 0);
   
   return 0;
 }

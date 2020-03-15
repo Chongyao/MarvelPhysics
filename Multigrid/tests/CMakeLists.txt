@@ -25,4 +25,11 @@ target_link_libraries(test_GS
   FEM
   )
 
+add_executable(test_permutation test_permutation.cc)
+target_link_libraries(test_permutation
+  marvel-core
+  MULTIGRID
+  FEM
+  )
+
 

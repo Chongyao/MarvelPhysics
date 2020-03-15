@@ -19,6 +19,10 @@ class Adjc_graph{
   int build_mat_from_graph(Eigen::MatrixXd& L)const;
   int build_mat_from_graph(std::vector<TPL>& trips)const;
 
+  int build_reordered_mat_from_graph(std::vector<TPL>& trips) const;
+   
+
+
   int Sparsification();
  private:
   const size_t dof_;
