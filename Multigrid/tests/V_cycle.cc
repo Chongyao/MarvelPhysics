@@ -99,6 +99,7 @@ int main(int argc, char** argv){
     
     for(size_t i = 0; i < num_layers - 1; ++i){
       const string coarse_mesh_file = path + mesh_name + ".sub" + to_string(finest_layer_id - i - 1) + ".vtk";
+      cout << coarse_mesh_file << endl;
       mesh_read_from_vtk<FLOAT_TYPE, 8>(coarse_mesh_file.c_str(), *nods_H_ptr, *cells_H_ptr);
       transfers[i] = make_shared<transfer>(get_transfer(*nods_H_ptr, *cells_H_ptr, *nods_h_ptr, *cells_h_ptr));
       {
@@ -108,6 +109,7 @@ int main(int argc, char** argv){
       }
       swap(nods_h_ptr, nods_H_ptr);
       swap(cells_h_ptr, cells_H_ptr);
+
     }
   }
 
@@ -117,7 +119,6 @@ int main(int argc, char** argv){
     energy->Hes(nods.data(), dat_str);
     layers[0] = make_shared<layer>(dat_str->get_hes(), false, gs_itrs);
     layers[0]->rhs_ = - dat_str->get_gra();
-    #pragma omp parallel for
     for(size_t i = 1; i < num_layers; ++i){
       layers[i] = make_shared<layer>(transfers[i - 1]->R_ * layers[i - 1]->A_ * transfers[i - 1]->I_, false, gs_itrs);
     }

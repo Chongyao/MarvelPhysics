@@ -78,7 +78,7 @@ else ()
   add_subdirectory(Point_Sys)
   add_subdirectory(FEM)
   add_subdirectory(src)
-  # add_subdirectory(Multigrid)
+  add_subdirectory(Multigrid)
 
 endif (${APPLE})
 

@@ -16,6 +16,7 @@ target_link_libraries(V_cycle
   marvel-core
   MULTIGRID
   FEM
+  ${Boost_LIBRARIES}    
   )
 
 add_executable(test_GS test_GS.cc)

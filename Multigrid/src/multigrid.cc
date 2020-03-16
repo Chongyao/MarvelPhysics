@@ -28,7 +28,7 @@ transfer get_transfer(const MatrixXd& nods_H, const MatrixXi& cells_H, const Mat
   for(size_t i = 0; i < cells_H.cols(); ++i){
     const Matrix<double, 3, num_per_cell_> x_H_cell = indexing(nods_H, all_rows, cells_H.col(i));
     vector<Triplet<double>> trips_patch;
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for(size_t j = 0; j < one_to_many; ++j){
       for(size_t k = 0; k < num_per_cell_; ++k){
         const size_t nod_h_id = cells_h(k, i * one_to_many + j);
@@ -44,8 +44,12 @@ transfer get_transfer(const MatrixXd& nods_H, const MatrixXi& cells_H, const Mat
         }
       }
     }
-    trips_I.insert(trips_I.end(), trips_patch.begin(), trips_patch.end());
+    #pragma omp critical
+    {
+    trips_I.insert(trips_I.end(), trips_patch.begin(), trips_patch.end());      
+    }
   }
+
   SparseMatrix<double> I(nods_h.cols(), nods_H.cols());{
     I.reserve(trips_I.size());
     I.setFromTriplets(trips_I.begin(), trips_I.end());
