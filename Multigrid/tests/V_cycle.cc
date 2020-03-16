@@ -161,12 +161,6 @@ int main(int argc, char** argv){
   VectorXd solu_cg = cg.solve(rhs);
   __TIME_END__("cg ");
   cout << "residual is " << (rhs - K * solu_cg).norm() << endl;
-  
-  Map<const MatrixXd> solu_cg_reshape(solu_cg.data(), nods.rows(), nods.cols());
-  MatrixXd x = nods + solu_cg_reshape;
-  energy->Gra(x.data(), dat_str);
-  VectorXd res = dat_str->get_gra();
-  cout << "gradient of E is "<< res.norm() << endl;
 
   cout << "=========compare to llt===============" << endl;
   SimplicialLDLT<SparseMatrix<double>> llt;
