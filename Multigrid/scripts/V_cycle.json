@@ -4,6 +4,7 @@
   "mesh_name":"cube",
   "path":"../data/cube-vox/",
   "gs_itrs":50,
-  "num_V":15,
-  "cg_itrs": 50000
+  "num_V":14,
+  "cg_itrs": 50000,
+  "Yound":80
 }

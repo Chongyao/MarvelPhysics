@@ -116,6 +116,8 @@ int main(int argc, char** argv){
   cout << "================set transfers done================" << endl;
   const size_t gs_itrs = pt.get<size_t>("gs_itrs", 40);
   VS<layer> layers(num_layers);{
+    dat_str->set_zero();
+    energy->Gra(nods.data(), dat_str);
     energy->Hes(nods.data(), dat_str);
     layers[0] = make_shared<layer>(dat_str->get_hes(), false, gs_itrs);
     layers[0]->rhs_ = - dat_str->get_gra();
@@ -151,14 +153,20 @@ int main(int argc, char** argv){
 
   cout << "=================compare to CG=================="<<endl;
   ConjugateGradient<SparseMatrix<FLOAT_TYPE>, Lower|Upper> cg;
-  SparseMatrix<double> K = dat_str->get_hes();
-  VectorXd rhs = -dat_str->get_gra();
+  const SparseMatrix<double> K = dat_str->get_hes();
+  const VectorXd rhs = -dat_str->get_gra();
   cg.setMaxIterations(pt.get<size_t>("cg_itrs", 2 * rhs.size()));
   __TIME_BEGIN__;
   cg.compute(K);
   VectorXd solu_cg = cg.solve(rhs);
   __TIME_END__("cg ");
   cout << "residual is " << (rhs - K * solu_cg).norm() << endl;
+  
+  Map<const MatrixXd> solu_cg_reshape(solu_cg.data(), nods.rows(), nods.cols());
+  MatrixXd x = nods + solu_cg_reshape;
+  energy->Gra(x.data(), dat_str);
+  VectorXd res = dat_str->get_gra();
+  cout << "gradient of E is "<< res.norm() << endl;
 
   cout << "=========compare to llt===============" << endl;
   SimplicialLDLT<SparseMatrix<double>> llt;
