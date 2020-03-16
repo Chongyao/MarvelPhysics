@@ -3,7 +3,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem.hpp>
-
+#include "config.h"
 #include "DEFINE_TYPE.h"
 #include "basic_energy.h"
 #include "implicit_euler.h"
@@ -12,6 +12,7 @@
 #include "FEM/src/mass_matrix.h"
 #include <iostream>
 #include <string>
+#include<Eigen/SparseCholesky>
 
 using namespace std;
 using namespace Eigen;
@@ -143,9 +144,28 @@ int main(int argc, char** argv){
   cout << "================set process done================" << endl;
   multigrid_process MP(process, layers, transfers);
   VectorXd solution = VectorXd::Zero(nods.cols());
+  __TIME_BEGIN__;
   MP.execute(solution.data());
-  
+  __TIME_END__("V cycle ");
 
+  cout << "=================compare to CG=================="<<endl;
+  ConjugateGradient<SparseMatrix<FLOAT_TYPE>, Lower|Upper> cg;
+  SparseMatrix<double> K = dat_str->get_hes();
+  VectorXd rhs = -dat_str->get_gra();
+  cg.setMaxIterations(pt.get<size_t>("cg_itrs", 2 * rhs.size()));
+  __TIME_BEGIN__;
+  cg.compute(K);
+  VectorXd solu_cg = cg.solve(rhs);
+  __TIME_END__("cg ");
+  cout << "residual is " << (rhs - K * solu_cg).norm() << endl;
+
+  cout << "=========compare to llt===============" << endl;
+  SimplicialLDLT<SparseMatrix<double>> llt;
+  __TIME_BEGIN__;
+  llt.compute(K);
+  VectorXd solu_llt = llt.solve(rhs);
+  __TIME_END__("LLT ");
+  cout << "residual is " << (rhs - K * solu_llt).norm() << endl;
   
   return 0;
 }

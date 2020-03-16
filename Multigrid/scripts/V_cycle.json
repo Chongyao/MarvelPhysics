@@ -1,8 +1,9 @@
 {
-  "num_layers": 3,
-  "finest_layer":2,
+  "num_layers": 5,
+  "finest_layer":4,
   "mesh_name":"cube",
   "path":"../data/cube-vox/",
-  "gs_itrs":100,
-  "num_V":1
+  "gs_itrs":50,
+  "num_V":15,
+  "cg_itrs": 50000
 }

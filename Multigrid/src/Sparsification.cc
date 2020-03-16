@@ -23,6 +23,8 @@ void Adjc_graph::init(){
 Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
     :dof_(L.rows()){
   init();
+  dig_vals_ = L * VectorXd::Ones(dof_);
+
   size_t num_edges = 0;
   for(size_t i = 0; i < dof_; ++i){
     for(size_t j = i + 1; j < dof_; ++j){
@@ -36,9 +38,11 @@ Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
   }
 }
 
-//Here soppose sum of each column in L equals to zero
+
 Adjc_graph::Adjc_graph(const SparseMatrix<double>& L):dof_(L.rows()){
   init();
+
+  dig_vals_ = L * VectorXd::Ones(dof_);
   size_t num_edges = 0;
   for(int k=0; k<L.outerSize(); ++k)
     for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
@@ -149,7 +153,6 @@ int Adjc_graph::Sparsification(){
             --it_a;
             break;
           }else if(sp_edge_id == it_b->second){
-            cout << "sp " << it_b->first << endl;
             adjc_V_E.erase(it_b);
             --it_b;
             continue;
@@ -245,9 +248,28 @@ int Adjc_graph::build_reordered_mat_from_graph(std::vector<TPL>& trips){
       trips.insert(trips.end(), trips_e.begin(), trips_e.end());
     }
   }
+
+  for(size_t i = 0; i < dof_; ++i){
+    trips.push_back(TPL(i, i, dig_vals_[i]));
+  }
   return 0;
 }
 //===================graph========================//
+
+int Schur_complement(const SparseMatrix<double>& L, const size_t& coarse_num,
+                     SparseMatrix<double>& topleft,
+                     SparseMatrix<double>& bottomright){
+  const size_t fine_num = L.rows() - coarse_num;
+  bottomright = L.bottomRightCorner(fine_num, fine_num);
+  const SparseMatrix<double>
+      L_cc = L.topLeftCorner(coarse_num, coarse_num),
+      L_fc = L.bottomLeftCorner(fine_num, coarse_num);
+
+  SimplicialLLT<SparseMatrix<double>> llt(bottomright);
+  topleft = L_cc - L_fc.transpose() * llt.solve(L_fc);
+  
+  return 0;
+}
 
 
 

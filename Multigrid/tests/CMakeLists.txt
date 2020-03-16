@@ -32,4 +32,11 @@ target_link_libraries(test_permutation
   FEM
   )
 
+add_executable(test_sparsification test_sparsification.cc)
+target_link_libraries(test_sparsification
+  marvel-core
+  MULTIGRID
+  FEM
+  )
+
 
