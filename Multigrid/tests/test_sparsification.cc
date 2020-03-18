@@ -98,48 +98,68 @@ int main(int argc, char** argv){
   //sparsification
   energy->Hes(nods.data(), dat_str);
   SparseMatrix<double> L = dat_str->get_hes();
-  cout << L.topLeftCorner(10, 10) << endl;
-  getchar();
-  
-  
+  #if 1
+  {
+    const size_t dim = stoi(argv[5]);
+    MatrixXd A = MatrixXd::Random(dim, dim);
+    A = A.transpose() * A;
+    A.array() = -A.array().abs();
+    A(0, 0) = -A(0,1) - A(0, 2) + 1;
+    A(1, 1) = -A(1, 0) - A(1, 2);
+    A(2, 2) = -A(2, 0) - A(2, 1) + 2;
+    // cout << "A\n" << A << endl;
+    vector<Triplet<double>> trips;
+    for(size_t i = 0; i < 3; ++i)
+      for(size_t j = 0; j < 3; ++j)
+        trips.push_back(Triplet<double>(i, j, A(i, j)));
+    L.resize(3, 3);
+    L.reserve(trips.size());
+    L.setFromTriplets(trips.begin(), trips.end());
+  }
+  #endif
+    
   Adjc_graph graph(L);
   graph.Sparsification();
-  
+
   VectorXd eigvals = MatrixXd(L).eigenvalues().real();
   sort(eigvals.data(), eigvals.data() + eigvals.size());
   cout << "condition number " << eigvals.array().abs().maxCoeff() / eigvals.array().abs().minCoeff() << endl;;
   
   
   
-  vector<Triplet<double>> trips;
-  graph.build_reordered_mat_from_graph(trips);
+
   SparseMatrix<double> L_new(L.rows(), L.cols());{
+    vector<Triplet<double>> trips;
+    graph.build_reordered_mat_from_graph(trips);
     L_new.reserve(trips.size());
     L_new.setFromTriplets(trips.begin(), trips.end());
   }
 
-
-  eigvals = MatrixXd(L_new).eigenvalues().real();
-  sort(eigvals.data(), eigvals.data() + eigvals.size());
-  // cout << eigvals << endl; 
-  cout << "condition number " << eigvals.array().abs().maxCoeff() / eigvals.array().abs().minCoeff() << endl;;
-
+  
+  
   {
-    SparseLU<SparseMatrix<double>> lu(L_new);
+    SparseMatrix<double> L_tilde(L.rows(), L.cols());{
+      vector<Triplet<double>> trips;
+      graph.build_mat_from_graph(trips);
+      L_tilde.reserve(trips.size());
+      L_tilde.setFromTriplets(trips.begin(), trips.end());
+    }
+    SparseLU<SparseMatrix<double>> lu(L_tilde);
     MatrixXd test_CN = MatrixXd(L) * lu.solve(MatrixXd::Identity(L.rows(), L.rows()));
     cout << "test CN" << endl;
     eigvals = test_CN.eigenvalues().real();
     sort(eigvals.data(), eigvals.data() + eigvals.size());
-    cout << eigvals << endl;
+    // cout << eigvals << endl;
     cout << "condition number " << eigvals.array().abs().maxCoeff() / eigvals.array().abs().minCoeff() << endl;;
 
   }
+  
   cout <<  "Schur_complement"  << endl;
   SparseMatrix<double> L_H, L_ff;
   Schur_complement(L_new, graph.num_coarse_, L_H, L_ff);
   eigvals = MatrixXd(L_H).eigenvalues().real();
   sort(eigvals.data(), eigvals.data() + eigvals.size());
-  cout << eigvals << endl;
+  // cout << eigvals << endl;xo
   cout << "condition number " << eigvals.array().abs().maxCoeff() / eigvals.array().abs().minCoeff() << endl;;
 
   return 0;

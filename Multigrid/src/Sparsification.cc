@@ -74,6 +74,10 @@ int Adjc_graph::build_mat_from_graph(vector<TPL>& trips)const{
       trips.insert(trips.end(), trips_e.begin(), trips_e.end());
     }
   }
+
+  for(size_t i = 0; i < dof_; ++i){
+    trips.push_back(TPL(i, i, dig_vals_[i]));
+  }
   return 0;
 }
 
@@ -94,7 +98,6 @@ void Adjc_graph::sparsify_one_edge(const size_t edge_id){
 
 void Adjc_graph::compensate_one_edge(const size_t edge_id_ik, const size_t edge_id_jk, const double& w){
   const auto& trip_ik = edges_[edge_id_ik];
-  if(trip_ik == nullptr)
   edges_[edge_id_ik] = make_shared<TPL>(trip_ik->row(), trip_ik->col(), trip_ik->value() + w);
   const auto& trip_jk = edges_[edge_id_jk];
   edges_[edge_id_jk] = make_shared<TPL>(trip_jk->row(), trip_jk->col(), trip_jk->value() + w);
@@ -118,9 +121,9 @@ bool Adjc_graph::is_connect(const size_t i, const size_t j, size_t& edge_ij)cons
 
 int Adjc_graph::sparsify_one_tri(const size_t edge_id_i, const size_t edge_id_j, const size_t edge_id_k, size_t& sparsified_edge_id){
   vector<pair<size_t, double>> ws;{
-    ws.push_back({edge_id_i, edges_[edge_id_i]->value()});
-    ws.push_back({edge_id_j, edges_[edge_id_j]->value()});
-    ws.push_back({edge_id_k, edges_[edge_id_k]->value()});
+    ws.push_back({edge_id_i, fabs(edges_[edge_id_i]->value())});
+    ws.push_back({edge_id_j, fabs(edges_[edge_id_j]->value())});
+    ws.push_back({edge_id_k, fabs(edges_[edge_id_k]->value())});
   }
   sort(ws.begin(), ws.end(), [](const pair<size_t, double>&lhs, const pair<size_t,double>&rhs)->bool{
       return lhs.second < rhs.second;
