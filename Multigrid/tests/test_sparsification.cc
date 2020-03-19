@@ -120,39 +120,24 @@ int main(int argc, char** argv){
     }
     L.prune(0.0);
   }
-  #if 0
-  {
-    const size_t dim = stoi(argv[5]);
-    MatrixXd A = MatrixXd::Random(dim, dim);
-    A = A.transpose() * A;
-    A.array() = -A.array().abs();
-    A(0, 0) = -A(0,1) - A(0, 2) + 1;
-    A(1, 1) = -A(1, 0) - A(1, 2);
-    A(2, 2) = -A(2, 0) - A(2, 1) + 2;
-    // cout << "A\n" << A << endl;
-    vector<Triplet<double>> trips;
-    for(size_t i = 0; i < 3; ++i)
-      for(size_t j = 0; j < 3; ++j)
-        trips.push_back(Triplet<double>(i, j, A(i, j)));
-    L.resize(3, 3);
-    L.reserve(trips.size());
-    L.setFromTriplets(trips.begin(), trips.end());
-  }
-  #endif
     
   Adjc_graph graph(L);
-  graph.Sparsification();
+  // graph.Sparsification();
+  Sparsify sp_op(L.rows());
+  sp_op.sparsify_and_compensate(graph);
+  sp_op.post_coloring(graph);
+  sp_op.reorder_coarse_and_fine();
+  VectorXi perm_inv = sp_op.get_perm_inv();
 
   VectorXd eigvals = MatrixXd(L).eigenvalues().real();
   sort(eigvals.data(), eigvals.data() + eigvals.size());
   cout << "condition number " << eigvals.array().abs().maxCoeff() / eigvals.array().abs().minCoeff() << endl;;
-  
-  
+    
   
 
   SparseMatrix<double> L_new(L.rows(), L.cols());{
     vector<Triplet<double>> trips;
-    graph.build_reordered_mat_from_graph(trips);
+    graph.build_reordered_mat_from_graph(perm_inv, trips);
     L_new.reserve(trips.size());
     L_new.setFromTriplets(trips.begin(), trips.end());
   }
@@ -178,7 +163,7 @@ int main(int argc, char** argv){
   
   cout <<  "Schur_complement"  << endl;
   SparseMatrix<double> L_H, L_ff;
-  Schur_complement(L_new, graph.num_coarse_, L_H, L_ff);
+  Schur_complement(L_new, sp_op.num_coarse_, L_H, L_ff);
   eigvals = MatrixXd(L_H).eigenvalues().real();
   sort(eigvals.data(), eigvals.data() + eigvals.size());
   // cout << eigvals << endl;xo
