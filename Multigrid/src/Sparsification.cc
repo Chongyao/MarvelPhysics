@@ -48,6 +48,7 @@ Adjc_graph::Adjc_graph(const SparseMatrix<double>& L):dof_(L.rows()){
     for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
       if(it.index() >= k)
         break;
+      assert(it.value() < 0);
       vertices_[it.row()]->insert(num_edges);
       vertices_[it.col()]->insert(num_edges);
       edges_.push_back(make_shared<TPL>(it.row(), it.col(), -it.value()));

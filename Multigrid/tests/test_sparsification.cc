@@ -98,7 +98,29 @@ int main(int argc, char** argv){
   //sparsification
   energy->Hes(nods.data(), dat_str);
   SparseMatrix<double> L = dat_str->get_hes();
-  #if 1
+  {
+
+    for(int k=0; k<L.outerSize(); ++k){
+      double sum = 0;
+      for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
+        if(it.index() == k){
+          continue;
+        }
+        if(it.value() > 0){
+          sum += it.value();
+          it.valueRef() = 0;          
+        }
+      }
+      for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
+        if(it.index() == k){
+          it.valueRef() += sum;
+          break;
+        }
+      }
+    }
+    L.prune(0.0);
+  }
+  #if 0
   {
     const size_t dim = stoi(argv[5]);
     MatrixXd A = MatrixXd::Random(dim, dim);
