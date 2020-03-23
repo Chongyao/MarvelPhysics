@@ -98,7 +98,8 @@ int main(int argc, char** argv){
   //sparsification
   energy->Hes(nods.data(), dat_str);
   SparseMatrix<double> L = dat_str->get_hes();
-  {
+  #if 0
+  {//truncate
 
     for(int k=0; k<L.outerSize(); ++k){
       double sum = 0;
@@ -120,12 +121,27 @@ int main(int argc, char** argv){
     }
     L.prune(0.0);
   }
+  #endif
     
-  Adjc_graph graph(L);
+  // Adjc_graph graph_P(L, true);
+
+  Adjc_graph graph_N(L, false);
+  
+  SparseMatrix<double> L_truncated(L.rows(), L.cols()); 
+  {
+    vector<TPL> trips;
+    graph_N.build_mat_from_graph(trips);
+    add_dig_vals(L, trips);
+    L_truncated.reserve(trips.size());
+    L_truncated.setFromTriplets(trips.begin(),trips.end());
+  }
+  
   // graph.Sparsification();
   Sparsify sp_op(L.rows());
-  sp_op.sparsify_and_compensate(graph);
-  sp_op.post_coloring(graph);
+  // sp_op.sparsify_and_compensate(graph_P);
+  sp_op.sparsify_and_compensate(graph_N);
+  // sp_op.post_coloring(graph_P);
+  sp_op.post_coloring(graph_N);
   sp_op.reorder_coarse_and_fine();
   VectorXi perm_inv = sp_op.get_perm_inv();
 
@@ -137,7 +153,9 @@ int main(int argc, char** argv){
 
   SparseMatrix<double> L_new(L.rows(), L.cols());{
     vector<Triplet<double>> trips;
-    graph.build_reordered_mat_from_graph(perm_inv, trips);
+    // graph_P.build_reordered_mat_from_graph(perm_inv, trips);
+    graph_N.build_reordered_mat_from_graph(perm_inv, trips);
+    add_dig_vals(L, trips);
     L_new.reserve(trips.size());
     L_new.setFromTriplets(trips.begin(), trips.end());
   }
@@ -147,12 +165,16 @@ int main(int argc, char** argv){
   {
     SparseMatrix<double> L_tilde(L.rows(), L.cols());{
       vector<Triplet<double>> trips;
-      graph.build_mat_from_graph(trips);
+      // graph_P.build_reordered_mat_from_graph(perm_inv, trips);
+      graph_N.build_reordered_mat_from_graph(perm_inv, trips);
+      add_dig_vals(L, trips);
       L_tilde.reserve(trips.size());
       L_tilde.setFromTriplets(trips.begin(), trips.end());
     }
     SparseLU<SparseMatrix<double>> lu(L_tilde);
-    MatrixXd test_CN = MatrixXd(L) * lu.solve(MatrixXd::Identity(L.rows(), L.rows()));
+
+       
+    MatrixXd test_CN = MatrixXd(L_truncated) * lu.solve(MatrixXd::Identity(L.rows(), L.rows()));
     cout << "test CN" << endl;
     eigvals = test_CN.eigenvalues().real();
     sort(eigvals.data(), eigvals.data() + eigvals.size());

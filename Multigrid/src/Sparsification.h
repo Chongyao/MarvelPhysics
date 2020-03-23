@@ -20,8 +20,7 @@ class Sparsify;
 class Adjc_graph{
   
  public:
-  Adjc_graph(const Eigen::MatrixXd& L);
-  Adjc_graph(const Eigen::SparseMatrix<double>& L);
+  Adjc_graph(const Eigen::SparseMatrix<double>& L, const bool w_is_positive = true);
   int build_mat_from_graph(Eigen::MatrixXd& L)const;
   int build_mat_from_graph(std::vector<TPL>& trips)const;
 
@@ -31,7 +30,7 @@ class Adjc_graph{
   const size_t dof_;
   VS<std::unordered_set<size_t>> vertices_;
   VS<TPL> edges_;
-  Eigen::VectorXd dig_vals_;
+  const bool w_is_positive_;
 
   friend class Sparsify;
 
@@ -72,7 +71,7 @@ class Sparsify{
   
 };
 
-
+int add_dig_vals(const Eigen::SparseMatrix<double>& L, std::vector<TPL>& trips);
 int Schur_complement(const Eigen::SparseMatrix<double>& L, const size_t& coarse_num,
                      Eigen::SparseMatrix<double>& topleft,
                      Eigen::SparseMatrix<double>& bottomright);

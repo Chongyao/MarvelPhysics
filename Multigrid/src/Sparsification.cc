@@ -16,38 +16,45 @@ void Adjc_graph::init(){
   return;
 }
 
-Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
-    :dof_(L.rows()){
+// Adjc_graph::Adjc_graph(const Eigen::MatrixXd& L)
+//     :dof_(L.rows()){
+//   init();
+
+//   size_t num_edges = 0;
+//   for(size_t i = 0; i < dof_; ++i){
+//     for(size_t j = i + 1; j < dof_; ++j){
+//       if(fabs(L(i, j)) < 1e-8)
+//         continue;
+//       vertices_[i]->insert(num_edges);
+//       vertices_[j]->insert(num_edges);
+//       edges_.push_back(make_shared<TPL>(i, j, -L(i, j)));
+//       ++num_edges;
+//     }
+//   }
+// }
+
+
+Adjc_graph::Adjc_graph(const SparseMatrix<double>& L, const bool w_is_positive):dof_(L.rows()), w_is_positive_(w_is_positive){
   init();
-  dig_vals_ = L * VectorXd::Ones(dof_);
-
   size_t num_edges = 0;
-  for(size_t i = 0; i < dof_; ++i){
-    for(size_t j = i + 1; j < dof_; ++j){
-      if(fabs(L(i, j)) < 1e-8)
-        continue;
-      vertices_[i]->insert(num_edges);
-      vertices_[j]->insert(num_edges);
-      edges_.push_back(make_shared<TPL>(i, j, -L(i, j)));
-      ++num_edges;
-    }
-  }
-}
-
-
-Adjc_graph::Adjc_graph(const SparseMatrix<double>& L):dof_(L.rows()){
-  init();
-
-  dig_vals_ = L * VectorXd::Ones(dof_);
-  size_t num_edges = 0;
+  
   for(int k=0; k<L.outerSize(); ++k)
     for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
       if(it.index() >= k)
         break;
-      assert(it.value() < 0);
-      vertices_[it.row()]->insert(num_edges);
-      vertices_[it.col()]->insert(num_edges);
-      edges_.push_back(make_shared<TPL>(it.row(), it.col(), -it.value()));
+      if(w_is_positive){
+        if(it.value() > 0)
+          continue;
+        vertices_[it.row()]->insert(num_edges);
+        vertices_[it.col()]->insert(num_edges);
+        edges_.push_back(make_shared<TPL>(it.row(), it.col(), -it.value()));
+      }else{
+        if(it.value() < 0 )
+          continue;
+        vertices_[it.row()]->insert(num_edges);
+        vertices_[it.col()]->insert(num_edges);
+        edges_.push_back(make_shared<TPL>(it.row(), it.col(), it.value()));
+      }
       ++num_edges;
     }
 }
@@ -61,10 +68,12 @@ int Adjc_graph::build_mat_from_graph(vector<TPL>& trips)const{
     
     vector<Triplet<double>> trips_e;
     const auto& trip = *edges_[i];
-    trips_e.push_back(TPL(trip.row(), trip.col(), -trip.value()));
-    trips_e.push_back(TPL(trip.col(), trip.row(), -trip.value()));
-    trips_e.push_back(TPL(trip.row(), trip.row(), trip.value()));
-    trips_e.push_back(TPL(trip.col(), trip.col(), trip.value()));
+    const size_t row_id = trip.row(), col_id = trip.col();
+    const double value = w_is_positive_ ? -trip.value() : trip.value();
+    trips_e.push_back(TPL(row_id, col_id, value));
+    trips_e.push_back(TPL(col_id, row_id, value));
+    trips_e.push_back(TPL(row_id, row_id, -value));
+    trips_e.push_back(TPL(col_id, col_id, -value));
 
     #pragma omp critical
     {
@@ -72,9 +81,6 @@ int Adjc_graph::build_mat_from_graph(vector<TPL>& trips)const{
     }
   }
 
-  for(size_t i = 0; i < dof_; ++i){
-    trips.push_back(TPL(i, i, dig_vals_[i]));
-  }
   return 0;
 }
 
@@ -108,20 +114,17 @@ int Adjc_graph::build_reordered_mat_from_graph(const VectorXi& perm_inv, std::ve
     const size_t
         row_id = perm_inv(trip.row()),
         col_id = perm_inv(trip.col());
+    const double value = w_is_positive_ ? -trip.value() : trip.value();
     
-    trips_e.push_back(TPL(row_id, col_id, -trip.value()));
-    trips_e.push_back(TPL(col_id, row_id, -trip.value()));
-    trips_e.push_back(TPL(row_id, row_id, trip.value()));
-    trips_e.push_back(TPL(col_id, col_id, trip.value()));
+    trips_e.push_back(TPL(row_id, col_id, value));
+    trips_e.push_back(TPL(col_id, row_id, value));
+    trips_e.push_back(TPL(row_id, row_id, -value));
+    trips_e.push_back(TPL(col_id, col_id, -value));
 
     #pragma omp critical
     {
       trips.insert(trips.end(), trips_e.begin(), trips_e.end());
     }
-  }
-
-  for(size_t i = 0; i < dof_; ++i){
-    trips.push_back(TPL(i, i, dig_vals_[i]));
   }
   return 0;
 }
@@ -212,9 +215,9 @@ void Sparsify::compensate_one_edge(Adjc_graph& graph, const size_t edge_id_ik, c
 void Sparsify::sparsify_one_tri(Adjc_graph& graph, const size_t edge_id_i, const size_t edge_id_j, const size_t edge_id_k, size_t& sparsified_edge_id){
   auto& edges = graph.edges_;
   vector<pair<size_t, double>> ws;{
-    ws.push_back({edge_id_i, fabs(edges[edge_id_i]->value())});
-    ws.push_back({edge_id_j, fabs(edges[edge_id_j]->value())});
-    ws.push_back({edge_id_k, fabs(edges[edge_id_k]->value())});
+    ws.push_back({edge_id_i, edges[edge_id_i]->value()});
+    ws.push_back({edge_id_j, edges[edge_id_j]->value()});
+    ws.push_back({edge_id_k, edges[edge_id_k]->value()});
   }
   sort(ws.begin(), ws.end(), [](const pair<size_t, double>&lhs, const pair<size_t,double>&rhs)->bool{
                                return lhs.second < rhs.second;
@@ -303,5 +306,12 @@ VectorXi Sparsify::get_perm_inv() const{
   return perm_vec_inv_;
 }
 
+int add_dig_vals(const Eigen::SparseMatrix<double>& L, std::vector<TPL>& trips){
+  VectorXd dig_vals = L * VectorXd::Ones(L.rows());
+  for(size_t i = 0; i < dig_vals.size(); ++i){
+    trips.push_back(TPL(i, i, dig_vals(i)));
+  }
+  return 0;
+}
 
 }
