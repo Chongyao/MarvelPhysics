@@ -5,25 +5,27 @@
 
 namespace marvel{
 int gauss_seidel_solver(const Eigen::SparseMatrix<double, Eigen::RowMajor>& A, const Eigen::VectorXd& b, Eigen::VectorXd& solution, const size_t itrs);
-#if 0
+
 class Gauss_seidel{
  public:
   using SPM = Eigen::SparseMatrix<double, Eigen::RowMajor>;
-  Gauss_seidel(const SPM& A, const double* b, const size_t& max_iter, const double& error, const double& SOR_weight);
-  int solve(const double* init_x, double* post_x) const;
-  void update_problem(const SPM& A, const double* b);
+  Gauss_seidel(const SPM& A, const size_t& max_itr);
+  
+  int solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) const;
 
  private:
-  SPM A_;
+  const SPM A_;
+  const size_t max_itr_;
+  const size_t dof_;
+
+  std::vector<size_t> dig_ids_;
+  Eigen::VectorXd dig_vals_;
+  
+  
   Eigen::VectorXd b_;
-  const size_t max_iter_;
-  const double error_;
-  //SOR weight
-  const double w_;
-  const size_t dim_;
   
 };
-#endif
+
 
 
 

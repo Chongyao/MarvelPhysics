@@ -6,7 +6,7 @@
 #include<Eigen/Dense>
 #include<Eigen/Sparse>
 #include<data_str_core.h>
-
+#include"gauss_seidel.h"
 namespace marvel{
 
 template<typename T>
@@ -33,6 +33,8 @@ struct layer{
   Eigen::VectorXd u_;
   const bool if_direct_;
   const size_t itrs_;
+
+  std::shared_ptr<Gauss_seidel> GS_solver_;
 
 };
 

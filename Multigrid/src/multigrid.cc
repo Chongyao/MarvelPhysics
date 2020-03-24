@@ -61,7 +61,7 @@ transfer get_transfer(const MatrixXd& nods_H, const MatrixXi& cells_H, const Mat
 }
 //============================transfer===========================//
 //============================layer===========================//
-layer::layer(const SPM& A, const bool if_direct, const size_t itrs):A_(A), u_(VectorXd::Zero(A.rows())), if_direct_(if_direct), itrs_(itrs){}
+layer::layer(const SPM& A, const bool if_direct, const size_t itrs):A_(A), u_(VectorXd::Zero(A.rows())), if_direct_(if_direct), itrs_(itrs), GS_solver_(if_direct ? nullptr : make_shared<Gauss_seidel>(A, itrs)){}
 
 int layer::solve(){
   if(if_direct_){
@@ -72,7 +72,8 @@ int layer::solve(){
     // Gauss_seidel GS(A_, rhs_.data(), itrs_, 1e-4, 1.0);
     // VectorXd solution(rhs_.size());
     // GS.solve(u_.data(), solution.data());
-    gauss_seidel_solver(A_, rhs_, u_, itrs_);
+    // gauss_seidel_solver(A_, rhs_, u_, itrs_);
+    GS_solver_->solve(rhs_, u_);
   }
   return 0;
 }

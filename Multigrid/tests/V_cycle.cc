@@ -138,11 +138,6 @@ int main(int argc, char** argv){
   for(size_t i = 0; i < num_V; ++i){
     copy(one_V.begin(), one_V.end(), process.begin() + i * one_V.size());
   }
-  for(auto a : process)
-    cout << a << " ";
-  cout << endl;
-
-  
   
   cout << "================set process done================" << endl;
   multigrid_process MP(process, layers, transfers);
