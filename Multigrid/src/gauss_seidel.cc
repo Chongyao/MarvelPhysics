@@ -3,6 +3,7 @@
 #include "gauss_seidel.h"
 #include <iostream>
 #include <Eigen/Eigenvalues>
+#include <set>
 namespace marvel{
 using namespace std;
 using namespace Eigen;
@@ -121,10 +122,10 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
       const size_t start = dig_ids_[i] + 1, end = first_ids[i + 1];
 
       double sum = 0;
-      for(size_t j = start; j < end; ++j){
-        sum += solution_now(col_ids[j]) * vals[j];
-      }
-      solution_next(i) -= sum / vals[dig_ids_[i]];
+      for(size_t j = start; j < end; ++j)
+        sum += solution_now(col_ids[j]) * (vals[j]);
+
+      solution_next(i) -= sum / dig_vals_[i];
     }
     time_upper +=__TIME_END__("upper part ", false);
     __TIME_BEGIN__;
@@ -133,10 +134,9 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
       const size_t start = first_ids[i], end = dig_ids_[i];
 
       double sum = 0;
-      for(size_t j = start; j < end; ++j){
-        sum += solution_next(col_ids[j]) * vals[j];
-      }
-      solution_next(i) -= sum / vals[dig_ids_[i]];
+      for(size_t j = start; j < end; ++j)
+        sum += solution_next(col_ids[j]) * (vals[j]);
+      solution_next(i) -= sum / dig_vals_[i];
     }
     time_lower += __TIME_END__("lower part ", false);
     swap(solution_next_ptr, solution_now_ptr);
@@ -148,6 +148,8 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
   
   return 0;
 }
+
+
 
 
 
