@@ -14,15 +14,16 @@ class TIMING{
   static void begin(){
     starts_.push_back(std::chrono::system_clock::now());
   }
-  static void end(const std::string& info){
+  static double end(const std::string& info, const bool if_print = true){
     assert(!starts_.empty());
       
     auto end = std::chrono::system_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - starts_.back());
-    std::cout << info << " cost "
-              << double(duration.count()) *std::chrono::microseconds::period::num / std::chrono::microseconds::period::den
-         << "seoncds" << std::endl;
+    double res = double(duration.count()) *std::chrono::microseconds::period::num / std::chrono::microseconds::period::den;
+    if(if_print)
+      std::cout << info << " cost "<< res << "seoncds" << std::endl;
     starts_.pop_back();
+    return res;
   }
  private:
   static std::list<std::chrono::system_clock::time_point> starts_;
@@ -32,9 +33,16 @@ class TIMING{
 #define __TIME_BEGIN__\
   TIMING::begin();
 
-#define __TIME_END__(_str)\
+#define __TIME_END_1__(_str)\
   TIMING::end(_str);
 
+#define __TIME_END_2__(_str, _print)\
+  TIMING::end(_str, _print);
+
+#define __GET_THIRD_ARG__(arg1, arg2, arg3, ...) arg3
+#define __TIME_END_CHOOSER__(...)\
+  __GET_THIRD_ARG__(__VA_ARGS__, __TIME_END_2__, __TIME_END_1__,)
+#define __TIME_END__(...) __TIME_END_CHOOSER__(__VA_ARGS__)(__VA_ARGS__)
 
 
 }

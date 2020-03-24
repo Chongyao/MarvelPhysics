@@ -1,3 +1,4 @@
+#include "config.h"
 #include "multigrid.h"
 #include "gauss_seidel.h"
 #include "inverse_isoparametric_map.h"
@@ -98,20 +99,35 @@ multigrid_process::multigrid_process(const vector<int>& process, VS<layer>& laye
 int multigrid_process::execute(double* solution){
   const size_t num_layers = layers_.size();
   size_t layer_id = 0;
+
+  double time_rel = 0, time_res = 0, time_corr = 0;
   for(const auto& op : process_){
     layer_id += op;
     if(op == 1){
+      __TIME_BEGIN__;
       relax(layer_id - 1);
+      time_rel += __TIME_END__("relax", false);
+      __TIME_BEGIN__;
       restrict(layer_id);
+      time_res += __TIME_END__("res", false);
     }else{
+      __TIME_BEGIN__;
       correct(layer_id);
+      time_corr += __TIME_END__("corr", false);
+      __TIME_BEGIN__;
       relax(layer_id);
+      time_rel += __TIME_END__("relax", false);
     }
     if(layer_id == num_layers - 1){
+      __TIME_BEGIN__;
       relax(layer_id);
+      time_rel += __TIME_END__("relax", false);
     }
 
   }
+  cout << "time for relax is " << time_rel << " seconds.\n"
+       << "time for restrict is " << time_res << " seconds.\n"
+       << "time for correction is "<< time_corr << " seconds.\n";
   return 0;
 }
 
