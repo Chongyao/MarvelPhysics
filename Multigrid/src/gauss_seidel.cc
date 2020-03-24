@@ -1,3 +1,5 @@
+#include "config.h"
+
 #include "gauss_seidel.h"
 #include <iostream>
 #include <Eigen/Eigenvalues>
@@ -107,11 +109,13 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
   auto solution_next_ptr = std::make_shared<Eigen::VectorXd>(b);
 
   size_t itr_cnt = 0;
+  double time_upper = 0, time_lower = 0;
   do{
     auto& solution_next = *solution_next_ptr;
     auto& solution_now = *solution_now_ptr;
     solution_next = b.array() / dig_vals_.array();
     //loop for upper triangle part of A
+    __TIME_BEGIN__;
     #pragma omp parallel for
     for(size_t i = 0; i < dof_ - 1; ++i){
       const size_t start = dig_ids_[i] + 1, end = first_ids[i + 1];
@@ -122,6 +126,8 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
       }
       solution_next(i) -= sum / vals[dig_ids_[i]];
     }
+    time_upper +=__TIME_END__("upper part ", false);
+    __TIME_BEGIN__;
     //loop for lower triangle part of A
     for(size_t i = 1; i < dof_; ++i){
       const size_t start = first_ids[i], end = dig_ids_[i];
@@ -132,9 +138,12 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
       }
       solution_next(i) -= sum / vals[dig_ids_[i]];
     }
+    time_lower += __TIME_END__("lower part ", false);
     swap(solution_next_ptr, solution_now_ptr);
     ++itr_cnt;
   }while(itr_cnt < max_itr_);
+  cout << "time upper is " << time_upper << " seconds.\n"
+       << "time lower is " << time_lower << " seconds.\n";
   solution = *solution_now_ptr;
   
   return 0;

@@ -106,7 +106,7 @@ int multigrid_process::execute(double* solution){
     if(op == 1){
       __TIME_BEGIN__;
       relax(layer_id - 1);
-      time_rel += __TIME_END__("relax", false);
+      time_rel += __TIME_END__("relax");
       __TIME_BEGIN__;
       restrict(layer_id);
       time_res += __TIME_END__("res", false);
@@ -116,12 +116,12 @@ int multigrid_process::execute(double* solution){
       time_corr += __TIME_END__("corr", false);
       __TIME_BEGIN__;
       relax(layer_id);
-      time_rel += __TIME_END__("relax", false);
+      time_rel += __TIME_END__("relax");
     }
     if(layer_id == num_layers - 1){
       __TIME_BEGIN__;
       relax(layer_id);
-      time_rel += __TIME_END__("relax", false);
+      time_rel += __TIME_END__("relax");
     }
 
   }
