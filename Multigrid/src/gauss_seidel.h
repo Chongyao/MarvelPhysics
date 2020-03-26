@@ -36,7 +36,7 @@ class Gauss_seidel : public Jacobi_like_solver{
 class Weighted_Jacobi: public Jacobi_like_solver{
  public:
   using SPM = Eigen::SparseMatrix<double, Eigen::RowMajor>;
-  Weighted_Jacobi(const SPM& A, const size_t& max_itr, const double& error, const double& w = 2.0/3.0);
+  Weighted_Jacobi(const SPM& A, const size_t& max_itr, const double& error, const double& w = 0.6, const bool set_opt_w = false);
   int solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) const;
   int set_optimal_w();
   

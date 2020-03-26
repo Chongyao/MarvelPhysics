@@ -34,4 +34,7 @@ target_link_libraries(test_sparsification
   FEM
   )
 
+add_executable(test_spectra test_spectra.cc)
+
+
 

@@ -1,10 +1,10 @@
 {
-  "num_layers": 6,
+  "num_layers":6,
   "finest_layer":5,
   "mesh_name":"cube",
   "path":"../data/cube-vox/",
   "gs_itrs":100,
-  "num_V":1,
+  "num_V":2,
   "Yound":80,
   "solver_type":"WJ"
 }

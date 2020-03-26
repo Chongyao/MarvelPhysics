@@ -151,11 +151,15 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
 }
 #if 1
 //=========================Weighted_Jacobi========================//
-Weighted_Jacobi::Weighted_Jacobi(const SPM& A, const size_t& max_itr, const double& error, const double& w)
+Weighted_Jacobi::Weighted_Jacobi(const SPM& A, const size_t& max_itr, const double& error, const double& w, const bool set_opt_w)
     :w_(w), error_(error), max_itr_(max_itr),dig_vals_(A.diagonal()),U_plus_L_(A.triangularView<StrictlyUpper>() + A.triangularView<StrictlyLower>()), A_(A){
-  double max_eigval, min_eigval;
-  find_max_min_eigenvalues(A, max_eigval, min_eigval);
-  *(const_cast<double*>(&w_)) = 2.0 / (max_eigval + min_eigval);
+  if(set_opt_w){
+    SparseMatrix<double> test  = dig_vals_.asDiagonal().inverse() * A;
+    double max_eigval, min_eigval;
+    find_max_min_eigenvalues(test, max_eigval, min_eigval);
+    *(const_cast<double*>(&w_)) = 2.0 / (max_eigval + min_eigval);
+    cout <<"optimal w is "<< w_ << endl;
+  }
 }
 
 int Weighted_Jacobi::solve(const VectorXd& b, VectorXd& solution) const{
