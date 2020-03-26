@@ -77,7 +77,7 @@ int gauss_seidel_solver(const Eigen::SparseMatrix<double, Eigen::RowMajor>& A, c
 //===========================Gauss seidel=============================//
 
 Gauss_seidel::Gauss_seidel(const SPM& A, const size_t& max_itr):A_(A), max_itr_(max_itr), dof_(A.rows()){
-  assert(A.rows() == A.cols()&&A.rows() == b.size());
+  assert(A.rows() == A.cols());
   const auto& first_ids = A_.outerIndexPtr();
   const auto& col_ids = A_.innerIndexPtr();
   const auto& vals = A_.valuePtr();
@@ -148,8 +148,24 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
   
   return 0;
 }
+#if 1
+//=========================Weighted_Jacobi========================//
+Weighted_Jacobi::Weighted_Jacobi(const SPM& A, const size_t& max_itr, const double& error, const double& w)
+    :w_(w), error_(error), max_itr_(max_itr),dig_vals_(A.diagonal()),U_plus_L_(A.triangularView<StrictlyUpper>() + A.triangularView<StrictlyLower>()), A_(A){
+  MatrixXd test = dig_vals_.asDiagonal().inverse() * A;
+  const double w_max = 2.0 / test.eigenvalues().real().maxCoeff();
+  if(w_ > w_max)
+    *(const_cast<double*>(&w_)) = w_max;
+}
+
+int Weighted_Jacobi::solve(const VectorXd& b, VectorXd& solution) const{
+   for(size_t i = 0; i < max_itr_; ++i)
+     solution.array() = w_ * (b - U_plus_L_ * solution).array() / dig_vals_.array() + (1 - w_) * solution.array();
 
 
+  return 0;
+}
+#endif
 
 
 

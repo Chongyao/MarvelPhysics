@@ -62,10 +62,17 @@ transfer get_transfer(const MatrixXd& nods_H, const MatrixXi& cells_H, const Mat
 }
 //============================transfer===========================//
 //============================layer===========================//
-layer::layer(const SPM& A, const bool if_direct, const size_t itrs):A_(A), u_(VectorXd::Zero(A.rows())), if_direct_(if_direct), itrs_(itrs), GS_solver_(if_direct ? nullptr : make_shared<Gauss_seidel>(A, itrs)){}
+layer::layer(const SPM& A, const solver_type& type, const size_t itrs):A_(A), u_(VectorXd::Zero(A.rows())), type_(type), itrs_(itrs){
+  if(type == solver_type::PCG)
+    GS_solver_ = nullptr;
+  else if(type == solver_type::GS)
+    GS_solver_ = make_shared<Gauss_seidel>(A, itrs);
+  else if(type_ == solver_type::WJ)
+    GS_solver_ = make_shared<Weighted_Jacobi>(A, itrs, 1e-10);
+}
 
 int layer::solve(){
-  if(if_direct_){
+  if(type_ == solver_type::PCG){
     ConjugateGradient<SPM, Lower|Upper> cg;
     cg.compute(A_);
     u_ = cg.solve(rhs_);

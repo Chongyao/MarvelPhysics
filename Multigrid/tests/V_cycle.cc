@@ -21,6 +21,7 @@ using namespace marvel;
 using HEX_ELAS = BaseElas<FLOAT_TYPE, 3, 8, 1, 2, linear_csttt, basis_func, quadrature>;
 
 int main(int argc, char** argv){
+  Eigen::initParallel();
   boost::property_tree::ptree pt;{
     const string jsonfile_path = argv[1];
     cout << jsonfile_path << endl;
@@ -114,15 +115,22 @@ int main(int argc, char** argv){
   }
 
   cout << "================set transfers done================" << endl;
+  const string sol_type_str = pt.get<string>("solver_type", "GS");
+  solver_type sol_type;
+  if(sol_type_str == "GS")
+    sol_type = solver_type::GS;
+  else if(sol_type_str == "WJ")
+    sol_type = solver_type::WJ;
+          
   const size_t gs_itrs = pt.get<size_t>("gs_itrs", 40);
   VS<layer> layers(num_layers);{
     dat_str->set_zero();
     energy->Gra(nods.data(), dat_str);
     energy->Hes(nods.data(), dat_str);
-    layers[0] = make_shared<layer>(dat_str->get_hes(), false, gs_itrs);
+    layers[0] = make_shared<layer>(dat_str->get_hes(), sol_type, gs_itrs);
     layers[0]->rhs_ = - dat_str->get_gra();
     for(size_t i = 1; i < num_layers; ++i){
-      layers[i] = make_shared<layer>(transfers[i - 1]->R_ * layers[i - 1]->A_ * transfers[i - 1]->I_, false, gs_itrs);
+      layers[i] = make_shared<layer>(transfers[i - 1]->R_ * layers[i - 1]->A_ * transfers[i - 1]->I_, sol_type, gs_itrs);
     }
     
   }

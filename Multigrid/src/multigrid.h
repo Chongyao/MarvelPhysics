@@ -24,17 +24,19 @@ transfer get_transfer(const MatrixXd& nods_H, const MatrixXi& cells_H, const Mat
 
 
 struct layer{
-  layer(const SPM& A, const bool if_direct, const size_t itrs);
+  layer(const SPM& A, const solver_type& type, const size_t itrs);
   int solve();
   Eigen::VectorXd get_residual()const;
   
   const SPM A_;
   Eigen::VectorXd rhs_;
   Eigen::VectorXd u_;
-  const bool if_direct_;
+  // const bool if_direct_;
+  const solver_type type_;
   const size_t itrs_;
 
-  std::shared_ptr<Gauss_seidel> GS_solver_;
+
+  std::shared_ptr<Jacobi_like_solver> GS_solver_;
 
 };
 
