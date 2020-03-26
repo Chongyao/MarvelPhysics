@@ -153,9 +153,9 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
 Weighted_Jacobi::Weighted_Jacobi(const SPM& A, const size_t& max_itr, const double& error, const double& w)
     :w_(w), error_(error), max_itr_(max_itr),dig_vals_(A.diagonal()),U_plus_L_(A.triangularView<StrictlyUpper>() + A.triangularView<StrictlyLower>()), A_(A){
   MatrixXd test = dig_vals_.asDiagonal().inverse() * A;
-  const double w_max = 2.0 / test.eigenvalues().real().maxCoeff();
-  if(w_ > w_max)
-    *(const_cast<double*>(&w_)) = w_max;
+  VectorXd eigvalues = test.eigenvalues().real();
+  const double w_max = 2.0 / eigvalues.maxCoeff();
+  *(const_cast<double*>(&w_)) = 2.0 / (eigvalues.maxCoeff() + eigvalues.minCoeff());
 }
 
 int Weighted_Jacobi::solve(const VectorXd& b, VectorXd& solution) const{
