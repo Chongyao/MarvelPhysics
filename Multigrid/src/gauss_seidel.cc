@@ -4,6 +4,7 @@
 #include <iostream>
 #include <Eigen/Eigenvalues>
 #include <set>
+#include "search_eigenvalues.h"
 namespace marvel{
 using namespace std;
 using namespace Eigen;
@@ -152,10 +153,9 @@ int Gauss_seidel::solve(const Eigen::VectorXd& b, Eigen::VectorXd& solution) con
 //=========================Weighted_Jacobi========================//
 Weighted_Jacobi::Weighted_Jacobi(const SPM& A, const size_t& max_itr, const double& error, const double& w)
     :w_(w), error_(error), max_itr_(max_itr),dig_vals_(A.diagonal()),U_plus_L_(A.triangularView<StrictlyUpper>() + A.triangularView<StrictlyLower>()), A_(A){
-  MatrixXd test = dig_vals_.asDiagonal().inverse() * A;
-  VectorXd eigvalues = test.eigenvalues().real();
-  const double w_max = 2.0 / eigvalues.maxCoeff();
-  *(const_cast<double*>(&w_)) = 2.0 / (eigvalues.maxCoeff() + eigvalues.minCoeff());
+  double max_eigval, min_eigval;
+  find_max_min_eigenvalues(A, max_eigval, min_eigval);
+  *(const_cast<double*>(&w_)) = 2.0 / (max_eigval + min_eigval);
 }
 
 int Weighted_Jacobi::solve(const VectorXd& b, VectorXd& solution) const{
