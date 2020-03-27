@@ -140,50 +140,9 @@ int multigrid_process::execute(double* solution){
 
 int multigrid_process::relax(const size_t layer_id){
   cout << "relax layer " << layer_id << endl;
-  cout << "residual befor GS " << layers_[layer_id]->get_residual().norm() << endl;
-  // static size_t t = 0;
-  // auto A = MatrixXd(layers_[layer_id]->A_);
-  // EigenSolver<MatrixXd> s(A);
-  // MatrixXd eigvecs = s.eigenvectors().real();
-  // VectorXd eigvalues = s.eigenvalues().real();
-  // map<double, size_t> order;{
-  //   for(size_t i = 0; i < eigvalues.rows(); ++i){
-  //     order.insert({eigvalues(i), i});
-  //   }
-  // }
-
-  
-  // {//check spectrum
-  //   VectorXd r = layers_[layer_id]->get_residual();
-    
-  //   ofstream ofs(to_string(t)+"_before.txt");
-  //   for(auto& v : order){
-  //     const size_t i = v.second;
-  //     VectorXd tmp = eigvecs.col(i) / eigvecs.col(i).norm();
-  //     double w = r.dot(tmp);
-  //     ofs << fabs(w) << endl;
-  //     r -= tmp * w;
-  //   }
-  //   cout << "after proj " << r.norm() << endl;
-  //   ofs.close();
-  // }
-  
-  layers_[layer_id]->solve();
-  cout << "residual after GS" << layers_[layer_id]->get_residual().norm() << endl;
-  // {//check spectrum
-  //   VectorXd r = layers_[layer_id]->get_residual();
-  //   ofstream ofs(to_string(t)+"_after.txt");
-  //   for(auto& v : order){
-  //     const size_t i = v.second;
-  //     VectorXd tmp = eigvecs.col(i) / eigvecs.col(i).norm();
-  //     double w = r.dot(tmp);
-  //     ofs << -fabs(w) << endl;
-  //     r -= tmp * w;
-  //   }
-  //   cout << "after proj " << r.norm() << endl;
-  //   ofs.close();
-  //   ++t;
-  // }
+  cout << "relative error  befor GS " << layers_[layer_id]->get_residual().norm() / layers_[layer_id]->rhs_.norm() << endl;
+    layers_[layer_id]->solve();
+    cout << "relative error after GS" << layers_[layer_id]->get_residual().norm() / layers_[layer_id]->rhs_.norm()<< endl;
   return 0;
 }
 

@@ -4,7 +4,7 @@
   "mesh_name":"cube",
   "path":"../data/cube-vox/",
   "gs_itrs":100,
-  "num_V":2,
+  "num_V":8,
   "Yound":80,
   "solver_type":"WJ"
 }

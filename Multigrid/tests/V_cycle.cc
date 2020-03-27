@@ -163,15 +163,15 @@ int main(int argc, char** argv){
   cg.compute(K);
   VectorXd solu_cg = cg.solve(rhs);
   __TIME_END__("cg ");
-  cout << "residual is " << (rhs - K * solu_cg).norm() << endl;
+  cout << "residual is " << (rhs - K * solu_cg).norm() / rhs.norm()<< endl;
 
-  cout << "=========compare to llt===============" << endl;
-  SimplicialLDLT<SparseMatrix<double>> llt;
-  __TIME_BEGIN__;
-  llt.compute(K);
-  VectorXd solu_llt = llt.solve(rhs);
-  __TIME_END__("LLT ");
-  cout << "residual is " << (rhs - K * solu_llt).norm() << endl;
+  // cout << "=========compare to llt===============" << endl;
+  // SimplicialLDLT<SparseMatrix<double>> llt;
+  // __TIME_BEGIN__;
+  // llt.compute(K);
+  // VectorXd solu_llt = llt.solve(rhs);
+  // __TIME_END__("LLT ");
+  // cout << "residual is " << (rhs - K * solu_llt).norm() << endl;
   
   return 0;
 }
