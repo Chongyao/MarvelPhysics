@@ -20,7 +20,7 @@ class Sparsify;
 class Adjc_graph{
   
  public:
-  Adjc_graph(const Eigen::SparseMatrix<double>& L, const bool w_is_positive = true);
+  Adjc_graph(const Eigen::SparseMatrix<double>& L, const int option = 1);
   int build_mat_from_graph(Eigen::MatrixXd& L)const;
   int build_mat_from_graph(std::vector<TPL>& trips)const;
 
@@ -30,7 +30,6 @@ class Adjc_graph{
   const size_t dof_;
   VS<std::unordered_set<size_t>> vertices_;
   VS<TPL> edges_;
-  const bool w_is_positive_;
 
   friend class Sparsify;
 
