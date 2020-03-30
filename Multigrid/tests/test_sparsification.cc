@@ -7,7 +7,7 @@
 #include "FEM/src/mass_matrix.h"
 #include "Multigrid/src/Sparsification.h"
 #include <iostream>
-
+#include "search_eigenvalues.h"
 
 using namespace std;
 using namespace Eigen;
@@ -98,12 +98,45 @@ int main(int argc, char** argv){
   //sparsification
   energy->Hes(nods.data(), dat_str);
   SparseMatrix<double> L = dat_str->get_hes();
-  #if 0
-  {//truncate
+  // {
+  //   ofstream ofs("SPM", ofstream::binary);
+  //   int 64 = L.
+    
+  // }
+  auto spar =
+      [](const SparseMatrix<double>& hes, const int opt)->SparseMatrix<double>{
+        Adjc_graph graph(hes, opt);
+        Sparsify sp_op(hes.rows());
+        sp_op.sparsify_and_compensate(graph);
+        SparseMatrix<double> hes_new(hes.rows(), hes.cols());{
+          vector<Triplet<double>> trips;
+          graph.build_mat_from_graph(trips);
+          add_dig_vals(hes, trips);
+          hes_new.reserve(trips.size());
+          hes_new.setFromTriplets(trips.begin(), trips.end());
+        }
+        return hes_new;
+  };
+  auto test_condition =
+      [](const SparseMatrix<double>& hes, const SparseMatrix<double>& hes_new)->void{
+        SparseLU<SparseMatrix<double>> lu(hes_new);
+        MatrixXd test = MatrixXd(hes) * lu.solve(MatrixXd::Identity(hes.rows(), hes.rows()));
+        VectorXd eigvalues = test.eigenvalues().real();
+        cout << "condition number is " << eigvalues.maxCoeff() / eigvalues.minCoeff() << endl;
 
-    for(int k=0; k<L.outerSize(); ++k){
+      };
+  
+  {//origin version
+    cout << "origin version" << endl;
+    auto L_new = spar(L, 0);
+    test_condition(L, L_new);
+  }
+
+  {//truncated version
+    auto L_t = L;
+    for(int k=0; k<L_t.outerSize(); ++k){
       double sum = 0;
-      for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
+      for (SparseMatrix<double>::InnerIterator it(L_t,k); it; ++it){
         if(it.index() == k){
           continue;
         }
@@ -112,21 +145,45 @@ int main(int argc, char** argv){
           it.valueRef() = 0;          
         }
       }
-      for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
+      for (SparseMatrix<double>::InnerIterator it(L_t,k); it; ++it){
         if(it.index() == k){
           it.valueRef() += sum;
           break;
         }
       }
     }
-    L.prune(0.0);
+    L_t.prune(0.0);
+    cout << "truncated versoin" << endl;
+    auto L_new = spar(L_t, 0);
+    test_condition(L_t, L_new);
+    test_condition(L, L_new);
   }
-  #endif
-    
-  // Adjc_graph graph_P(L, true);
 
-  Adjc_graph graph_N(L, false);
+  {//mixed version
+    cout << "mixed version" << endl;
+    Adjc_graph graph_P(L, 1), graph_N(L, -1);
+    Sparsify sp_op(L.rows());
+    sp_op.sparsify_and_compensate(graph_P);
+    sp_op.sparsify_and_compensate(graph_N);
+    
+    SparseMatrix<double> L_tilde(L.rows(), L.cols());{
+      vector<Triplet<double>> trips;
+      graph_P.build_mat_from_graph(trips);
+      graph_N.build_mat_from_graph(trips);
+      add_dig_vals(L, trips);
+      L_tilde.reserve(trips.size());
+      L_tilde.setFromTriplets(trips.begin(), trips.end());
+    }
+    
+    SparseLU<SparseMatrix<double>> lu(L_tilde);
+    MatrixXd test = MatrixXd(L) * lu.solve(MatrixXd::Identity(L.rows(), L.rows()));
+    VectorXd eigvalues = test.eigenvalues().real();
+    cout << "condition number is " << eigvalues.maxCoeff() / eigvalues.minCoeff() << endl;
+    
+  }
   
+  // Adjc_graph graph_P(L, true);
+  #if 0
   SparseMatrix<double> L_truncated(L.rows(), L.cols()); 
   {
     vector<TPL> trips;
@@ -190,6 +247,7 @@ int main(int argc, char** argv){
   sort(eigvals.data(), eigvals.data() + eigvals.size());
   // cout << eigvals << endl;xo
   cout << "condition number " << eigvals.array().abs().maxCoeff() / eigvals.array().abs().minCoeff() << endl;;
+  #endif
 
   return 0;
 }

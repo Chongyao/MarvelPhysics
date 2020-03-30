@@ -34,7 +34,7 @@ void Adjc_graph::init(){
 // }
 
 
-Adjc_graph::Adjc_graph(const SparseMatrix<double>& L, const bool w_is_positive):dof_(L.rows()), w_is_positive_(w_is_positive){
+Adjc_graph::Adjc_graph(const SparseMatrix<double>& L, const int option):dof_(L.rows()){
   init();
   size_t num_edges = 0;
   
@@ -42,19 +42,14 @@ Adjc_graph::Adjc_graph(const SparseMatrix<double>& L, const bool w_is_positive):
     for (SparseMatrix<double>::InnerIterator it(L,k); it; ++it){
       if(it.index() >= k)
         break;
-      if(w_is_positive){
-        if(it.value() > 0)
+      if(option == 1 && it.value() > 0)
           continue;
-        vertices_[it.row()]->insert(num_edges);
-        vertices_[it.col()]->insert(num_edges);
-        edges_.push_back(make_shared<TPL>(it.row(), it.col(), -it.value()));
-      }else{
-        if(it.value() < 0 )
+      else if(option == -1 && it.value() < 0)
           continue;
-        vertices_[it.row()]->insert(num_edges);
-        vertices_[it.col()]->insert(num_edges);
-        edges_.push_back(make_shared<TPL>(it.row(), it.col(), it.value()));
-      }
+      
+      vertices_[it.row()]->insert(num_edges);
+      vertices_[it.col()]->insert(num_edges);
+      edges_.push_back(make_shared<TPL>(it.row(), it.col(), it.value()));
       ++num_edges;
     }
 }
@@ -69,7 +64,7 @@ int Adjc_graph::build_mat_from_graph(vector<TPL>& trips)const{
     vector<Triplet<double>> trips_e;
     const auto& trip = *edges_[i];
     const size_t row_id = trip.row(), col_id = trip.col();
-    const double value = w_is_positive_ ? -trip.value() : trip.value();
+    const double value = trip.value();
     trips_e.push_back(TPL(row_id, col_id, value));
     trips_e.push_back(TPL(col_id, row_id, value));
     trips_e.push_back(TPL(row_id, row_id, -value));
@@ -114,7 +109,7 @@ int Adjc_graph::build_reordered_mat_from_graph(const VectorXi& perm_inv, std::ve
     const size_t
         row_id = perm_inv(trip.row()),
         col_id = perm_inv(trip.col());
-    const double value = w_is_positive_ ? -trip.value() : trip.value();
+    const double value = trip.value();
     
     trips_e.push_back(TPL(row_id, col_id, value));
     trips_e.push_back(TPL(col_id, row_id, value));
@@ -215,9 +210,9 @@ void Sparsify::compensate_one_edge(Adjc_graph& graph, const size_t edge_id_ik, c
 void Sparsify::sparsify_one_tri(Adjc_graph& graph, const size_t edge_id_i, const size_t edge_id_j, const size_t edge_id_k, size_t& sparsified_edge_id){
   auto& edges = graph.edges_;
   vector<pair<size_t, double>> ws;{
-    ws.push_back({edge_id_i, edges[edge_id_i]->value()});
-    ws.push_back({edge_id_j, edges[edge_id_j]->value()});
-    ws.push_back({edge_id_k, edges[edge_id_k]->value()});
+    ws.push_back({edge_id_i, fabs(edges[edge_id_i]->value())});
+    ws.push_back({edge_id_j, fabs(edges[edge_id_j]->value())});
+    ws.push_back({edge_id_k, fabs(edges[edge_id_k]->value())});
   }
   sort(ws.begin(), ws.end(), [](const pair<size_t, double>&lhs, const pair<size_t,double>&rhs)->bool{
                                return lhs.second < rhs.second;
