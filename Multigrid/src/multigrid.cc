@@ -104,6 +104,9 @@ multigrid_process::multigrid_process(const vector<int>& process, VS<layer>& laye
 }
 
 int multigrid_process::execute(double* solution){
+  Map<VectorXd> u(solution, layers_[0]->u_.size());
+  layers_[0]->u_ = u;
+  
   const size_t num_layers = layers_.size();
   size_t layer_id = 0;
 
@@ -132,6 +135,7 @@ int multigrid_process::execute(double* solution){
     }
 
   }
+  u = layers_[0]->u_;
   cout << "time for relax is " << time_rel << " seconds.\n"
        << "time for restrict is " << time_res << " seconds.\n"
        << "time for correction is "<< time_corr << " seconds.\n";

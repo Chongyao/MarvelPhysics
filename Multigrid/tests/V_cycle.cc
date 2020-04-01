@@ -13,6 +13,7 @@
 #include <iostream>
 #include <string>
 #include<Eigen/SparseCholesky>
+#include <math.h>
 
 using namespace std;
 using namespace Eigen;
@@ -134,6 +135,18 @@ int main(int argc, char** argv){
     }
     
   }
+
+  cout << "=================compare to CG=================="<<endl;
+  ConjugateGradient<SparseMatrix<FLOAT_TYPE>, Lower|Upper> cg;
+  const SparseMatrix<double> K = dat_str->get_hes();
+  const VectorXd rhs = -dat_str->get_gra();
+  cg.setMaxIterations(pt.get<size_t>("cg_itrs", 2 * rhs.size()));
+  __TIME_BEGIN__;
+  cg.compute(K);
+  VectorXd solu_cg = cg.solve(rhs);
+  __TIME_END__("cg ");
+  cout << "residual is " << (rhs - K * solu_cg).norm() / rhs.norm()<< endl;
+
   cout << "================set layers done================" << endl;
   vector<int> one_V(2 * (num_layers - 1), -1);
   for(size_t i = 0; i < num_layers - 1; ++i){
@@ -158,25 +171,48 @@ int main(int argc, char** argv){
   VectorXd solution = VectorXd::Zero(nods.size());
   VectorXd last_solution = solution;
   vector<double> diff;
+  vector<double> error;
   for(size_t i = 0; i < num_V; ++i){
     __TIME_BEGIN__;
     MP.execute(solution.data());
     __TIME_END__(to_string(i) + " V ");
     diff.push_back((solution - last_solution).norm());
+    error.push_back((solution - solu_cg).norm());
     last_solution = solution;
   }
 
+  cout << "diff " << endl;
+  for(auto& v : diff)
+    cout << v << endl;
 
-  cout << "=================compare to CG=================="<<endl;
-  ConjugateGradient<SparseMatrix<FLOAT_TYPE>, Lower|Upper> cg;
-  const SparseMatrix<double> K = dat_str->get_hes();
-  const VectorXd rhs = -dat_str->get_gra();
-  cg.setMaxIterations(pt.get<size_t>("cg_itrs", 2 * rhs.size()));
-  __TIME_BEGIN__;
-  cg.compute(K);
-  VectorXd solu_cg = cg.solve(rhs);
-  __TIME_END__("cg ");
-  cout << "residual is " << (rhs - K * solu_cg).norm() / rhs.norm()<< endl;
+  // calculate rate of convergence
+  vector<double> order;
+  for(size_t i = 0; i < diff.size() - 2; ++i){
+    order.push_back(log(diff[i + 2] / diff[i + 1]) / log(diff[i + 1] / diff[i]));
+  }
+  cout << "order " << endl;
+  for(auto& v : order)
+    cout << v << endl;
+
+  {//write error
+    ofstream ofs("gs_itrs_"+to_string(gs_itrs)+ "_error.txt");
+    for(auto& v : error){
+      ofs << v << "\n";
+    }
+    ofs.close();
+  }
+  //try linear
+  cout << "try linear convergence." << endl;
+  vector<double> linear_rate;
+  for(size_t i = 0; i < error.size() - 1; ++i){
+    linear_rate.push_back(error[i + 1] / error[i]);
+  }
+  for(auto& v : linear_rate)
+    cout << v << endl;
+
+
+
+
 
   // cout << "=========compare to llt===============" << endl;
   // SimplicialLDLT<SparseMatrix<double>> llt;
