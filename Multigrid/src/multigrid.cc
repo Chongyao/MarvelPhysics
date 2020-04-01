@@ -139,10 +139,10 @@ int multigrid_process::execute(double* solution){
 }
 
 int multigrid_process::relax(const size_t layer_id){
-  cout << "relax layer " << layer_id << endl;
-  cout << "relative error  befor GS " << layers_[layer_id]->get_residual().norm() / layers_[layer_id]->rhs_.norm() << endl;
+  // cout << "relax layer " << layer_id << endl;
+  // cout << "relative error  befor GS " << layers_[layer_id]->get_residual().norm() / layers_[layer_id]->rhs_.norm() << endl;
     layers_[layer_id]->solve();
-    cout << "relative error after GS" << layers_[layer_id]->get_residual().norm() / layers_[layer_id]->rhs_.norm()<< endl;
+    // cout << "relative error after GS" << layers_[layer_id]->get_residual().norm() / layers_[layer_id]->rhs_.norm()<< endl;
   return 0;
 }
 

@@ -141,18 +141,31 @@ int main(int argc, char** argv){
   }
 
   const size_t num_V = pt.get<size_t>("num_V", 1);
-  vector<int> process(num_V * one_V.size());
-  #pragma omp parallel for
-  for(size_t i = 0; i < num_V; ++i){
-    copy(one_V.begin(), one_V.end(), process.begin() + i * one_V.size());
-  }
+  // vector<int> process(num_V * one_V.size());
+  // #pragma omp parallel for
+  // for(size_t i = 0; i < num_V; ++i){
+  //   copy(one_V.begin(), one_V.end(), process.begin() + i * one_V.size());
+  // }
   
-  cout << "================set process done================" << endl;
-  multigrid_process MP(process, layers, transfers);
-  VectorXd solution = VectorXd::Zero(nods.cols());
-  __TIME_BEGIN__;
-  MP.execute(solution.data());
-  __TIME_END__("V cycle ");
+  // cout << "================set process done================" << endl;
+  // multigrid_process MP(process, layers, transfers);
+  // VectorXd solution = VectorXd::Zero(nods.cols());
+  // __TIME_BEGIN__;
+  // MP.execute(solution.data());
+  // __TIME_END__("V cycle ");
+
+  multigrid_process MP(one_V, layers, transfers);
+  VectorXd solution = VectorXd::Zero(nods.size());
+  VectorXd last_solution = solution;
+  vector<double> diff;
+  for(size_t i = 0; i < num_V; ++i){
+    __TIME_BEGIN__;
+    MP.execute(solution.data());
+    __TIME_END__(to_string(i) + " V ");
+    diff.push_back((solution - last_solution).norm());
+    last_solution = solution;
+  }
+
 
   cout << "=================compare to CG=================="<<endl;
   ConjugateGradient<SparseMatrix<FLOAT_TYPE>, Lower|Upper> cg;
