@@ -16,7 +16,8 @@ namespace marvel {
 
 int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, Eigen::MatrixXd *pos=nullptr);
 
-
+int write_MAT(const char* path, const Eigen::MatrixXd& A);
+int write_SPM(const char* path, const Eigen::SparseMatrix<double>& A);
 
 int tri_mesh_write_to_vtk(const char *path, const Eigen::MatrixXd &nods, const Eigen::MatrixXi &tris, const Eigen::MatrixXd *mtr=nullptr);
 // int quad_mesh_write_to_vtk(const char *path, const matd_t &nods, const mati_t &quad,
