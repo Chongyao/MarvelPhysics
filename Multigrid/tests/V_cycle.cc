@@ -194,13 +194,7 @@ int main(int argc, char** argv){
   for(auto& v : order)
     cout << v << endl;
 
-  {//write error
-    ofstream ofs("gs_itrs_"+to_string(gs_itrs)+ "_error.txt");
-    for(auto& v : error){
-      ofs << v << "\n";
-    }
-    ofs.close();
-  }
+
   //try linear
   cout << "try linear convergence." << endl;
   vector<double> linear_rate;
@@ -210,7 +204,26 @@ int main(int argc, char** argv){
   for(auto& v : linear_rate)
     cout << v << endl;
 
+  {//write error
+    const string prefix = "../results/V_cycle/layers_" + to_string(num_layers) + "_gs_itrs_" + to_string(gs_itrs);
+    boost::filesystem::path outpath(prefix);
+    if ( !boost::filesystem::exists(outpath) )
+      boost::filesystem::create_directories(outpath);
+    
+    auto writefile =
+        [&](const vector<double>& vec, const string& name){
+          ofstream ofs(prefix + "/" + name +".txt");
+          for(auto& v : vec){
+            ofs << v << "\n";
+          }
+          ofs.close();
+        };
+    writefile(error, "error");
+    writefile(diff, "diff");
+    writefile(order, "order");
+    writefile(linear_rate, "linear_rate");
 
+  }
 
 
 
