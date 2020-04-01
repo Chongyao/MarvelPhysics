@@ -172,12 +172,14 @@ int main(int argc, char** argv){
   VectorXd last_solution = solution;
   vector<double> diff;
   vector<double> error;
+  auto& A =  layers[0]->A_;
   for(size_t i = 0; i < num_V; ++i){
     __TIME_BEGIN__;
     MP.execute(solution.data());
     __TIME_END__(to_string(i) + " V ");
     diff.push_back((solution - last_solution).norm());
-    error.push_back((solution - solu_cg).norm());
+    VectorXd res = solution - solu_cg;
+    error.push_back(sqrt(res.dot(A * res)));
     last_solution = solution;
   }
 
