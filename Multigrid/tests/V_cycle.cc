@@ -14,6 +14,7 @@
 #include <string>
 #include<Eigen/SparseCholesky>
 #include <math.h>
+#include "search_eigenvalues.h"
 
 using namespace std;
 using namespace Eigen;
@@ -122,8 +123,10 @@ int main(int argc, char** argv){
     sol_type = solver_type::GS;
   else if(sol_type_str == "WJ")
     sol_type = solver_type::WJ;
-          
-  const size_t gs_itrs = pt.get<size_t>("gs_itrs", 40);
+
+
+  const size_t gs_itrs = argc > 2 ? stoi(argv[2]) : pt.get<size_t>("gs_itrs", 40); 
+  cout << "gs_itrs is " << gs_itrs << endl;
   VS<layer> layers(num_layers);{
     dat_str->set_zero();
     energy->Gra(nods.data(), dat_str);
@@ -135,10 +138,30 @@ int main(int argc, char** argv){
     }
     
   }
+  cout << "================set layers done================" << endl;
 
   cout << "=================compare to CG=================="<<endl;
   ConjugateGradient<SparseMatrix<FLOAT_TYPE>, Lower|Upper> cg;
   const SparseMatrix<double> K = dat_str->get_hes();
+  #if 0
+  {
+    VectorXd dig_val = K.diagonal();
+    auto PK = K;{
+      for(int k=0; k<PK.outerSize(); ++k)
+        for (SparseMatrix<double>::InnerIterator it(PK,k); it; ++it){
+          it.valueRef() /= dig_val(k);
+        }
+    }
+    double CN = find_condition_number(PK, 500);
+    cout << "condition number is" << CN<< endl;
+    cout << "convergence rate is "  << 1 - 2.0 / sqrt(CN) << endl;
+
+    CN = find_condition_number(K, 500);
+    cout << "condition number is" << CN<< endl;
+    cout << "convergence rate is "  << 1 - 2.0 / sqrt(CN) << endl;
+    getchar();
+  }
+  #endif
   const VectorXd rhs = -dat_str->get_gra();
   cg.setMaxIterations(pt.get<size_t>("cg_itrs", 2 * rhs.size()));
   __TIME_BEGIN__;
@@ -147,42 +170,127 @@ int main(int argc, char** argv){
   __TIME_END__("cg ");
   cout << "residual is " << (rhs - K * solu_cg).norm() / rhs.norm()<< endl;
 
-  cout << "================set layers done================" << endl;
+  #if 1
+  const string prefix = "../results/V_cycle/layers_" + to_string(num_layers) + "_gs_itrs_" + to_string(gs_itrs);
+  boost::filesystem::path outpath(prefix);
+  if ( !boost::filesystem::exists(outpath) )
+    boost::filesystem::create_directories(outpath);
+    
+  auto writefile =
+      [&](const vector<double>& vec, const string& name){
+        ofstream ofs(prefix + "/" + name +".txt");
+        for(auto& v : vec){
+          ofs << v << "\n";
+        }
+        ofs.close();
+      };
+
+
+  // {
+  //   //PCG convergence
+  //   vector<double> diff;
+  //   vector<double> error;
+  //   VectorXd solution = VectorXd::Zero(K.rows());
+  //   VectorXd last_solution = VectorXd::Zero(K.rows());
+  //   for(size_t i = 0; i < K.rows() * 2; ++i){
+  //     cout << i << endl;
+  //     cg.setMaxIterations(i);
+  //     cg.setTolerance(0.0);
+  //     solution = cg.solve(rhs);
+      
+  //     if(i > 0)
+  //       diff.push_back((solution - last_solution).norm());
+      
+  //     VectorXd res = solution - solu_cg;
+  //     error.push_back(sqrt(res.dot(K * res)));
+  //     last_solution = solution;
+  //   }
+  //   writefile(error, "cg_error");
+  //   writefile(diff, "cg_diff");
+  //   vector<double> order;
+  //   for(size_t i = 0; i < diff.size() - 2; ++i){
+  //     order.push_back(log(diff[i + 2] / diff[i + 1]) / log(diff[i + 1] / diff[i]));
+  //   }
+  //   writefile(order, "cg_order");
+    
+
+    
+  // }
+  // getchar();
+  #endif
+
+
   vector<int> one_V(2 * (num_layers - 1), -1);
   for(size_t i = 0; i < num_layers - 1; ++i){
     one_V[i] = 1;
   }
 
   const size_t num_V = pt.get<size_t>("num_V", 1);
-  // vector<int> process(num_V * one_V.size());
-  // #pragma omp parallel for
-  // for(size_t i = 0; i < num_V; ++i){
-  //   copy(one_V.begin(), one_V.end(), process.begin() + i * one_V.size());
-  // }
+  vector<int> process(num_V * one_V.size());
+  #pragma omp parallel for
+  for(size_t i = 0; i < num_V; ++i){
+    copy(one_V.begin(), one_V.end(), process.begin() + i * one_V.size());
+  }
   
   // cout << "================set process done================" << endl;
   // multigrid_process MP(process, layers, transfers);
-  // VectorXd solution = VectorXd::Zero(nods.cols());
+  // VectorXd solution = VectorXd::Zero(nods.size());
   // __TIME_BEGIN__;
   // MP.execute(solution.data());
   // __TIME_END__("V cycle ");
+  // auto& A =  layers[0]->A_;
+  // auto& b = layers[0]->rhs_;
+  // cout << "residual " << " " << (A*solution - b).norm() / b.norm() << endl;
 
+  #if 1
+  multigrid_process MP(one_V, layers, transfers);
+  VectorXd solution = VectorXd::Zero(nods.size());
+  double V_time = 0;
+  auto cnt = 0;
+  double res = 0.0, last_res = 1e40;
+  do{
+    __TIME_BEGIN__;
+    MP.execute(solution.data());
+    V_time +=__TIME_END__("V", false);
+    res = (K * solution - rhs).norm() / rhs.norm();
+    if(res < 1e-13)
+      break;
+    if(res > last_res)
+      break;
+    last_res = res;
+  }while(cnt++ < 100000);
+  ofstream ofs("itrs_time.txt", std::ofstream::app);
+  ofs << gs_itrs << " " << cnt << " "<<V_time << " " << res << "\n";
+  ofs.close();
+  return 0;
+  #endif
+  
+  
+  
+
+  
+  #if 0
   multigrid_process MP(one_V, layers, transfers);
   VectorXd solution = VectorXd::Zero(nods.size());
   VectorXd last_solution = solution;
   vector<double> diff;
   vector<double> error;
   auto& A =  layers[0]->A_;
+  auto& b = layers[0]->rhs_;
   for(size_t i = 0; i < num_V; ++i){
     __TIME_BEGIN__;
     MP.execute(solution.data());
     __TIME_END__(to_string(i) + " V ");
+    cout << "cycle " << i << " " << (A*solution - b).norm() / b.norm() << endl;
+    #ifdef TEST
     diff.push_back((solution - last_solution).norm());
     VectorXd res = solution - solu_cg;
     error.push_back(sqrt(res.dot(A * res)));
     last_solution = solution;
+    #endif
   }
-
+  #endif
+  #ifdef TEST
   cout << "diff " << endl;
   for(auto& v : diff)
     cout << v << endl;
@@ -207,19 +315,6 @@ int main(int argc, char** argv){
     cout << v << endl;
 
   {//write error
-    const string prefix = "../results/V_cycle/layers_" + to_string(num_layers) + "_gs_itrs_" + to_string(gs_itrs);
-    boost::filesystem::path outpath(prefix);
-    if ( !boost::filesystem::exists(outpath) )
-      boost::filesystem::create_directories(outpath);
-    
-    auto writefile =
-        [&](const vector<double>& vec, const string& name){
-          ofstream ofs(prefix + "/" + name +".txt");
-          for(auto& v : vec){
-            ofs << v << "\n";
-          }
-          ofs.close();
-        };
     writefile(error, "error");
     writefile(diff, "diff");
     writefile(order, "order");
@@ -227,7 +322,7 @@ int main(int argc, char** argv){
 
   }
 
-
+  #endif
 
   // cout << "=========compare to llt===============" << endl;
   // SimplicialLDLT<SparseMatrix<double>> llt;
