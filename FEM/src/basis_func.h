@@ -103,7 +103,7 @@ class basis_func{
     return;
   }
   static void get_def_gra(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const T* const x, const Matrix<T, dim_, dim_>& Dm_inv,  Eigen::Matrix<T, field_, dim_> & def_gra) {
-    const Eigen::Map<const Matrix<T, dim_, num_per_cell_>> deformed(x);
+    const Eigen::Map<const Matrix<T, field_, num_per_cell_>> deformed(x);
     def_gra = deformed * Dphi_Dxi * Dm_inv;
     return;
   }

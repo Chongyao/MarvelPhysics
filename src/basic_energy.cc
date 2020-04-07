@@ -239,8 +239,11 @@ size_t collision<T, dim_>::Nx() const{
 /*************************************collision*********************************/
 
 template class position_constraint<FLOAT_TYPE, 3>;
+template class position_constraint<FLOAT_TYPE, 1>;
 template class momentum<FLOAT_TYPE, 3>;
 template class gravity_energy<double, 3>;
 template class collision<FLOAT_TYPE, 3>;
+
+
 
 }//namespace marvel

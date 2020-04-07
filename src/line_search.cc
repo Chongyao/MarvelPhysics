@@ -102,10 +102,22 @@ template double line_search<double ,3>(
     std::shared_ptr<dat_str_core<double, 3>>& data,
     const double* const xk, const double* const  pk);
 
+template double line_search<double ,1>(
+    const double& val_init, const double& down,
+    const std::shared_ptr<Functional<double, 1>>& energy,
+    std::shared_ptr<dat_str_core<double, 1>>& data,
+    const double* const xk, const double* const  pk);
+
 template float line_search<float, 3>(
     const float& val_init, const float& down,
     const std::shared_ptr<Functional<float, 3>>& energy,
     std::shared_ptr<dat_str_core<float, 3>>& data,
+    const float* const xk, const float* const  pk);
+
+template float line_search<float, 1>(
+    const float& val_init, const float& down,
+    const std::shared_ptr<Functional<float, 1>>& energy,
+    std::shared_ptr<dat_str_core<float, 1>>& data,
     const float* const xk, const float* const  pk);
 // template class line_search<double, 2>;
 // template class line_search<float, 3>;

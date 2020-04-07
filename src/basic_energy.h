@@ -29,6 +29,8 @@ class position_constraint : public Functional<T, dim_>{
   const std::vector<size_t> cons_;
 };
 
+
+
 template<typename T, size_t dim_>
 class gravity_energy : public Functional<T, dim_>{
  public:

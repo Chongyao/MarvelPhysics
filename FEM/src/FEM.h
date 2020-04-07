@@ -29,6 +29,7 @@ class finite_element : public Functional<T, field_>{
   int Val(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) const;
   int Gra(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) const;
   int Hes(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) const;
+  Eigen::Matrix<T, -1, -1> mtr_;
   
  protected://about elements
   const size_t all_dim_, num_nods_, num_cells_, num_qdrt_;
@@ -36,7 +37,7 @@ class finite_element : public Functional<T, field_>{
   const Eigen::Matrix<int, num_per_cell_, -1> cells_; // elements
   const Matrix<int, dim_, 1> all_rows_;
   const qdrt quadrature_;
-  Matrix<T, -1, -1> mtr_;
+
 
  protected:   // precomputed values
   void PreComputation();

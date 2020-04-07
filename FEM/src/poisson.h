@@ -5,6 +5,7 @@
 #include "data_str_core.h"
 #include "gaussian_quadrature.h"
 #include "basis_func.h"
+#include "FEM.h"
 
 #include <Eigen/Dense>
 #include "eigen_ext.h"
@@ -13,38 +14,23 @@
 #include <fstream>
 
 namespace marvel{
-#if 0
-// Functional dimension is 1 since the solution is scalar function.
-template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,
-         template<typename, size_t, size_t, size_t > class BASIS, //  basis
+
+
+template<typename T, size_t dim_, size_t num_per_cell_, size_t qdrt_axis_,
+         template<typename, size_t, size_t> class CSTTT,  // constituitive function
+         template<typename, size_t, size_t, size_t, size_t > class BASIS, //  basis
          template<typename, size_t, size_t, size_t> class QDRT> //
-class poisson : public Functional<T, 1>{
+class POISSON : public finite_element<T, dim_, 1, num_per_cell_, 1, qdrt_axis_, CSTTT, BASIS, QDRT>{
  public:
-  poisson(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells, const Eigen::Matrix<T, -1, 1>& k);
-  size_t Nx() const;
-  int Val(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const;
-  int Gra(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const;
-  int Hes(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data) const;
- private:
-  void PreComputation();
-  const size_t num_nods_, num_cells_, num_qdrt_;
-  const Eigen::Matrix<T, dim_, -1> nods_; // vertices
-  const Eigen::Matrix<int, num_per_cell_, -1> cells_; // elements
-  const Eigen::Matrix<T, -1, 1>& k_;
-  const Matrix<int, 1, 1> all_rows_;
-
- private:
-  const qdrt quadrature_;
-  std::vector<std::vector<Eigen::Matrix<T, dim_, dim_>>> Dm_inv_;
-  std::vector<std::vector<Eigen::Matrix<T, num_per_cell_, dim_>>> Dphi_Dxi_;
-  std::vector<std::vector<T>> Jac_det_;
+  using base_class = finite_element<T, dim_, 1, num_per_cell_, 1, qdrt_axis_, CSTTT, BASIS, QDRT>;
+  POISSON(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells, const Matrix<T, 1, -1>& mtr):
+      base_class(nods, cells){
+    base_class::mtr_ = mtr;
+  }
 };
+using HEX_POISSON = POISSON<double, 3, 8, 2, quadratic_csttt, basis_func, quadrature>;
+using QUAD_POISSON = POISSON<double, 2, 4, 2, quadratic_csttt, basis_func, quadrature>;
 
-
-
-#define POI_TEMP template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,template<typename, size_t, size_t, size_t > class BASIS,template<typename, size_t, size_t, size_t> class QDRT>
-#define POI_CLASS BaseElas<T, dim_, num_per_cell_, bas_order_, qdrt_axis_, BASIS, QDRT>
-#endif
 
 }
 #endif

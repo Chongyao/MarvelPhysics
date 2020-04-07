@@ -30,7 +30,7 @@ void FEM_CLASS::PreComputation(){
     
   Eigen::Matrix<T, dim_, dim_> Dm_inv_tmp;
   T Jac_det_tmp;
-  Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_> Ddef_Dx_tmp;
+  Eigen::Matrix<T, field_ * dim_, field_ * num_per_cell_> Ddef_Dx_tmp;
   Eigen::Matrix<T, num_per_cell_, dim_> Dphi_Dxi_tmp;
     
   for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
@@ -71,7 +71,7 @@ int FEM_CLASS::Gra(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) co
 
 #pragma omp parallel for
   for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
-    Matrix<T, dim_, dim_> def_gra;
+    Matrix<T, field_, dim_> def_gra;
       
     const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
     Matrix<T, field_ * dim_, 1> gra_F_based;
@@ -138,7 +138,7 @@ finite_element<double, 3, 3, 4, 1, 1, stvk, basis_func, quadrature>;
 template class
 finite_element<double, 3, 3, 8, 1, 2, stvk, basis_func, quadrature>;
 
-
+template class finite_element<double, 3, 1, 8, 1, 2, quadratic_csttt, basis_func, quadrature>;
 
 
 }

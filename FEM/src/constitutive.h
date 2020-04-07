@@ -14,6 +14,7 @@ using namespace std;
 
 template<typename T, size_t dim_, size_t field_>
 class constitutive{
+ public:
   static T
   val(const Eigen::Matrix<T, field_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr) ;
   static  Eigen::Matrix<T, field_ * dim_, 1>
@@ -23,7 +24,27 @@ class constitutive{
   hes(const Eigen::Matrix<T, field_, dim_>& F,const Eigen::Matrix<T, -1, -1>& mtr);  
 };
 
-
+template<typename T, size_t dim_, size_t field_>
+class quadratic_csttt : public constitutive<T, dim_, field_>{
+ public:
+  static T
+  val(const Eigen::Matrix<T, field_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr){
+    return 0.5 * mtr(0) * ((F.array() * F.array()).sum());
+  }
+  static Eigen::Matrix<T, field_ * dim_, 1>
+  gra(const Eigen::Matrix<T, field_, dim_>&F, const Eigen::Matrix<T, -1,-1>& mtr){
+    Map<const Matrix<T, field_ * dim_, 1>> F_vec(F.data());
+    Eigen::Matrix<T, field_ * dim_, 1> gra_vec = mtr(0) * F_vec;
+    return gra_vec;
+  }
+  static Eigen::Matrix<T, field_ * dim_, field_ * dim_>
+  hes(const Eigen::Matrix<T, field_, dim_>&F, const Eigen::Matrix<T, -1, -1>&mtr){
+    const static Matrix<T, field_ * dim_, field_ * dim_> hes
+        = mtr(0) * Matrix<T, field_ * dim_, field_ * dim_>::Identity();
+    return std::move(hes);
+ 
+  }
+};
 
 template<typename T, size_t dim_, size_t field_>
 class elas_csttt : public constitutive<T, dim_, field_>{

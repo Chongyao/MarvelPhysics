@@ -116,5 +116,7 @@ int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::Matrix<T
 }
 template class newton_iter<double, 3>;
 template class newton_iter<float, 3>;
+template class newton_iter<double, 1>;
+template class newton_iter<float, 1>;
 
 }//namespace

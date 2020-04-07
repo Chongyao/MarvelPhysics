@@ -11,7 +11,7 @@ namespace marvel{
 
 ELAS_TEMP
 ELAS_CLASS::BaseElas(const Matrix<T, dim_, -1>& nods, const Matrix<int, num_per_cell_, -1>& cells, const T& ym, const T&poi):
-    finite_element<T, dim_, dim_, num_per_cell_, bas_order_, qdrt_axis_, CSTTT, BASIS, QDRT>(nods, cells){
+    base_class(nods, cells){
   T mu, lambda;
   compute_lame_coeffs(ym, poi, mu, lambda);
   base_class::mtr_.resize(2, cells.cols());

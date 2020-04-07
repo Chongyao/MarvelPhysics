@@ -3,9 +3,12 @@
 namespace marvel{
 using namespace std;
 using namespace Eigen;
+
+// template class finite_element<double, 3, 1, 8, 1, 2, quadratic_csttt, basis_func, quadrature>;
+template class POISSON<double, 3, 8, 2, quadratic_csttt, basis_func, quadrature>;
 #if 0
 POI_TEMP
-POI_CLASS::poisson(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells, const Eigen::Matrix<T, -1, 1>& k):
+POI_CLASS::poisson(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells, const Eigen::Matrixx<T, -1, 1>& k):
     nods_(nods),cells_(cells),k_(k), num_nods_(nods.cols()), num_cells_(cells.cols()),quadrature_(), all_rows_(Matrix<int, 1, 1>::Ones()),
 num_qdrt_(static_cast<size_t>(pow(qdrt_axis_, dim_))){
   assert(k.size() == num_cells_);
@@ -59,5 +62,6 @@ int POI_CLASS::Val(const T *x, std::shared_ptr<dat_str_core<T,dim_>>& data)const
 }
 
 #endif
+
 
 }
