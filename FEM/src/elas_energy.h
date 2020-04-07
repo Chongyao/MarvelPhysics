@@ -27,7 +27,7 @@ inline void compute_lame_coeffs(const T Ym, const T Pr,
 template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,
          template<typename, size_t> class CSTTT,  // constituitive function
          template<typename, size_t, size_t, size_t > class BASIS, //  basis
-         template<typename, size_t, size_t, size_t> class QDRT> //  
+         template<typename, size_t, size_t, size_t> class QDRT> //
 class BaseElas : public Functional<T, dim_>{
   using basis = BASIS<T, dim_, bas_order_, num_per_cell_>;
   using csttt = CSTTT<T, dim_>;
@@ -186,5 +186,9 @@ private:  // precomputed values
   std::vector<std::vector<Eigen::Matrix<T, num_per_cell_, dim_>>> Dphi_Dxi_;
   
 };
+
+#define ELAS_TEMP template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,template<typename, size_t> class CSTTT,template<typename, size_t, size_t, size_t > class BASIS,template<typename, size_t, size_t, size_t> class QDRT>
+#define ELAS_CLASS BaseElas<T, dim_, num_per_cell_, bas_order_, qdrt_axis_, CSTTT, BASIS, QDRT>
+
 }
 #endif

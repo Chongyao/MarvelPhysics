@@ -1,7 +1,7 @@
 #include <Eigen/Core>
 #include <iostream>
-
-
+#include "DEFINE_TYPE.h"
+#include "SDF.h"
 
 namespace marvel {
 
@@ -153,4 +153,9 @@ int geom_contact_energy<T, dim_>::update_center_position(const size_t obj_id, co
   return 0;
 }
 //===============================================================================
+
+template class signed_dist_func<double,3>;
+template class planeSDF<double,3>;
+template class sphereSDF<double,3>;
+template class geom_contact_energy<double, 3>;
 }

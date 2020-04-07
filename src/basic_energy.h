@@ -76,7 +76,7 @@ class momentum : public  Functional<T, dim_>{
   int Gra(const T *disp, data_ptr<T, dim_> &data) const ;
   int Hes(const T *disp, data_ptr<T, dim_> &data) const ;
   int update_location_and_velocity(const T *new_dispk_ptr);
-  int set_initial_velocity(const Matrix<T, dim_, 1>& velo);
+  int set_initial_velocity(const Eigen::Matrix<T, dim_, 1>& velo);
   size_t Nx() const;
 
   Eigen::Matrix<T, -1, 1> vk_, dispk_;
@@ -89,13 +89,8 @@ class momentum : public  Functional<T, dim_>{
 
 };
 
-// template class position_constraint<3>;
-// template class momentum<3>;
-// template class gravity_energy<3>;
-// template class collision<3>;
-
 }//namespace marvel
 
-#include "basic_energy.imp"
+
 
 #endif

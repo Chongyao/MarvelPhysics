@@ -13,6 +13,9 @@ template<typename T>
 using VS = std::vector<std::shared_ptr<T>>;
 using SPM = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 
+using MatrixXd = Eigen::MatrixXd;
+using MatrixXi = Eigen::MatrixXi;
+
 struct transfer {
   transfer(const SPM& I, const SPM&R);
   SPM I_;
