@@ -13,6 +13,7 @@
 #include <fstream>
 
 namespace marvel{
+#if 0
 // Functional dimension is 1 since the solution is scalar function.
 template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,
          template<typename, size_t, size_t, size_t > class BASIS, //  basis
@@ -43,7 +44,7 @@ class poisson : public Functional<T, 1>{
 
 #define POI_TEMP template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,template<typename, size_t, size_t, size_t > class BASIS,template<typename, size_t, size_t, size_t> class QDRT>
 #define POI_CLASS BaseElas<T, dim_, num_per_cell_, bas_order_, qdrt_axis_, BASIS, QDRT>
-
+#endif
 
 }
 #endif

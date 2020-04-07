@@ -47,12 +47,12 @@ class quadrature{
     PNT_.resize(dim_, qdrt_num);
     WGT_.resize(qdrt_num, 1.0);
     PNT_.setZero();
-    vector<size_t> idx;
+    std::vector<size_t> idx;
     init(idx, 0);
   }
 
  private:
-    void init(vector<size_t>& idx, size_t PNT_id){
+  void init(std::vector<size_t>& idx, size_t PNT_id){
       const size_t depth = idx.size();
       if(idx.size() == dim_){
         for(size_t i = 0; i < dim_; ++i){

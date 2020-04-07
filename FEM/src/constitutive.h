@@ -12,29 +12,31 @@ using namespace std;
 
 
 
-
-template<typename T, size_t dim_>
-class elas_csttt{
- public:
-  // virtual ~elas_csttt(){}
-
+template<typename T, size_t dim_, size_t field_>
+class constitutive{
   static T
-  val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) ;
+  val(const Eigen::Matrix<T, field_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr) ;
+  static  Eigen::Matrix<T, field_ * dim_, 1>
+  gra(const Eigen::Matrix<T, field_, dim_>& F, const Eigen::Matrix<T, -1, -1>& mtr);
   
-  static  Eigen::Matrix<T, dim_ * dim_, 1>
-  gra(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu);
-  
-  static  Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
-  hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) ;
-x};
+  static  Eigen::Matrix<T, field_ * dim_, field_ * dim_>
+  hes(const Eigen::Matrix<T, field_, dim_>& F,const Eigen::Matrix<T, -1, -1>& mtr);  
+};
 
-template<typename T, size_t dim_>
-class arap_csttt : public elas_csttt<T, dim_>{
+
+
+template<typename T, size_t dim_, size_t field_>
+class elas_csttt : public constitutive<T, dim_, field_>{
+};
+
+template<typename T, size_t dim_, size_t field_>
+class arap_csttt : public constitutive<T, dim_, field_>{
 
  public:
   
   static T
-  val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+  val(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, -1>& mtr) {
+    T lam = mtr(0), mu = mtr(1);
     Matrix<T, dim_, dim_> R;
     {
       Eigen::Matrix3d A; A=F.template cast<double>();
@@ -58,7 +60,8 @@ class arap_csttt : public elas_csttt<T, dim_>{
   }
 
   static Matrix<T, dim_ * dim_, 1>
-  gra(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu){
+  gra(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr){
+    T lam = mtr(0), mu = mtr(1);
     Matrix<T, dim_, dim_> R;
     {
       Matrix3d A; A=F.template cast<double>();
@@ -84,7 +87,8 @@ class arap_csttt : public elas_csttt<T, dim_>{
   }
 
   static Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
-  hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+  hes(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr) {
+    T lam = mtr(0), mu = mtr(1);
     Matrix<T, dim_*dim_, dim_*dim_> hes;
     hes.setIdentity();
     hes *= lam;
@@ -93,18 +97,21 @@ class arap_csttt : public elas_csttt<T, dim_>{
   
 };
 
-template<typename T, size_t dim_>
-class linear_csttt : public elas_csttt<T, dim_>{
+
+template<typename T, size_t dim_, size_t field_>
+class linear_csttt : public elas_csttt<T, dim_, field_>{
  public:
   
   static T
-  val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+  val(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr) {
+    const T lam = mtr(0), mu = mtr(1);
     Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Matrix<T, dim_, dim_>::Identity();
     return mu * (strain.array() * strain.array()).sum() + 0.5 * lam * strain.trace() * strain.trace();
   }
 
   static Matrix<T, dim_ * dim_, 1>
-  gra(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu){
+  gra(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr){
+    const T lam = mtr(0), mu = mtr(1);
     const Matrix<T, dim_, dim_> Iden = Matrix<T, dim_, dim_>::Identity();
     Matrix<T, dim_, dim_> strain = 0.5 * (F + F.transpose()) - Iden;
     Matrix<T, dim_ , dim_> gra_mat = mu * (F + F.transpose() - 2 * Iden) + lam * (F - Iden).trace() * Iden;
@@ -113,7 +120,8 @@ class linear_csttt : public elas_csttt<T, dim_>{
   }
 
   static Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
-  hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+  hes(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr) {
+    const T lam = mtr(0), mu = mtr(1);
     static Matrix<T, dim_ * dim_, dim_ * dim_> hes;
     static bool have_calc = false;
     if(!have_calc){
@@ -143,18 +151,20 @@ class linear_csttt : public elas_csttt<T, dim_>{
   
 };
 
-template<typename T, size_t dim_>
-class stvk : public elas_csttt<T, dim_>{
+template<typename T, size_t dim_, size_t field_>
+class stvk : public elas_csttt<T, dim_, field_>{
  public:
   using tensor_type = fourth_tensor<T, dim_, dim_, dim_, dim_>;
   static T
-  val(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+  val(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr) {
+    const T lam = mtr(0), mu = mtr(1);
     Matrix<T, dim_, dim_> strain = 0.5 * (F.transpose() * F - Matrix<T, dim_, dim_>::Identity());
     return mu * (strain.array() * strain.array()).sum() + 0.5 * lam * strain.trace() * strain.trace();
   }
 
   static Matrix<T, dim_ * dim_, 1>
-  gra(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu){
+  gra(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr){
+    T lam = mtr(0), mu = mtr(1);
     const Matrix<T, dim_, dim_> Iden = Matrix<T, dim_, dim_>::Identity();
     Matrix<T, dim_, dim_> strain = 0.5 * (F.transpose() * F - Iden);
     Matrix<T, dim_ , dim_> gra_mat = F * (2 * mu * strain + lam * strain.trace() * Iden);
@@ -163,7 +173,8 @@ class stvk : public elas_csttt<T, dim_>{
   }
 
   static Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
-  hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) {
+  hes(const Eigen::Matrix<T, dim_, dim_>& F, const Eigen::Matrix<T, -1, 1>& mtr) {
+    T lam = mtr(0), mu = mtr(1);
     Matrix<T, dim_, dim_> strain = 0.5 * (F.transpose() * F - Matrix<T, dim_, dim_>::Identity());
     const Matrix<T, dim_, dim_> Iden = Matrix<T, dim_, dim_>::Identity();
     static Matrix<T, dim_ * dim_, dim_ * dim_> hes;

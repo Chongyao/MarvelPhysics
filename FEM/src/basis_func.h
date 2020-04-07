@@ -87,7 +87,7 @@ struct shape_func<T, 3, 1, 8>{
 
 
 
-template<typename T, size_t dim_, size_t order_, size_t num_per_cell_>
+template<typename T, size_t dim_, size_t field_, size_t order_, size_t num_per_cell_>
 class basis_func{
  public:
   static void calc_Dphi_Dxi(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X,  Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi){
@@ -102,19 +102,19 @@ class basis_func{
     Jac_det = fabs(Dm.determinant());
     return;
   }
-  static void get_def_gra(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const T* const x, const Matrix<T, dim_, dim_>& Dm_inv,  Eigen::Matrix<T, dim_, dim_> & def_gra) {
+  static void get_def_gra(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const T* const x, const Matrix<T, dim_, dim_>& Dm_inv,  Eigen::Matrix<T, field_, dim_> & def_gra) {
     const Eigen::Map<const Matrix<T, dim_, num_per_cell_>> deformed(x);
     def_gra = deformed * Dphi_Dxi * Dm_inv;
     return;
   }
   
-  static void get_Ddef_Dx(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const Eigen::Matrix<T, dim_, dim_>& Dm_inv, Eigen::Matrix<T, dim_ * dim_, dim_ * num_per_cell_>& Ddef_Dx){
+  static void get_Ddef_Dx(const Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi, const Eigen::Matrix<T, dim_, dim_>& Dm_inv, Eigen::Matrix<T, field_ * dim_, field_ * num_per_cell_>& Ddef_Dx){
     Ddef_Dx.setZero();
     const Eigen::Matrix<T, num_per_cell_, dim_> Ddef_Dx_compressed = Dphi_Dxi * Dm_inv;
     #pragma omp parallel for
     for(size_t i = 0; i < num_per_cell_; ++i)
       for(size_t j = 0; j < dim_; ++j)
-        Ddef_Dx.block(j * dim_, i * dim_, dim_, dim_) = Eigen::Matrix<T, dim_, dim_>::Identity() * Ddef_Dx_compressed(i, j);
+        Ddef_Dx.block(j * field_, i * field_, field_, field_) = Eigen::Matrix<T, field_, field_>::Identity() * Ddef_Dx_compressed(i, j);
     return;
   }
 };
