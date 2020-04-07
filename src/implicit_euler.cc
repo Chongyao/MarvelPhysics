@@ -13,29 +13,31 @@ newton_iter<T,dim_>::newton_iter(shared_ptr<dat_str_core<T, dim_>>& dat_str, sha
                                  const T time_step, const size_t max_iter, const T tol,
                                  const bool if_pre_compute_hes, const bool if_line_search,
                                   const bool if_hes_constant_)
-    :time_step_(time_step), max_iter_(max_iter), tol_(tol), dat_str_(dat_str), energy_(energy), if_line_search_(if_line_search), if_hes_constant_(if_hes_constant_), dof_(dat_str->get_dof())
-    {
+    :time_step_(time_step), max_iter_(max_iter), tol_(tol), dat_str_(dat_str), energy_(energy), if_line_search_(if_line_search), if_hes_constant_(if_hes_constant_), dof_(dat_str->get_dof()){
 
-
-  Matrix<T, Dynamic, 1> random_x(dim_ * dof_);{
-  #pragma omp parallel for
-    for(size_t i = 0; i < dim_ * dof_; ++i){
-      random_x(i) = i * 4.5 + i * i;
+  if(if_pre_compute_hes){
+    Matrix<T, Dynamic, 1> random_x(dim_ * dof_);{
+      #pragma omp parallel for
+      for(size_t i = 0; i < dim_ * dof_; ++i){
+        random_x(i) = i * 4.5 + i * i;
+      }
     }
-  }
-  dat_str_->set_zero();
-  __TIME_BEGIN__
-  energy_->Val(random_x.data(), dat_str_);
-  energy_->Gra(random_x.data(), dat_str_);
-  energy_->Hes(random_x.data(), dat_str_);
-  dat_str_->setFromTriplets();
-  const auto& sm1 = dat_str_->get_hes();
-  cout<<"the number of nonzeros with comparison: \n"
-      << (Eigen::Map<const Matrix<T, -1, 1>> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
-      << endl;
+    dat_str_->set_zero();
+    __TIME_BEGIN__
+        energy_->Val(random_x.data(), dat_str_);
+    energy_->Gra(random_x.data(), dat_str_);
+    energy_->Hes(random_x.data(), dat_str_);
+    dat_str_->setFromTriplets();
+    const auto& sm1 = dat_str_->get_hes();
+    cout<<"the number of nonzeros with comparison: \n"
+        << (Eigen::Map<const Matrix<T, -1, 1>> (sm1.valuePtr(), sm1.nonZeros()).array() != 0).count()
+        << endl;
 
-  dat_str_->set_zero_after_pre_compute();
-  __TIME_END__("[INFO] Pre_compute_hes");
+    dat_str_->set_zero_after_pre_compute();
+    __TIME_END__("[INFO] Pre_compute_hes");
+
+  }
+      
       
 }
 

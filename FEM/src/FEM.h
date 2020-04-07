@@ -35,7 +35,8 @@ class finite_element : public Functional<T, field_>{
   const size_t all_dim_, num_nods_, num_cells_, num_qdrt_;
   const Eigen::Matrix<T, dim_, -1> nods_; // vertices
   const Eigen::Matrix<int, num_per_cell_, -1> cells_; // elements
-  const Matrix<int, dim_, 1> all_rows_;
+  const Matrix<int, dim_, 1> dim_all_rows_;
+  const Matrix<int, field_, 1> field_all_rows_;
   const qdrt quadrature_;
 
 

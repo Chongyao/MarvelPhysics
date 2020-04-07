@@ -11,7 +11,7 @@ namespace marvel{
 FEM_TEMP
 FEM_CLASS::finite_element(const Matrix<T, dim_, -1>& nods, const Matrix<int, num_per_cell_, -1>& cells):
     all_dim_(nods.cols() * field_), num_nods_(nods.cols()), num_cells_(cells.cols()),
-    nods_(nods),cells_(cells), all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)), quadrature_(), num_qdrt_(static_cast<size_t>(pow(qdrt_axis_, dim_))){
+    nods_(nods),cells_(cells), dim_all_rows_(Matrix<int, dim_, 1>::LinSpaced(dim_, 0, dim_ -1)), field_all_rows_(Matrix<int, field_, 1>::LinSpaced(field_, 0, field_ -1)), quadrature_(), num_qdrt_(static_cast<size_t>(pow(qdrt_axis_, dim_))){
   static_assert(std::is_base_of<constitutive<T, dim_, field_>, csttt>::value, "CSTTT must derive from elas_csttt");
   static_assert(std::is_base_of<basis_func<T, dim_, field_, bas_order_, num_per_cell_>, basis>::value, "BASIS must derive from basis_func");
   static_assert(std::is_base_of<quadrature<T, dim_, qdrt_axis_, num_per_cell_>, qdrt>::value, "GAUS must derive from gaus_quad");
@@ -34,7 +34,7 @@ void FEM_CLASS::PreComputation(){
   Eigen::Matrix<T, num_per_cell_, dim_> Dphi_Dxi_tmp;
     
   for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
-    const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, all_rows_, cells_.col(cell_id));
+    const Matrix<T, dim_, num_per_cell_> X_cell = indexing(nods_, dim_all_rows_, cells_.col(cell_id));
     for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id) {
       basis::calc_Dphi_Dxi(quadrature_.PNT_.col(qdrt_id), X_cell.data(), Dphi_Dxi_tmp);
       Dphi_Dxi_[cell_id].push_back(Dphi_Dxi_tmp);
@@ -51,11 +51,11 @@ void FEM_CLASS::PreComputation(){
 
 FEM_TEMP
 int FEM_CLASS::Val(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) const {
-  Eigen::Map<const Eigen::Matrix<T, -1 ,-1>> deformed(x, dim_, num_nods_ );
+  Eigen::Map<const Eigen::Matrix<T, -1 ,-1>> deformed(x, field_, num_nods_ );
 #pragma omp parallel for
   for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
     Matrix<T, field_, dim_> def_gra;
-    const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
+    const Matrix<T, field_, num_per_cell_> x_cell = indexing(deformed, field_all_rows_, cells_.col(cell_id));
     for(size_t qdrt_id = 0; qdrt_id < num_qdrt_; ++qdrt_id){
       basis::get_def_gra(Dphi_Dxi_[cell_id][qdrt_id], x_cell.data(), Dm_inv_[cell_id][qdrt_id], def_gra);
       data->save_val(csttt::val(def_gra, mtr_.col(cell_id))  * quadrature_.WGT_[qdrt_id] * Jac_det_[cell_id][qdrt_id]);
@@ -67,13 +67,14 @@ int FEM_CLASS::Val(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) co
 
 FEM_TEMP
 int FEM_CLASS::Gra(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) const {
-  Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
-
+  Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, field_, num_nods_);
 #pragma omp parallel for
   for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
     Matrix<T, field_, dim_> def_gra;
       
-    const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
+    const Matrix<T, field_, num_per_cell_> x_cell = indexing(deformed, field_all_rows_, cells_.col(cell_id));
+
+
     Matrix<T, field_ * dim_, 1> gra_F_based;
     Matrix<T, field_ * num_per_cell_, 1> gra_x_based = Matrix<T, field_ *  num_per_cell_, 1>::Zero();
 
@@ -96,13 +97,13 @@ int FEM_CLASS::Gra(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) co
 
 FEM_TEMP
 int FEM_CLASS::Hes(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) const {
-  Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, dim_, num_nods_);
+  Eigen::Map<const Eigen::Matrix<T, -1, -1>> deformed(x, field_, num_nods_);
 
 #pragma omp parallel for
   for(size_t cell_id = 0; cell_id < num_cells_ ; ++cell_id){
 
     Matrix<T, field_, dim_> def_gra;
-    const Matrix<T, dim_, num_per_cell_> x_cell = indexing(deformed, all_rows_, cells_.col(cell_id));
+    const Matrix<T, field_, num_per_cell_> x_cell = indexing(deformed, field_all_rows_, cells_.col(cell_id));
     Matrix<T, field_ * num_per_cell_, 1> gra_x_based = Matrix<T, field_ *  num_per_cell_, 1>::Zero();
     Matrix<T, field_ * dim_, field_ * dim_> hes_F_based; 
     Matrix<T, field_ * num_per_cell_, field_ * num_per_cell_> hes_x_based; hes_x_based.setZero();
@@ -117,8 +118,8 @@ int FEM_CLASS::Hes(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) co
     //save hes
     for(size_t p = 0; p < field_ * num_per_cell_; ++p){
       for(size_t q = 0; q < field_ * num_per_cell_; ++q){
-        const size_t I = cells_(p / dim_, cell_id) * dim_ + p%dim_;
-        const size_t J = cells_(q / dim_, cell_id) * dim_ + q%dim_;
+        const size_t I = cells_(p / field_, cell_id) * field_ + p%field_;
+        const size_t J = cells_(q / field_, cell_id) * field_ + q%field_;
         // if(hes_x_based(p, q))
         data->save_hes(I, J, hes_x_based(p, q));
       }
