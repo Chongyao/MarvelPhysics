@@ -59,8 +59,6 @@ struct shape_func<T, 3, 1, 8>{
   static void calc_Dphi_Dxi(const Eigen::Matrix<T, 3, 1>& PNT, const T* X,  Eigen::Matrix<T, 8, 3>& Dphi_Dxi){
     Dphi_Dxi.setZero();
     const T xi0 = PNT(0), xi1 = PNT(1), xi2 = PNT(2);
-    // vector<T> l(3, 0);
-    // vector<T> sign(3, 0);
     T l[3];
     T sign[3];
     for(size_t z = 0; z < 2; ++z){
@@ -79,8 +77,6 @@ struct shape_func<T, 3, 1, 8>{
       }
     }
     Dphi_Dxi /= 8.0;
-
-    
     return;
 
   }

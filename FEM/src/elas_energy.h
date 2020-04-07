@@ -13,20 +13,17 @@
 #include <fstream>
 namespace marvel{
 
-using namespace Eigen;
-using namespace std;
-
 template<typename T>
 inline void compute_lame_coeffs(const T Ym, const T Pr,
                                 T &mu, T &lambda) {
   mu = Ym/(2*(1+Pr));
   lambda = Ym*Pr/((1+Pr)*(1-2*Pr));
 }
-template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,
+template<typename T, size_t dim_, size_t field_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,
          template<typename, size_t> class CSTTT,  // constituitive function
          template<typename, size_t, size_t, size_t > class BASIS, //  basis
          template<typename, size_t, size_t, size_t> class QDRT> //
-class BaseElas : public Functional<T, dim_>{
+class BaseElas : public Functional<T, field_>{
   using basis = BASIS<T, dim_, bas_order_, num_per_cell_>;
   using csttt = CSTTT<T, dim_>;
   using qdrt = QDRT<T, dim_, qdrt_axis_, num_per_cell_>;
@@ -60,8 +57,8 @@ class BaseElas : public Functional<T, dim_>{
 
 };
 
-#define ELAS_TEMP template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,template<typename, size_t> class CSTTT,template<typename, size_t, size_t, size_t > class BASIS,template<typename, size_t, size_t, size_t> class QDRT>
-#define ELAS_CLASS BaseElas<T, dim_, num_per_cell_, bas_order_, qdrt_axis_, CSTTT, BASIS, QDRT>
+#define ELAS_TEMP template<typename T, size_t dim_, size_t field_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,template<typename, size_t> class CSTTT,template<typename, size_t, size_t, size_t > class BASIS,template<typename, size_t, size_t, size_t> class QDRT>
+#define ELAS_CLASS BaseElas<T, dim_, field_, num_per_cell_, bas_order_, qdrt_axis_, CSTTT, BASIS, QDRT>
 
 
 

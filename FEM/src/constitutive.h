@@ -26,7 +26,7 @@ class elas_csttt{
   
   static  Eigen::Matrix<T, dim_ * dim_, dim_ * dim_>
   hes(const Eigen::Matrix<T, dim_, dim_>& F, const double& lam, const double& mu) ;
-};
+x};
 
 template<typename T, size_t dim_>
 class arap_csttt : public elas_csttt<T, dim_>{

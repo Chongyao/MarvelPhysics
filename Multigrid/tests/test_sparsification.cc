@@ -140,6 +140,7 @@ int main(int argc, char** argv){
   {//origin version
     cout << "origin version" << endl;
     auto L_new = spar(L, 0);
+    cout << "hhh" << endl;
     test_condition(L, L_new);
   }
 
@@ -154,6 +155,7 @@ int main(int argc, char** argv){
     }
 
     cout << "truncated versoin" << endl;
+    write_SPM("A_t_spm", L_t);
     auto L_new = spar(L_t, 0);
     test_condition(L_t, L_new);
     test_condition(L, L_new);
