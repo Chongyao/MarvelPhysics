@@ -57,7 +57,7 @@ int main(int argc, char** argv){
       u_cons(cons_top[i]) = 10;
     #pragma omp parallel for
     for(size_t i = 0; i < cons_bottom.size(); ++i)
-      u_cons(cons_bottom[i]) = -4;
+      u_cons(cons_bottom[i]) =  5 * sin(nods(1, cons_bottom[i])) + 5 * cos(nods(2, cons_bottom[i]));
     cout << "constraint " << cons.size() << " points" << endl;
   }
   
