@@ -169,5 +169,12 @@ template<typename T, size_t dim_>
 const size_t dat_str_core<T, dim_>::get_dof()const{
   return dof_;
 }
+
+template class dat_str_core<double, 3>;
+template class dat_str_core<double, 2>;
+template class dat_str_core<double, 1>;
+template class dat_str_core<float, 3>;
+template class dat_str_core<float, 2>;
+template class dat_str_core<float, 1>;
 }//namespace
 

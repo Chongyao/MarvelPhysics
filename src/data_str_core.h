@@ -5,8 +5,6 @@
 namespace marvel{
 template <typename T, size_t dim_>
 class dat_str_core{
-
-  
  public:
 
   using SMP_TYPE = Eigen::SparseMatrix<T, Eigen::RowMajor>;
@@ -62,10 +60,9 @@ class dat_str_core{
 
 };
 
-template class dat_str_core<double, 3>;
-template class dat_str_core<float, 3>;
+
 }
 
-#include "data_str_core.imp"
+// #include "data_str_core.imp"
 
 #endif
