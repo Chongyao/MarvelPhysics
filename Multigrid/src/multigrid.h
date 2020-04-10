@@ -10,6 +10,7 @@
 namespace marvel{
 
 template<typename T>
+
 using VS = std::vector<std::shared_ptr<T>>;
 using SPM = Eigen::SparseMatrix<double, Eigen::RowMajor>;
 
@@ -49,7 +50,7 @@ class multigrid_process{
   int execute(double* solution);
   
   
- private:
+ protected:
   int relax(const size_t layer_id);
   int restrict(const size_t layer_id);
   int correct(const size_t layer_id);

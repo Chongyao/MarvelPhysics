@@ -36,5 +36,11 @@ target_link_libraries(test_sparsification
 
 add_executable(test_spectra test_spectra.cc)
 
+add_executable(test_PCG test_PCG.cc)
+target_link_libraries(test_PCG
+  marvel-core
+  MULTIGRID
+  FEM
+  )
 
 

@@ -138,6 +138,17 @@ int main(int argc, char** argv){
     }
     
   }
+
+  #if 0
+  {// see spectrum
+    for(size_t i = 0; i < num_layers; ++i){
+      auto& A = layers[i]->A_;
+      double cd = find_condition_number(A);
+      cout << "layer " << i << " condition number is " << cd << endl;
+    }
+    return 0;
+  }
+  #endif
   cout << "================set layers done================" << endl;
 
   cout << "=================compare to CG=================="<<endl;
@@ -233,16 +244,19 @@ int main(int argc, char** argv){
   }
   
   // cout << "================set process done================" << endl;
-  // multigrid_process MP(process, layers, transfers);
-  // VectorXd solution = VectorXd::Zero(nods.size());
-  // __TIME_BEGIN__;
-  // MP.execute(solution.data());
-  // __TIME_END__("V cycle ");
-  // auto& A =  layers[0]->A_;
-  // auto& b = layers[0]->rhs_;
-  // cout << "residual " << " " << (A*solution - b).norm() / b.norm() << endl;
-
+  cout << "asfdhasfd" << endl;
   #if 1
+  multigrid_process MP(process, layers, transfers);
+  VectorXd solution = VectorXd::Zero(nods.size());
+  __TIME_BEGIN__;
+  MP.execute(solution.data());
+  __TIME_END__("V cycle ");
+  auto& A =  layers[0]->A_;
+  auto& b = layers[0]->rhs_;
+  cout << "residual " << " " << (A*solution - b).norm() / b.norm() << endl;
+  #endif
+
+  #if 0
   multigrid_process MP(one_V, layers, transfers);
   VectorXd solution = VectorXd::Zero(nods.size());
   double V_time = 0;
