@@ -2,18 +2,19 @@
 #define MARVEL_HSC
 #include "Sparsification.h"
 #include "multigrid.h"
+#include <boost/property_tree/ptree.hpp>
 
 namespace marvel{
 
 class HSC : public multigrid_process{
  public:
-  HSC(VS<layer>& layers, const VS<transfer>& transfers);
+  HSC(VS<layer>& layers, const VS<transfer>& transfers,const bool pre_sm, const bool post_sm, const bool diag_PD, const size_t num_mu, const size_t num_V);
   Eigen::VectorXd solve(const Eigen::VectorXd& b);
   
  private:
-  Eigen::VectorXd unified_multigrid(
-      const size_t& curr_layer, const bool& pre_sm,
-      const bool& post_sm, const size_t& num_V, const bool& diag_PD);
+  void unified_multigrid(
+    const size_t& curr_layer_id, const bool& pre_sm,
+    const bool& post_sm, const size_t& num_mu, const bool& diag_PD);
   
   const size_t num_layers_;
 
@@ -23,7 +24,7 @@ class HSC : public multigrid_process{
 };
 
 
-HSC set_hierarchy(const SPM& L);
+HSC set_hierarchy(const SPM& L, const boost::property_tree::ptree& pt);
 
 
 

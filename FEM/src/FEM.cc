@@ -120,8 +120,8 @@ int FEM_CLASS::Hes(const T *x, std::shared_ptr<dat_str_core<T,field_>>& data) co
       for(size_t q = 0; q < field_ * num_per_cell_; ++q){
         const size_t I = cells_(p / field_, cell_id) * field_ + p%field_;
         const size_t J = cells_(q / field_, cell_id) * field_ + q%field_;
-        // if(hes_x_based(p, q))
-        data->save_hes(I, J, hes_x_based(p, q));
+        if(fabs(hes_x_based(p, q)) > 1e-14)
+          data->save_hes(I, J, hes_x_based(p, q));
       }
     }
   }

@@ -1,5 +1,5 @@
 #include "hsc.h"
-#include <boost/property_tree/ptree.hpp>
+#include <iostream>
 namespace marvel{
 using namespace std;
 using namespace Eigen;
@@ -10,10 +10,14 @@ HSC::HSC(VS<layer>& layers, const VS<transfer>& transfers,const bool pre_sm, con
 
 
 VectorXd HSC::solve(const VectorXd& b){
+  layers_[0]->u_.setZero();
   layers_[0]->rhs_ = b;
-  for(size_t i = 0; i < num_V_; ++i){
-    unified_multigrid(0, pre_sm_, post_sm_, num_mu_, diag_PD_);
-  }
+  if(layers_.size() == 1)
+    relax(0);
+  else
+    for(size_t i = 0; i < num_V_; ++i)
+      unified_multigrid(0, pre_sm_, post_sm_, num_mu_, diag_PD_);
+
   return layers_[0]->u_;
 }
 
@@ -22,7 +26,7 @@ void HSC::unified_multigrid(
     const bool& post_sm, const size_t& num_mu, const bool& diag_PD){
   auto& layer_ptr =  layers_[curr_layer_id];
   auto& e = layer_ptr->u_, r = layer_ptr->rhs_;
-  auto& A = layer_ptr->A_; 
+  auto& A = layer_ptr->A_;
   // e.setZero();
   if(pre_sm){
     relax(curr_layer_id);
@@ -30,10 +34,11 @@ void HSC::unified_multigrid(
   restrict(curr_layer_id + 1);
   if(curr_layer_id + 1 == num_layers_ - 1)
     relax(curr_layer_id + 1);
+
   else{
     layers_[curr_layer_id + 1]->u_.setZero();
     for(size_t i = 0; i < num_mu; ++i)
-      unified_multigrid(curr_layer_id + 1, pre_sm, post_sm, num_V, diag_PD);
+      unified_multigrid(curr_layer_id + 1, pre_sm, post_sm, num_mu_, diag_PD);
   }
   correct(curr_layer_id);
   
@@ -48,7 +53,7 @@ void HSC::unified_multigrid(
 }
 
 
-HSC set_hierarchy(const SPM& L, const bool truncate, const ptree& pt){
+HSC set_hierarchy(const SPM& L, const ptree& pt){
   //get parameters
   const size_t gs_itrs = pt.get<size_t>("gs_itrs", 2);
   const string sol_type_str = pt.get<string>("solver_type", "WJ");
@@ -58,49 +63,58 @@ HSC set_hierarchy(const SPM& L, const bool truncate, const ptree& pt){
     sol_type = solver_type::GS;
   else if(sol_type_str == "WJ")
     sol_type = solver_type::WJ;
-
   
-  VS<Adjc_graph> graphs;
-  VS<Sparsify> sp_ops;
 
   VS<layer> layers;
   VS<transfer> transfers;
+  cout << "layer 0: dim  " << L.rows() << endl;
+  if(L.rows() > coarest_num)
+    layers.push_back(make_shared<layer>(L, sol_type, gs_itrs));
+  else{
+    layers.push_back(make_shared<layer>(L, solver_type::PCG, gs_itrs));
+    HSC hsc(layers, transfers, pt.get<bool>("pre_sm",false), pt.get<bool>("post_sm", false),pt.get<bool>("diag_PD", true), pt.get<size_t>("num_mu", 1), pt.get<size_t>("num_V", 1));
+    return hsc;
+  }
+  
   size_t dim = L.rows();
   shared_ptr<SPM>
-      L_now = make_shared<SPM>(L),
-      L_next = make_shared<SPM>(L.rows(), L.rows());
+      L_now = make_shared<SPM>(L);
   
-  do{
-    layers.push_back(make_shared<layer>(*L_now, sol_type, gs_itrs));
-    graphs.push_back(make_shared<Adjc_graph>(L_now, 1));
-    sp_ops.push_back(make_shared<Sparsify>(L_now.rows()));
-    
-    auto& sp_op = sp_ops[sp_ops.size() - 1];
+  while(dim > coarest_num){
+    Adjc_graph graph(*L_now, 1);
+    Sparsify sp_op(L_now->rows());
+
     sp_op.sparsify_and_compensate(graph);
     sp_op.post_coloring(graph);
     sp_op.reorder_coarse_and_fine();
-    VectorXd perm_inv = sp_op.get_perm_inv();
+    VectorXi perm_inv = sp_op.get_perm_inv();
 
     {//get sparsified and reordered L
       vector<Triplet<double>> trips;
-      graphs[graphs.size() - 1]->build_reordered_mat_from_graph(perm_inv, trips);
-      add_dig_vals(*L_now, trips, perm_inv);
-      L_now.setZero();
+      graph.build_reordered_mat_from_graph(perm_inv, trips);
+      add_dig_vals(*L_now, trips, &perm_inv);
+      L_now->setZero();
       L_now->reserve(trips.size());
       L_now->setFromTriplets(trips.begin(), trips.end());
     }
     {//get S and coraser L
-      SPM S(L_now.rows(), sp_op->num_coarse_);
-      schur_complement(sp_op->num_coarse_, *L_now, *L_next, S);
+      SPM S(L_now->rows(), sp_op.num_coarse_);
+      Schur_complement(sp_op.num_coarse_, *L_now, *L_now, S);
       PermutationMatrix<-1, -1> perm = perm_inv.asPermutation();
       S = perm.transpose() * S;
       transfers.push_back(make_shared<transfer>(S, S.transpose()));
-      dim = sp_op->num_coarse_;
+      dim = sp_op.num_coarse_;
     }
-    L_now = L_next;
-  }while(dim > coarest_num);
- 
+    if(dim > coarest_num)
+      layers.push_back(make_shared<layer>(*L_now, sol_type, gs_itrs));
+    else
+      layers.push_back(make_shared<layer>(*L_now, solver_type::PCG, gs_itrs));
+    cout << "layer " << layers.size() - 1 << ": dim " << L_now->rows() << endl;
+  }
+
   
+  HSC hsc(layers, transfers, pt.get<bool>("pre_sm",false), pt.get<bool>("post_sm", false),pt.get<bool>("diag_PD", true), pt.get<size_t>("num_mu", 1), pt.get<size_t>("num_V", 1));
+  return hsc;
 }
 
 

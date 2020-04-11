@@ -43,4 +43,11 @@ target_link_libraries(test_PCG
   FEM
   )
 
+add_executable(test_hsc test_hsc.cc)
+target_link_libraries(test_hsc
+  marvel-core
+  MULTIGRID
+  FEM
+  )
+
 

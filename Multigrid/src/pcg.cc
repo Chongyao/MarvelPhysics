@@ -7,11 +7,11 @@ using namespace Eigen;
 PCG::PCG(const SPM& A, const size_t& max_itrs, const double& tol, const precond_type& M): A_(A), max_itrs_(max_itrs), tol_(tol), M_(M), dim_(A.rows()){}
 
 
-Eigen::VectorXd PCG::solve(const VectorXd& b, const VectorXd* x0){
+Eigen::VectorXd PCG::solve(const VectorXd& b){
   assert(b.size() == dim_);
-  assert(x0 == nullptr || x0->size() == dim_);
+
   
-  VectorXd xk = x0 == nullptr ? VectorXd::Zero(dim_) : *x0;
+  VectorXd xk = VectorXd::Zero(dim_);
   VectorXd rk = b - A_ * xk;
   VectorXd dk = M_ == nullptr ? rk : M_(rk);
   VectorXd rk_p(dim_);

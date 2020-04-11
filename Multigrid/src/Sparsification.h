@@ -7,7 +7,7 @@
 #include <memory>
 #include <unordered_set>
 #include <set>
-
+#include <iostream>
 namespace marvel{
 
 //TODO: decouplt and adjc_graph and sparsification
@@ -84,17 +84,21 @@ int Schur_complement(const size_t& coarse_num,
                      Eigen::SparseMatrix<double, mode_S>& S){
 
   const size_t fine_num = L.rows() - coarse_num;
-  Eigen::VectorXd L_ff = L.bottomRightCorner(fine_num, fine_num).diagonal();
-  const Eigen::SparseMatrix<double, Eigen::RowMajor>
+
+  Eigen::SparseMatrix<double, Eigen::RowMajor>
       L_cc = L.topLeftCorner(coarse_num, coarse_num),
       L_fc = L.bottomLeftCorner(fine_num, coarse_num),
-      L_cf = L.topRightCorner(coarse_num, fine_num);
+      L_cf = L.topRightCorner(coarse_num, fine_num),
+      L_ff = L.bottomRightCorner(fine_num, fine_num);
+
+  
+  const Eigen::VectorXd L_ff_diag = L_ff.diagonal();
 
   {//Lff_inv * Lfc
     #pragma omp parallel for
     for (int k=0; k<L_fc.outerSize(); ++k)
       for (decltype(L_fc)::InnerIterator it(L_fc,k); it; ++it)
-        it.valueRef() /= L_ff(it.row()) ;
+        it.valueRef() /= L_ff_diag(it.row()) ;
   }
 
   {//set S

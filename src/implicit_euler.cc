@@ -67,9 +67,9 @@ int newton_iter<T, dim_>::solve(T* x){
     cout << "[INFO]: ALL Energy: " << dat_str_->get_val() << endl;
     T eps;{
       if(typeid(res_value) == typeid(float))
-        eps = 1e-1;
+        eps = 1e-2;
       else if(typeid(res_value) == typeid(double))
-        eps = 1e-4;
+        eps = 1e-5;
       else
         throw runtime_error("run type");
     }
