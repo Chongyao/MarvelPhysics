@@ -33,7 +33,6 @@ void Adjc_graph::init(){
 //   }
 // }
 
-
 Adjc_graph::Adjc_graph(const SparseMatrix<double>& L, const int option):dof_(L.rows()){
   init();
   size_t num_edges = 0;
@@ -300,12 +299,23 @@ VectorXi Sparsify::get_perm_inv() const{
   assert(has_reordered);
   return perm_vec_inv_;
 }
+VectorXi Sparsify::get_perm() const{
+  assert(has_reordered);
+  return perm_vec_;
+}
 
-int add_dig_vals(const Eigen::SparseMatrix<double>& L, std::vector<TPL>& trips){
+int add_dig_vals(const Eigen::SparseMatrix<double>& L, std::vector<TPL>& trips,
+                 const Eigen::VectorXi* perm){
   VectorXd dig_vals = L * VectorXd::Ones(L.rows());
-  for(size_t i = 0; i < dig_vals.size(); ++i){
-    trips.push_back(TPL(i, i, dig_vals(i)));
-  }
+  if(perm == nullptr)
+    for(size_t i = 0; i < dig_vals.size(); ++i){
+      trips.push_back(TPL(i, i, dig_vals(i)));
+    }
+  else
+    for(size_t i = 0; i < dig_vals.size(); ++i){
+      const size_t id = (*perm)(i);
+      trips.push_back(TPL(id, id, dig_vals(i)));
+    }
   return 0;
 }
 

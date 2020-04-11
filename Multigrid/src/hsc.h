@@ -9,13 +9,21 @@ class HSC : public multigrid_process{
  public:
   HSC(VS<layer>& layers, const VS<transfer>& transfers);
   Eigen::VectorXd solve(const Eigen::VectorXd& b);
-private:
+  
+ private:
   Eigen::VectorXd unified_multigrid(
       const size_t& curr_layer, const bool& pre_sm,
       const bool& post_sm, const size_t& num_V, const bool& diag_PD);
   
   const size_t num_layers_;
+
+  const bool pre_sm_, post_sm_, diag_PD_;
+  const size_t num_mu_, num_V_;
+  
 };
+
+
+HSC set_hierarchy(const SPM& L);
 
 
 

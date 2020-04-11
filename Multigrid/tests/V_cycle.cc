@@ -133,9 +133,10 @@ int main(int argc, char** argv){
     energy->Hes(nods.data(), dat_str);
     layers[0] = make_shared<layer>(dat_str->get_hes(), sol_type, gs_itrs);
     layers[0]->rhs_ = - dat_str->get_gra();
-    for(size_t i = 1; i < num_layers; ++i){
+    for(size_t i = 1; i < num_layers - 1; ++i){
       layers[i] = make_shared<layer>(transfers[i - 1]->R_ * layers[i - 1]->A_ * transfers[i - 1]->I_, sol_type, gs_itrs);
     }
+    layers[num_layers - 1] = make_shared<layer>(transfers[num_layers - 2]->R_ * layers[num_layers -2]->A_ * transfers[num_layers - 2]->I_, solver_type::PCG, gs_itrs);
     
   }
 
