@@ -23,6 +23,11 @@ namespace chaos
 {
   namespace collision
   {
+    template<size_t num>
+    struct IDs{
+      size_t id[num];
+    };
+
     template<typename T>
     class collision_proxy
     {
@@ -60,11 +65,6 @@ namespace chaos
                const Vec &eb,
                bool do_update = true);
     protected:
-      template<size_t num>
-      struct IDs{
-        size_t id[num];
-      };
-
       // this function used to setup J and c.
       void _setup_constraint(
         // the ID4 of vf is:
@@ -94,6 +94,9 @@ namespace chaos
       std::vector<vtxType> vtxs;
       sMat J;
       Eigen::Matrix<T, Eigen::Dynamic, 1> c;
+      // Attention::total_v is not only total number of vtxs,
+      //            total_v is dim * (num of vtxs),
+      //            which means 3 times of num of vtxs.
       size_t total_v;
     };
   } // namespace collision
