@@ -59,7 +59,7 @@ namespace chaos
       response(const Mat &eA,
                const Vec &eb,
                bool do_update = true);
-    private:
+    protected:
       template<size_t num>
       struct IDs{
         size_t id[num];
@@ -89,7 +89,7 @@ namespace chaos
         const std::vector<meshType> &meshes,
         const std::vector<vtxType> &vtxs) = 0;
 
-    private:
+    protected:
       std::vector<meshType> meshes;
       std::vector<vtxType> vtxs;
       sMat J;
