@@ -16,7 +16,6 @@
 #include <vector>
 #include <memory>
 
-#include "collision_detect/src/CollisionAPI.h"
 #include "mprgp_solver.h"
 
 namespace chaos
@@ -27,6 +26,21 @@ namespace chaos
     struct IDs{
       size_t id[num];
     };
+
+    // the ID4 of vf is:
+    // ID4 => {mid_of_V, vid_of_V, mid_of_F, fid_of_F}
+    enum ID4{
+      MID_OF_V = 0, VID_OF_V, MID_OF_F, FID_OF_F
+    };
+    // the ID6 of ee is:
+    // Assume Vij is the j's vertex of the i's edge.
+    // ID6 => {mid_of_E1, vid_of_V11, vid_of_V12,
+    //         mid_of_E2, vid_of_V21, vid_of_V22}
+    enum ID6{
+      MID_OF_E1 = 0, VID_OF_V11, VID_OF_V12,
+      MID_OF_E2    , VID_OF_V21, VID_OF_V22
+    };
+
 
     template<typename T>
     class collision_proxy
@@ -92,6 +106,8 @@ namespace chaos
     protected:
       std::vector<meshType> meshes;
       std::vector<vtxType> vtxs;
+      // each model's start point of the vtxs.
+      std::vector<size_t> starts;
       sMat J;
       Eigen::Matrix<T, Eigen::Dynamic, 1> c;
       // Attention::total_v is not only total number of vtxs,
@@ -202,12 +218,69 @@ namespace chaos
       const std::vector<IDs<6>> &ee)
     {
       // clear the data of J and c.
+      size_t vf_num = vf.size(), ee_num = ee.size();
+      J = sMat(vf_num + ee_num, total_v);
+      c = Eigen::Matrix<T, Eigen::Dynamic, 1>(vf_num+ee_num);
+
+      auto get_point = [](const std::vector<T> &vtx,
+                          size_t start)->Eigen::Matrix<T, 3, 1>{
+        Eigen::Matrix<T, 3, 1> V;
+        V << vtx[start], vtx[start+1], vtx[start+2];
+        return V;
+      };
+
+      auto set_dim3 = [](sMat &J, size_t row, size_t col,
+                         T val1, T val2, T val3){
+        J.insert(row, col) = val1;
+        J.insert(row, col+1) = val2;
+        J.insert(row, col+2) = val3;
+      };
+
       // VF to Mat
+      for (size_t i = 0; i < vf_num; ++i) {
+        // calculate the face normal.
+        // TODO:: If the collision is severe, which means there
+        //        are many same faces in the constraint vf,
+        //        we can use a map to speed up this calculation.
+        size_t midF = vf[i].id[MID_OF_F];
+        size_t fid = vf[i].id[FID_OF_F];
+        size_t vpos = starts[vf[i].id[MID_OF_V]] + vf[i].id[VID_OF_V]*3;
+        size_t fstart = starts[midF];
+        const auto &mesh = meshes[midF];
+        const auto &vtx  = vtxs[midF];
+
+        size_t fv1id = mesh[fid*3];
+        size_t fv2id = mesh[fid*3+1];
+        size_t fv3id = mesh[fid*3+2];
+        Eigen::Matrix<T, 3, 1> FV1 = get_point(vtx, fv1id*3);
+        Eigen::Matrix<T, 3, 1> FV2 = get_point(vtx, fv2id*3);
+        Eigen::Matrix<T, 3, 1> FV3 = get_point(vtx, fv3id*3);
+        Eigen::Matrix<T, 3, 1> V = get_point(vtxs[vf[i].id[MID_OF_V]], vf[i].id[VID_OF_V]*3);
+
+        Eigen::Matrix<T, 3, 1> e1 = FV2 - FV1, e2 = FV3 - FV1;
+
+        Eigen::Matrix<T, 3, 1> fn = e1.cross(e2);
+        // suppose that last frame does not penetrate.
+        Eigen::Matrix<T, 3, 1> e = V - FV1;
+        if (e.dot(fn) < 0) {
+          fn = -fn;
+        }
+        fn.normalize();
+
+        // get the project point of V in the F plane.
+        set_dim3(J, i, vpos, fn[0], fn[1], fn[2]);
+        set_dim3(J, i, fstart+fv1id*3, -fn[0]/3, -fn[1]/3, -fn[2]/3);
+        set_dim3(J, i, fstart+fv2id*3, -fn[0]/3, -fn[1]/3, -fn[2]/3);
+        set_dim3(J, i, fstart+fv3id*3, -fn[0]/3, -fn[1]/3, -fn[2]/3);
+      }
+
       // EE to Mat
+      // TODO
+      for (size_t i = 0; i < ee_num; ++i) {
+
+      }
     }
   } // namespace collision
 } // namespace chaos
-
-#include "collision_tang.h"
 
 #endif /* COLLISION_PROXY_H */

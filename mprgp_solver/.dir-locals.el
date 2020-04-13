@@ -7,7 +7,7 @@
                                      (list
                                       (concat root "src/")
                                       (concat root "external/")
-                                      (concat root "external/utils/")))
+                                      (concat root "src/utils/")))
                          (setq-local company-c-headers-path-user
                                      (append company-c-headers-path-user
                                              local-project-include-path))

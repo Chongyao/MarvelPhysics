@@ -21,3 +21,6 @@ target_link_libraries(test_mprgp SQP)
 
 add_executable(test_collid test_collid.cc)
 target_link_libraries(test_collid coll_v3)
+
+add_executable(test_plane test_plane.cc)
+target_link_libraries(test_plane SQP coll_v3)
