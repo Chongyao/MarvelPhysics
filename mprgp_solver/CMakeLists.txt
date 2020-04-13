@@ -29,9 +29,9 @@ include_directories(${PROJECT_SOURCE_DIR}/src/utils)
 add_subdirectory(src)
 
 # According to the flags, build the test and sampels or not.
-if(MPRGP_SOLVER_BUILD_TESTS)
+# if(MPRGP_SOLVER_BUILD_TESTS)
   add_subdirectory(tests)
-endif(MPRGP_SOLVER_BUILD_TESTS)
+# endif(MPRGP_SOLVER_BUILD_TESTS)
 
 if(MPRGP_SOLVER_BUILD_SAMPLES)
   add_subdirectory(samples)
