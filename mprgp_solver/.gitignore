@@ -46,3 +46,5 @@ external
 
 # private files
 _*
+
+.dir-locals.el
