@@ -16,7 +16,8 @@ namespace marvel {
 
 int read_fixed_verts_from_csv(const char *filename, std::vector<size_t> &fixed, Eigen::MatrixXd *pos=nullptr);
 
-
+int write_MAT(const char* path, const Eigen::MatrixXd& A);
+int write_SPM(const char* path, const Eigen::SparseMatrix<double>& A);
 
 int tri_mesh_write_to_vtk(const char *path, const Eigen::MatrixXd &nods, const Eigen::MatrixXi &tris, const Eigen::MatrixXd *mtr=nullptr);
 // int quad_mesh_write_to_vtk(const char *path, const matd_t &nods, const mati_t &quad,
@@ -25,7 +26,7 @@ int point_write_to_vtk(const char *path, const double *nods, const size_t num_po
 int point_vector_append2vtk(const bool is_append, const char* path, const Eigen::MatrixXd &vectors, const size_t num_vecs, const char* vector_name);
 int point_scalar_append2vtk(const bool is_append, const char* path, const Eigen::VectorXd &scalars, const size_t num_sca, const char* scalar_name);
 
-template<typename T, size_t num_vert>
+template<typename T, size_t num_vert, size_t dim = 3>
 int mesh_read_from_vtk(const char* filename,  Eigen::Matrix<T, -1, -1>& nods, Eigen::MatrixXi & cells,  T*   mtr= nullptr){
   std::ifstream ifs(filename);
   if(ifs.fail()) {
@@ -43,10 +44,10 @@ int mesh_read_from_vtk(const char* filename,  Eigen::Matrix<T, -1, -1>& nods, Ei
     ifs >> str;
     if(str == "POINTS"){
       ifs >> point_num >> str;
-      nods.resize(3, point_num);
+      nods.resize(dim, point_num);
       T item;
       for(size_t i = 0;i < point_num; ++i){
-        for(size_t j = 0;j < 3; ++j){
+        for(size_t j = 0;j < dim; ++j){
           ifs >> nods(j, i);
         }
           
@@ -114,7 +115,7 @@ int mesh_read_from_vtk(const char* filename,  Eigen::Matrix<T, -1, -1>& nods, Ei
   return 0;
 }
 template<typename FLOAT, size_t num_vert>
-int mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::Matrix<FLOAT, -1, -1>> nods, const Eigen::Ref<Eigen::MatrixXi> cells, const Eigen::Matrix<FLOAT, -1,-1> *mtr=nullptr){
+int mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::Matrix<FLOAT, -1, -1>> nods, const Eigen::Ref<Eigen::MatrixXi> cells, const Eigen::Matrix<FLOAT, -1,-1> *mtr=nullptr, size_t dim = 3){
   assert(cells.rows() == num_vert);
   
   std::ofstream ofs(path);
@@ -122,10 +123,14 @@ int mesh_write_to_vtk(const char *path, const Eigen::Ref<Eigen::Matrix<FLOAT, -1
     return __LINE__;
 
   ofs << std::setprecision(15);
-  if(num_vert == 4)
+  if(dim == 3 && num_vert == 4)
     tet2vtk(ofs, nods.data(), nods.cols(), cells.data(), cells.cols());
-  else if (num_vert  == 8)
+  else if (dim == 3 && num_vert  == 8)
     hex2vtk(ofs, nods.data(), nods.cols(), cells.data(), cells.cols());
+  else if (dim == 2 && num_vert == 4)
+    quad2vtk(ofs, nods.data(), nods.cols(), cells.data(), cells.cols());
+  else if (dim == 2 && num_vert == 3)
+    tri2vtk(ofs, nods.data(), nods.cols(), cells.data(), cells.cols());
   
   if ( mtr != nullptr ) {
     for (int i = 0; i < mtr->rows(); ++i) {

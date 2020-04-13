@@ -211,7 +211,7 @@ int main(int argc, char** argv){
   Map<VectorXd> acce_vec(acce.data(), 3 * dim);
   Map<VectorXd> velo_vec(velocity.data(), 3 * dim);
   const VectorXd& gra_ref = dat_str->get_gra();
-  Map<MatrixXd> gra_vec(gra_ref.data(), 3, dim);
+  Map<const MatrixXd> gra_vec(gra_ref.data(), 3, dim);
 
   size_t iters_perframe = static_cast<size_t>(round(1.0/delt_t/common.get<size_t>("frame_rate")));
   size_t max_iter  = static_cast<size_t>(ceil(common.get<double>("total_time") / delt_t));

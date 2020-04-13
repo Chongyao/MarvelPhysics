@@ -81,10 +81,11 @@ int calc_mass_vector(const Matrix<T, 3, -1> nods, const MatrixXi cells, const T&
 }
 
 
-template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t num_qdrt_, template<typename, size_t, size_t, size_t > class BASIS, //  basis
+template<typename T, size_t dim_, size_t num_per_cell_, size_t bas_order_, size_t num_qdrt_,
+         template<typename, size_t, size_t, size_t, size_t > class BASIS, //  basis
          template<typename, size_t, size_t, size_t> class QDRT> //
 int mass_calculator(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<int, num_per_cell_, -1>& cells, const T& rho, Matrix<T, -1, 1>& mass_vector){
-  using basis = BASIS<T, dim_, bas_order_, num_per_cell_>;
+  using basis = BASIS<T, dim_, 1, bas_order_, num_per_cell_>;
   using qdrt = QDRT<T, dim_, num_qdrt_, num_per_cell_>;
   
   const size_t num_cells = cells.cols(), num_nods = nods.cols();
@@ -116,8 +117,10 @@ int mass_calculator(const Eigen::Matrix<T, dim_, -1>& nods, const Eigen::Matrix<
       for (size_t q = p; q < cells.rows(); ++q) {
         #pragma omp critical
         {
-        trips.push_back(Triplet<T>(cells(p, cell_id), cells(q, cell_id), mass));
-        trips.push_back(Triplet<T>(cells(q, cell_id), cells(p, cell_id), mass));              }
+
+          trips.push_back(Triplet<T>(cells(p, cell_id), cells(q, cell_id), mass));
+          trips.push_back(Triplet<T>(cells(q, cell_id), cells(p, cell_id), mass));
+        }
 
       }
   }

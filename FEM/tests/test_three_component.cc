@@ -6,8 +6,8 @@ using namespace std;
 using namespace Eigen;
 using namespace marvel;
 
-using CSTTT = stvk<double, 3>;
-using BASIS = basis_func<double, 3, 1, 8>;
+using CSTTT = stvk<double, 3, 3>;
+using BASIS = basis_func<double, 3,3, 1, 8>;
 using QDRT = quadrature<double, 3, 2, 8>;
 
 int main(){
