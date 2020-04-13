@@ -1,3 +1,5 @@
+SET(CMAKE_CXX_FLAGS "-std=c++0x -fopenmp")
+
 add_executable(example_based example_based.cc)
 target_link_libraries(example_based
   marvel-core

@@ -6,19 +6,15 @@ file(GLOB coll_rigid_cuda src/*.cuh src/*.cu)
 FIND_PACKAGE(CUDA ${CUDA_VERSION} REQUIRED)
 STRING (TOLOWER ${CMAKE_SYSTEM_NAME} LOWER_SYSTEM_NAME)
 SET(CUDA_TARGET_INCLUDE  ${CUDA_TOOLKIT_ROOT_DIR}-${CUDA_VERSION}/targets/${CMAKE_HOST_SYSTEM_PROCESSOR}-${LOWER_SYSTEM_NAME}/include)
-message(${CUDA_INCLUDE_DIRS})
 
-
-message(${CUDA_TOOLKIT_ROOT_DIR})
 #TODO: make this available for others
-SET(CUDA_CUBLAS_LIBRARIES /usr/local/cuda/lib64/libcublas.so)
 SET(CUDA_NVCC_FLAGS --compiler-options "-std=c++11")
-SET(CUDA_HELPER_PATH ${CUDA_TOOLKIT_ROOT_DIR}/samples/common/inc)
+SET(CUDA_HELPER_PATH ${PROJECT_SOURCE_DIR}/external/cuda-samples/Common)
+
 include_directories(${CUDA_HELPER_PATH})
 
 CUDA_ADD_LIBRARY(coll_rigid ${coll_rigid_header} ${coll_rigid_source} ${coll_rigid_cuda})
 target_link_libraries(coll_rigid
-  GLU glut GL
+  GLU glut GL cublas
   ${CUDA_cusparse_LIBRARY}
-  ${CUDA_CUBLAS_LIBRARIES}
 )
