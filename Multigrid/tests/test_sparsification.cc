@@ -125,6 +125,28 @@ int main(int argc, char** argv){
           hes_new.reserve(trips.size());
           hes_new.setFromTriplets(trips.begin(), trips.end());
         }
+        #if 1  
+        {//permutatoin
+          sp_op.post_coloring(graph);
+          sp_op.reorder_coarse_and_fine();
+          auto perm_inv = sp_op.get_perm_inv();
+          // auto perm_vec = sp_op.get_perm();
+          cout << "coarse num is " << sp_op.num_coarse_ << endl;
+          PermutationMatrix<-1, -1> perm = perm_inv.asPermutation();
+          
+          SparseMatrix<double> hes_perm(hes.rows(), hes.cols());
+          hes_perm = perm* hes_new * perm.transpose();
+          
+          SparseMatrix<double> hes_reord(hes.rows(), hes.cols());{
+            vector<Triplet<double>> trips;
+            graph.build_reordered_mat_from_graph(perm_inv, trips);
+            add_dig_vals(hes, trips, &perm_inv);
+            hes_reord.reserve(trips.size());
+            hes_reord.setFromTriplets(trips.begin(), trips.end());
+          }
+          cout << "diff " << (hes_perm - hes_reord).norm() << endl;
+        }
+        #endif
         return hes_new;
   };
   auto test_condition =
@@ -154,6 +176,7 @@ int main(int argc, char** argv){
     }
 
     cout << "truncated versoin" << endl;
+    write_SPM("A_t_spm", L_t);
     auto L_new = spar(L_t, 0);
     test_condition(L_t, L_new);
     test_condition(L, L_new);
@@ -191,6 +214,9 @@ int main(int argc, char** argv){
     cout << "condition number is " << eigvalues.maxCoeff() / eigvalues.minCoeff() << endl;
     
   }
+
+
+  
   
   // Adjc_graph graph_P(L, true);
   #if 0

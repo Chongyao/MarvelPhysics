@@ -133,11 +133,23 @@ int main(int argc, char** argv){
     energy->Hes(nods.data(), dat_str);
     layers[0] = make_shared<layer>(dat_str->get_hes(), sol_type, gs_itrs);
     layers[0]->rhs_ = - dat_str->get_gra();
-    for(size_t i = 1; i < num_layers; ++i){
+    for(size_t i = 1; i < num_layers - 1; ++i){
       layers[i] = make_shared<layer>(transfers[i - 1]->R_ * layers[i - 1]->A_ * transfers[i - 1]->I_, sol_type, gs_itrs);
     }
+    layers[num_layers - 1] = make_shared<layer>(transfers[num_layers - 2]->R_ * layers[num_layers -2]->A_ * transfers[num_layers - 2]->I_, solver_type::PCG, gs_itrs);
     
   }
+
+  #if 0
+  {// see spectrum
+    for(size_t i = 0; i < num_layers; ++i){
+      auto& A = layers[i]->A_;
+      double cd = find_condition_number(A);
+      cout << "layer " << i << " condition number is " << cd << endl;
+    }
+    return 0;
+  }
+  #endif
   cout << "================set layers done================" << endl;
 
   cout << "=================compare to CG=================="<<endl;
@@ -233,16 +245,19 @@ int main(int argc, char** argv){
   }
   
   // cout << "================set process done================" << endl;
-  // multigrid_process MP(process, layers, transfers);
-  // VectorXd solution = VectorXd::Zero(nods.size());
-  // __TIME_BEGIN__;
-  // MP.execute(solution.data());
-  // __TIME_END__("V cycle ");
-  // auto& A =  layers[0]->A_;
-  // auto& b = layers[0]->rhs_;
-  // cout << "residual " << " " << (A*solution - b).norm() / b.norm() << endl;
-
+  cout << "asfdhasfd" << endl;
   #if 1
+  multigrid_process MP(process, layers, transfers);
+  VectorXd solution = VectorXd::Zero(nods.size());
+  __TIME_BEGIN__;
+  MP.execute(solution.data());
+  __TIME_END__("V cycle ");
+  auto& A =  layers[0]->A_;
+  auto& b = layers[0]->rhs_;
+  cout << "residual " << " " << (A*solution - b).norm() / b.norm() << endl;
+  #endif
+
+  #if 0
   multigrid_process MP(one_V, layers, transfers);
   VectorXd solution = VectorXd::Zero(nods.size());
   double V_time = 0;

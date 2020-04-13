@@ -33,7 +33,6 @@ void Adjc_graph::init(){
 //   }
 // }
 
-
 Adjc_graph::Adjc_graph(const SparseMatrix<double>& L, const int option):dof_(L.rows()){
   init();
   size_t num_edges = 0;
@@ -177,7 +176,12 @@ void Sparsify::sparsify_and_compensate(Adjc_graph& graph){
         }
       }
 
-
+    //Set unmarked neighbors of i as coarse
+    for(auto it = adjc_V_E.begin();it!=adjc_V_E.end();++it)
+      if(labels_[it->first] == mark_state::unmarked){
+        labels_[it->first] = mark_state::coarse;
+        unmarked_vertices_.erase(it->first);
+      }
 
   }
   return;
@@ -187,11 +191,15 @@ void Sparsify::sparsify_one_edge(Adjc_graph& graph, const size_t edge_id){
   const auto& trip = *(graph.edges_[edge_id]);
   graph.vertices_[trip.row()]->erase(edge_id);
   graph.vertices_[trip.col()]->erase(edge_id);
-  
-  labels_[trip.row()] = mark_state::fine;
+
+  if(labels_[trip.row()] == mark_state::unmarked){
+    labels_[trip.row()] = mark_state::fine;
+    unmarked_vertices_.erase(trip.row());
+  }
+  if(labels_[trip.col()] == mark_state::unmarked){
   labels_[trip.col()] = mark_state::fine;
-  unmarked_vertices_.erase(trip.row());
   unmarked_vertices_.erase(trip.col());
+  }
   
   graph.edges_[edge_id] = nullptr;
   return;  
@@ -262,13 +270,15 @@ void Sparsify::post_coloring(const Adjc_graph& graph){
   for(size_t i = 0; i < dof_; ++i){
     if(labels_[i] == mark_state::fine)
       continue;
-    size_t num_coarse_neighbors = 0;
+    bool has_fine_neighbors = false;
     for(const auto& edge_id : *(vertices[i])){
       const size_t neighbor = edges[edge_id]->row() == i ? edges[edge_id]->col() : edges[edge_id]->row();
-      if(labels_[neighbor] == mark_state::coarse)
-        ++num_coarse_neighbors;
+      if(labels_[neighbor] == mark_state::fine){
+        has_fine_neighbors = true;
+        break;
+      }
     }
-    if(num_coarse_neighbors == 1)
+    if(!has_fine_neighbors)
       labels_[i] = mark_state::fine;
   }
   return;
@@ -300,12 +310,23 @@ VectorXi Sparsify::get_perm_inv() const{
   assert(has_reordered);
   return perm_vec_inv_;
 }
+VectorXi Sparsify::get_perm() const{
+  assert(has_reordered);
+  return perm_vec_;
+}
 
-int add_dig_vals(const Eigen::SparseMatrix<double>& L, std::vector<TPL>& trips){
+int add_dig_vals(const Eigen::SparseMatrix<double>& L, std::vector<TPL>& trips,
+                 const Eigen::VectorXi* perm){
   VectorXd dig_vals = L * VectorXd::Ones(L.rows());
-  for(size_t i = 0; i < dig_vals.size(); ++i){
-    trips.push_back(TPL(i, i, dig_vals(i)));
-  }
+  if(perm == nullptr)
+    for(size_t i = 0; i < dig_vals.size(); ++i){
+      trips.push_back(TPL(i, i, dig_vals(i)));
+    }
+  else
+    for(size_t i = 0; i < dig_vals.size(); ++i){
+      const size_t id = (*perm)(i);
+      trips.push_back(TPL(id, id, dig_vals(i)));
+    }
   return 0;
 }
 

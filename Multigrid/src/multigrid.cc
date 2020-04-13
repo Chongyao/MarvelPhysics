@@ -119,6 +119,7 @@ int multigrid_process::execute(double* solution){
       time_rel += __TIME_END__("relax", false);
       __TIME_BEGIN__;
       restrict(layer_id);
+      layers_[layer_id]->u_.setZero();
       time_res += __TIME_END__("res", false);
     }else{
       __TIME_BEGIN__; 

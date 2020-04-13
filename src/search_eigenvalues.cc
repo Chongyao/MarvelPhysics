@@ -81,7 +81,6 @@ double find_condition_number(const Eigen::SparseMatrix<double>& A, const size_t 
       max_eig = find_max_eigenvalue(A, max_itrs),
       min_eig = find_min_eigenvalue(A, max_eig, max_itrs);
   cout << "max eig value is " << max_eig << " min eig " << min_eig << endl;
-  getchar();
   return max_eig / min_eig;
 }
 

@@ -1,6 +1,5 @@
 file(GLOB header *.h)
 file(GLOB source *.cc *.c)
-
 if (${APPLE})
   add_library(FEM SHARED ${source})
 else ()
