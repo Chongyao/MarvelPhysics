@@ -1,5 +1,7 @@
 #include "DEFINE_TYPE.h"
 #define EIGEN_USE_BLAS
+// #include <omp.h>
+
 #include "basic_energy.h"
 #include "implicit_euler.h"
 #include "io.h"
@@ -12,7 +14,6 @@ using namespace std;
 using namespace Eigen;
 using namespace marvel;
 
-
 // using FLOAT_TYPE = double;
 
 using TET_ELAS = BaseElas<FLOAT_TYPE, 3, 4, 1, 1, linear_csttt, basis_func, quadrature>;
@@ -20,9 +21,8 @@ using HEX_ELAS = BaseElas<FLOAT_TYPE, 3, 8, 1, 2, linear_csttt, basis_func, quad
 
 int main(int argc, char** argv){
   Eigen::initParallel();
-  // std::cout.precision(17);
   const char* filename = argv[1];
-  
+
   Matrix<FLOAT_TYPE, -1, -1> nods(1, 1);
   MatrixXi cells(1, 1);
 
@@ -31,7 +31,7 @@ int main(int argc, char** argv){
     mesh_read_from_vtk<FLOAT_TYPE, 4>(filename, nods, cells);
   else if(type == "hex")
     mesh_read_from_vtk<FLOAT_TYPE, 8>(filename, nods, cells);
-    
+
   const size_t num_nods = nods.cols();
   cout <<"V"<< nods.rows() << " " << nods.cols() << endl << "T " << cells.rows() << " "<< cells.cols() << endl;
 
@@ -43,7 +43,7 @@ int main(int argc, char** argv){
   // }
 
   const string outdir = argv[3];
-  
+
   //set mtr
   constexpr  FLOAT_TYPE rho = 20;
   constexpr  FLOAT_TYPE Young = 80.0;
@@ -53,13 +53,11 @@ int main(int argc, char** argv){
   const      FLOAT_TYPE w_pos = 1e6;
   const      size_t num_frame = 100;
 
-
   //read fixed points
   vector<size_t> cons(0);
-  const char* cons_file_path = argv[2];
+  const char *cons_file_path = argv[2];
   read_fixed_verts_from_csv(cons_file_path, cons);
   cout << "constrint " << cons.size() << " points" << endl;
-  
 
   //set collision
   // vector<shared_ptr<signed_dist_func<FLOAT_TYPE, 3>>>  objs(6);
@@ -72,10 +70,7 @@ int main(int argc, char** argv){
   //     objs[i * 3 + j] = make_shared<planeSDF<FLOAT_TYPE,3>>(plane_center.data(), plane_normal.data());
   //   }
   // }
-  
-  
 
-  
   //calc mass vector
   Matrix<FLOAT_TYPE, -1, 1> mass_vec(nods.rows() * num_nods);
   // calc_mass_vector<FLOAT_TYPE>(nods, cells, rho, mass_vec);
@@ -97,24 +92,28 @@ int main(int argc, char** argv){
     ebf[POS] = make_shared<position_constraint<FLOAT_TYPE, 3>>(nods.data(), num_nods, w_pos, cons);
 
     }
-  cout << "assemble energy" << endl;
-  
-  shared_ptr<Functional<FLOAT_TYPE, 3>> energy;
-  try {
-    energy = make_shared<energy_t<FLOAT_TYPE, 3>>(ebf);
 
-  } catch ( std::exception &e ) {
+  cout << "assemble energy" << endl;
+
+  shared_ptr<Functional<FLOAT_TYPE, 3>> energy;
+  try
+  {
+    energy = make_shared<energy_t<FLOAT_TYPE, 3>>(ebf);
+  }
+  catch (std::exception &e)
+  {
     cerr << e.what() << endl;
     exit(EXIT_FAILURE);
   }
 
   //Sovle
 
-  const string filename_tmp = outdir  + "/frame_origin.vtk";
-  shared_ptr<dat_str_core<FLOAT_TYPE, 3>>  dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
+  const string filename_tmp = outdir + "/frame_origin.vtk";
+  shared_ptr<dat_str_core<FLOAT_TYPE, 3>> dat_str = make_shared<dat_str_core<FLOAT_TYPE, 3>>(num_nods);
   newton_iter<FLOAT_TYPE, 3> imp_euler(dat_str, energy, dt, 20, 1e-4, true, false, true);
 
-  for(size_t f_id = 0; f_id < num_frame; ++f_id){
+  for (size_t f_id = 0; f_id < num_frame; ++f_id)
+  {
     cout << "[frame " << f_id << "]" << endl;
     imp_euler.solve(nods.data());
     if(ebf[KIN]!= nullptr)

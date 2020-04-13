@@ -1,2 +1,3 @@
 add_subdirectory(Collision)
-# add_subdirectory(zjucad)
+add_subdirectory(collision_detect)
+

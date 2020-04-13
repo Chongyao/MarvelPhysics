@@ -2,6 +2,8 @@
 #define FEM_BASIS
 #include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
+#include <iostream>
+
 namespace marvel{
 using namespace Eigen;
 using namespace std;
@@ -13,6 +15,7 @@ struct shape_func{
     return Eigen::Matrix<T, num_per_cell_, 1>::Zero();
   }
   static void calc_Dhpi_Dxi(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X,  Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi){
+    cout << "unsupported type of basis func.\n";
     assert(0);
     return;
   }
@@ -59,6 +62,7 @@ struct shape_func<T, 3, 1, 8>{
   static void calc_Dphi_Dxi(const Eigen::Matrix<T, 3, 1>& PNT, const T* X,  Eigen::Matrix<T, 8, 3>& Dphi_Dxi){
     Dphi_Dxi.setZero();
     const T xi0 = PNT(0), xi1 = PNT(1), xi2 = PNT(2);
+
     T l[3];
     T sign[3];
     for(size_t z = 0; z < 2; ++z){
@@ -83,11 +87,8 @@ struct shape_func<T, 3, 1, 8>{
 };
 
 
-  
-
-
-
 template<typename T, size_t dim_, size_t field_, size_t order_, size_t num_per_cell_>
+
 class basis_func{
  public:
   static void calc_Dphi_Dxi(const Eigen::Matrix<T, dim_, 1>& PNT, const T* X,  Eigen::Matrix<T, num_per_cell_, dim_>& Dphi_Dxi){
@@ -119,7 +120,6 @@ class basis_func{
   }
 };
 
-  
 
 
 }

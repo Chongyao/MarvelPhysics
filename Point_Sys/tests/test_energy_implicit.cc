@@ -345,7 +345,7 @@ int main(int argc, char** argv){
     writeOBJ(surf_filename.c_str(), (nods + vet_displace).transpose(), surf.transpose());
     
 
-
+
   }
   //done
 
