@@ -1,4 +1,5 @@
 #include "DEFINE_TYPE.h"
+
 #define EIGEN_USE_BLAS
 #include "basic_energy.h"
 #include "implicit_euler.h"
@@ -124,9 +125,9 @@ int main(int argc, char** argv){
   #endif
 
   if(pt.get<bool>("PD", true)){
-    HSC hsc = set_hierarchy(dat_str->get_hes(), pt);
-    imp_euler.set_preconditioner(std::bind(&HSC::solve, hsc, std::__1::placeholders::_1));
 
+    HSC hsc = set_hierarchy(dat_str->get_hes(), pt);
+    imp_euler.set_preconditioner(std::bind(&HSC::solve, hsc, std::placeholders::_1));
   }
 
   for(size_t f_id = 0; f_id < 1; ++f_id){
