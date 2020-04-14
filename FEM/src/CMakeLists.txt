@@ -1,6 +1,5 @@
 file(GLOB header *.h)
 file(GLOB source *.cc *.c)
-
 if (${APPLE})
   add_library(FEM SHARED ${source})
 else ()
@@ -8,7 +7,7 @@ else ()
 endif (${APPLE})
 
 target_link_libraries(FEM
-  # marvel-core
+  marvel-core
  )
 
 

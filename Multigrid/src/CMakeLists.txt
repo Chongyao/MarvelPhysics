@@ -7,3 +7,7 @@ if (${APPLE})
 else ()
   cuda_add_library(MULTIGRID SHARED ${source})
 endif (${APPLE})
+
+target_link_libraries(MULTIGRID
+  marvel-core
+  )

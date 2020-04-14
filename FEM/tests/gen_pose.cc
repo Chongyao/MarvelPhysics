@@ -12,6 +12,7 @@ using namespace Eigen;
 using namespace marvel;
 
 using TET_ELAS = BaseElas<double, 3, 4, 1, 1, stvk, basis_func, quadrature>;
+
 int main(int argc, char** argv){
   std::cout.precision(10);
   const char* filename = argv[1];

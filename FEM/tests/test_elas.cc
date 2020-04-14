@@ -46,7 +46,7 @@ int main(int argc, char** argv){
 
   //set mtr
   constexpr  FLOAT_TYPE rho = 20;
-  constexpr  FLOAT_TYPE Young = 80.0;
+  constexpr  FLOAT_TYPE Young = 2000.0;
   constexpr  FLOAT_TYPE poi = 0.3;
   constexpr  FLOAT_TYPE gravity = 98;
   constexpr  FLOAT_TYPE dt = 0.01;
@@ -87,17 +87,12 @@ int main(int argc, char** argv){
       ebf[ELAS] = make_shared<TET_ELAS>(nods, cells, Young, poi);
     else if(type == "hex")
       ebf[ELAS] = make_shared<HEX_ELAS>(nods, cells, Young, poi);
-
-    // ebf[ELAS] = nullptr;
     ebf[GRAV] = make_shared<gravity_energy<FLOAT_TYPE, 3>>(num_nods, 1, gravity, mass_vec, 'y');
     ebf[KIN] = make_shared<momentum<FLOAT_TYPE, 3>>(nods.data(), num_nods, mass_vec, dt);
-    // ebf[KIN] =nullptr;
     ebf[POS] = make_shared<position_constraint<FLOAT_TYPE, 3>>(nods.data(), num_nods, w_pos, cons);
 
-    // ebf[POS] = make_shared<collision<FLOAT_TYPE, 3>>(nods.cols(), 1e5, 'x', 0.05, nods.cols(), init_points_ptr);
-    // ebf[POS] = make_shared<geom_contact_energy<FLOAT_TYPE,3>>(objs, num_nods, 1e5);
-    // ebf[POS] = nullptr;
-  }
+    }
+
   cout << "assemble energy" << endl;
 
   shared_ptr<Functional<FLOAT_TYPE, 3>> energy;
