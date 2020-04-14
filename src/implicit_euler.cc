@@ -13,7 +13,7 @@ newton_iter<T,dim_>::newton_iter(shared_ptr<dat_str_core<T, dim_>>& dat_str, sha
                                  const T time_step, const size_t max_iter, const T tol,
                                  const bool if_pre_compute_hes, const bool if_line_search,
                                   const bool if_hes_constant_)
-    :time_step_(time_step), max_iter_(max_iter), tol_(tol), dat_str_(dat_str), energy_(energy), if_line_search_(if_line_search), if_hes_constant_(if_hes_constant_), dof_(dat_str->get_dof()){
+    :time_step_(time_step), max_iter_(max_iter), tol_(tol), dat_str_(dat_str), energy_(energy), if_line_search_(if_line_search), if_hes_constant_(if_hes_constant_), dof_(dat_str->get_dof()), cg(make_shared<ConjugateGradient<SparseMatrix<T>, Lower|Upper>>()){
 
   if(if_pre_compute_hes){
     Matrix<T, Dynamic, 1> random_x(dim_ * dof_);{
@@ -111,8 +111,8 @@ template<typename T, size_t dim_>
 int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::Matrix<T, -1, 1>& b, Eigen::Matrix<T, -1, 1>& solution){
   __TIME_BEGIN__
    if (!(if_hes_constant_ && has_hes_computed_))
-    cg.compute(*A);
-  solution = cg.solve(b);
+    cg->compute(*A);
+  solution = cg->solve(b);
   __TIME_END__("[INFO]: Solve linear system by CG");
   return 0;
 }

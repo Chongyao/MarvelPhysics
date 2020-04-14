@@ -13,7 +13,6 @@ file(GLOB source *.cc *.c *.cpp)
 if (${APPLE})
     add_library(marvel-core SHARED ${source})
     target_link_libraries(marvel-core	
-        coll_rigid
     )
 else ()
     cuda_add_library(marvel-core SHARED ${source})

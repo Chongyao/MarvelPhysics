@@ -29,7 +29,7 @@ class newton_iter{
   const bool if_line_search_;
   const bool if_hes_constant_{false};
   bool has_hes_computed_{false};
-  Eigen::ConjugateGradient<Eigen::SparseMatrix<T>, Eigen::Lower|Eigen::Upper> cg;
+  std::shared_ptr<Eigen::ConjugateGradient<Eigen::SparseMatrix<T>, Eigen::Lower|Eigen::Upper>> cg;
   SMP_TYPE constant_hes_;
 
   std::shared_ptr<dat_str_core<T, dim_>> dat_str_;

@@ -46,7 +46,7 @@ int main(int argc, char** argv){
 
   //set mtr
   constexpr  FLOAT_TYPE rho = 20;
-  constexpr  FLOAT_TYPE Young = 80.0;
+  constexpr  FLOAT_TYPE Young = 2000.0;
   constexpr  FLOAT_TYPE poi = 0.3;
   constexpr  FLOAT_TYPE gravity = 98;
   constexpr  FLOAT_TYPE dt = 0.01;

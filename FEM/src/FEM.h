@@ -11,8 +11,11 @@
 #include <iostream>
 #include <set>
 #include <fstream>
+#include<Eigen/StdVector>
 
 namespace marvel{
+template<typename T, int row, int col>
+using vec_vec_mat = std::vector<std::vector<Eigen::Matrix<T, row, col>, Eigen::aligned_allocator<Eigen::Matrix<T, row, col>>>>;
 
 template<typename T, size_t dim_, size_t field_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,
          template<typename, size_t, size_t> class CSTTT,  // constituitive function
@@ -42,10 +45,10 @@ class finite_element : public Functional<T, field_>{
 
  protected:   // precomputed values
   void PreComputation();
-  std::vector<std::vector<Eigen::Matrix<T, dim_, dim_>>> Dm_inv_;
+  vec_vec_mat<T, dim_, dim_> Dm_inv_;
   std::vector<std::vector<T>> Jac_det_;
-  std::vector<std::vector<Eigen::Matrix<T, field_ * dim_, field_ * num_per_cell_>>> Ddef_Dx_;
-  std::vector<std::vector<Eigen::Matrix<T, num_per_cell_, dim_>>> Dphi_Dxi_;
+  vec_vec_mat<T, field_ * dim_, field_ * num_per_cell_> Ddef_Dx_;
+  vec_vec_mat<T, num_per_cell_, dim_> Dphi_Dxi_;
 };
 
 #define FEM_TEMP template<typename T, size_t dim_, size_t field_, size_t num_per_cell_, size_t bas_order_, size_t qdrt_axis_,template<typename, size_t, size_t> class CSTTT,template<typename, size_t, size_t, size_t, size_t > class BASIS,template<typename, size_t, size_t, size_t> class QDRT>

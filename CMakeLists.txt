@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8)
 if (${APPLE})
   list(APPEND CMAKE_CXX_FLAGS "-std=c++11 -O3 -fpermissive -march=native -ftemplate-backtrace-limit=0 -fPIC")
 else ()
-  list(APPEND CMAKE_CXX_FLAGS "-fopenmp -std=c++17 -O3 -fpermissive -march=native -ftemplate-backtrace-limit=0 -fPIC")
+  list(APPEND CMAKE_CXX_FLAGS "-fopenmp -std=c++11 -O3 -fpermissive -march=native -ftemplate-backtrace-limit=0 -fPIC")
 endif (${APPLE})
 
 # set(CMAKE_BUILD_TYPE "Release")
