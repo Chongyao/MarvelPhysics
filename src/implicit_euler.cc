@@ -10,10 +10,10 @@ namespace marvel{
 
 template<typename T, size_t dim_>
 newton_iter<T,dim_>::newton_iter(shared_ptr<dat_str_core<T, dim_>>& dat_str, shared_ptr<Functional<T, dim_>>& energy,
-                                 const T time_step, const size_t max_iter, const T tol,
+                                 const size_t max_iter, const T tol,
                                  const bool if_pre_compute_hes, const bool if_line_search,
                                   const bool if_hes_constant_)
-    :time_step_(time_step), max_iter_(max_iter), tol_(tol), dat_str_(dat_str), energy_(energy), if_line_search_(if_line_search), if_hes_constant_(if_hes_constant_), dof_(dat_str->get_dof()), cg(make_shared<ConjugateGradient<SparseMatrix<T>, Lower|Upper>>()){
+    :max_iter_(max_iter), tol_(tol), dat_str_(dat_str), energy_(energy), if_line_search_(if_line_search), if_hes_constant_(if_hes_constant_), dof_(dat_str->get_dof()), cg(make_shared<ConjugateGradient<SparseMatrix<T>, Lower|Upper>>()){
 
   if(if_pre_compute_hes){
     Matrix<T, Dynamic, 1> random_x(dim_ * dof_);{
@@ -43,19 +43,18 @@ newton_iter<T,dim_>::newton_iter(shared_ptr<dat_str_core<T, dim_>>& dat_str, sha
 
 template<typename T, size_t dim_>
 int newton_iter<T, dim_>::solve(T* x){
-  
   Eigen::Map<Matrix<T, Dynamic, 1>>X(x, dim_ * dof_);
-  const Matrix<T, Dynamic, 1>& res = dat_str_->get_gra();
-
+  Matrix<T, Dynamic, 1> res = Matrix<T, -1, 1>::Zero(dim_ * dof_);
   Matrix<T, -1, 1> solution(dim_ * dof_);
   T res_last_iter;
+  
   Matrix<T, -1, 1> rhs;
   for(size_t newton_i = 0; newton_i < max_iter_; ++newton_i){
     cout << "[INFO]>>>>>>>>>>>>>>>newton iter is " << newton_i << endl;
     dat_str_->set_zero();
     energy_->Val(x, dat_str_);
     energy_->Gra(x, dat_str_);
-   
+    res = dat_str_->get_gra();
     // __TIME_BEGIN__
     if (!(if_hes_constant_ && has_hes_computed_))
       energy_->Hes(x, dat_str_);
@@ -93,8 +92,8 @@ int newton_iter<T, dim_>::solve(T* x){
     }     
     else
       A = &constant_hes_;
-    rhs = -res;
-    linear_solver(A, rhs, solution);
+
+    linear_solver(A, -res, solution);
     cout << "solution " << solution.array().abs().sum() << endl;    
     if(if_line_search_)
       X += line_search<T, dim_>(dat_str_->get_val(), static_cast<T>(res.dot(solution)), energy_, dat_str_, x, solution.data()) * solution;
@@ -109,9 +108,13 @@ int newton_iter<T, dim_>::solve(T* x){
 
 template<typename T, size_t dim_>
 int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::Matrix<T, -1, 1>& b, Eigen::Matrix<T, -1, 1>& solution){
+  
   __TIME_BEGIN__
-   if (!(if_hes_constant_ && has_hes_computed_))
-    cg->compute(*A);
+ if (!(if_hes_constant_ && has_hes_computed_)){
+        cout << "AA" << endl;
+        cg->compute(*A);        
+ }
+
   solution = cg->solve(b);
   __TIME_END__("[INFO]: Solve linear system by CG");
   return 0;

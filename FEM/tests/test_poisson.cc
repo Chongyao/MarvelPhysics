@@ -85,7 +85,7 @@ int main(int argc, char** argv){
   //Sovle
   const string filename_tmp = outdir  + "/frame_origin.vtk";
   shared_ptr<dat_str_core<FLOAT_TYPE, 1>>  dat_str = make_shared<dat_str_core<FLOAT_TYPE, 1>>(num_nods);
-  newton_iter<FLOAT_TYPE, 1> imp_euler(dat_str, energy, 10000, 20, 1e-4, true, false, true);
+  newton_iter<FLOAT_TYPE, 1> imp_euler(dat_str, energy, 20, 1e-4, true, false, true);
 
   for(size_t f_id = 0; f_id < 1; ++f_id){
     cout << "[frame " << f_id << "]" << endl;

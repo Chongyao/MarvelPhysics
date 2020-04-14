@@ -15,6 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/external)
+include_directories(${PROJECT_SOURCE_DIR}/mprgp_solver/src/utils)
 
 # BOOST
 set(Boost_USE_STATIC_LIBS ON)
@@ -84,7 +85,7 @@ else ()
   add_subdirectory(FEM)
   add_subdirectory(src)
   add_subdirectory(mprgp_solver)
-
+  add_subdirectory(App)
 
 
 endif (${APPLE})
