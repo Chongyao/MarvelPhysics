@@ -40,3 +40,10 @@ add_executable(test_three_component test_three_component.cc)
 target_link_libraries(test_three_component
   marvel-core
   FEM)
+
+add_executable(test_extract_surface test_extract_surface.cc)
+target_link_libraries(test_extract_surface
+  marvel-core
+  FEM
+  blas
+  lapack)
