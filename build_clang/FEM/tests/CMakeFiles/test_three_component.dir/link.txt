@@ -1,1 +1,0 @@
-/usr/bin/c++  -std=c++0x  -rdynamic CMakeFiles/test_three_component.dir/test_three_component.cc.o  -o ../../bin/test_three_component -Wl,-rpath,/home/zcy/Documents/projects/MarvelPhysics/build_clang/FEM/src:/home/zcy/Documents/projects/MarvelPhysics/build_clang/src ../src/libFEM.so ../../src/libmarvel-core.so /usr/local/cuda/lib64/libcudart_static.a -lpthread -ldl -lrt 
