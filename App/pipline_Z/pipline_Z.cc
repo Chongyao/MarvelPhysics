@@ -12,6 +12,7 @@
 #include "mprgp_solver/src/collision_plane.h"
 #include <iostream>
 #include "constrained_newton.h"
+#include "extract_surface.imp"
 
 using namespace std;
 using namespace Eigen;
@@ -56,15 +57,17 @@ int main(int argc, char** argv){
   cout << "constrint " << cons.size() << " points" << endl;
 
   //set collision
-  vector<vector<size_t>> cells_4_coll(1, vector<size_t>(cells.size()));{
-    copy(cells.data(), cells.data() + cells.size(), cells_4_coll[0].begin());
+  MatrixXi surface;
+  extract_surface(nods, cells, surface, type);
+  vector<vector<size_t>> surface_4_coll(1, vector<size_t>(surface.size()));{
+    copy(surface.data(), surface.data() + surface.size(), surface_4_coll[0].begin());
   }
   vector<vector<FLOAT_TYPE>> nods_4_coll(1, vector<FLOAT_TYPE>(nods.size()));{
     copy(nods.data(), nods.data() + nods.size(), nods_4_coll[0].begin());
   }
   
   shared_ptr<collision_proxy<FLOAT_TYPE>> coll = make_shared<collision_zplane<FLOAT_TYPE>>() ;
-  coll->init(cells_4_coll, nods_4_coll);
+  coll->init(surface_4_coll, nods_4_coll);
 
 
   

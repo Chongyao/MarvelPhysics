@@ -75,8 +75,8 @@ namespace chaos
       return Sparse;
     }
 
-    template<typename T, typename Vec>
-    inline void get_diagonal (const Eigen::SparseMatrix<T> &A, Vec &diag_A)
+  template<typename T, typename Vec, int mode>
+  inline void get_diagonal (const Eigen::SparseMatrix<T, mode> &A, Vec &diag_A)
     {
       diag_A.setConstant(std::min(A.rows(), A.cols()), 0);
       assert_ext ((size_t) diag_A.size () == (size_t) A.rows () ||
@@ -84,7 +84,7 @@ namespace chaos
                   "in get diagonal: check diag_A size");
 
       for (int i = 0; i < A.outerSize (); ++i)
-        for (typename Eigen::SparseMatrix<T>::InnerIterator it (A, i); it; ++it)
+        for (typename Eigen::SparseMatrix<T, mode>::InnerIterator it (A, i); it; ++it)
           {
             if (it.col () == it.row ())
               {
