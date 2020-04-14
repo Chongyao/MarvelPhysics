@@ -63,6 +63,8 @@ namespace chaos
       void update(const std::vector<vtxType> &nvtxs)
         {this->vtxs = nvtxs;}
 
+      size_t get_last_coll_num()
+      {return last_coll_num;}
       // before calling this function,
       // J and c should be setuped.
       template<typename Mat, typename Vec>
@@ -114,6 +116,7 @@ namespace chaos
       //            total_v is dim * (num of vtxs),
       //            which means 3 times of num of vtxs.
       size_t total_v;
+      size_t last_coll_num;
     };
   } // namespace collision
 } // namespace chaos

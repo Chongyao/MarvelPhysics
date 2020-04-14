@@ -34,9 +34,6 @@ int mesh_read_from_vtk(const char* filename,  Eigen::Matrix<T, -1, -1>& nods, Ei
     return __LINE__;
   }
 
-
-
-
   std::string str;
   int point_num = 0,cell_num = 0;
   

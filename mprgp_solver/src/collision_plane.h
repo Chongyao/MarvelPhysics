@@ -107,6 +107,7 @@ namespace chaos
           }
         }
       }
+      collision_proxy<T>::last_coll_num = cnt;
       return cnt != 0;
     }
 

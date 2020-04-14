@@ -19,9 +19,13 @@ class constrained_newton : public newton_iter<T, dim_>{
 
   //TODO: need to adapt to multi body
   int linear_solver(const SMP_TYPE*A, const Eigen::Matrix<T, -1, 1>&b, Eigen::Matrix<T, -1, 1>& solution) override{
-    vector<vector<T>> sol_coll;
-    sol_coll = coll_->response(*A, b, false);
-    copy(sol_coll[0].begin(), sol_coll[0].end(), solution.data());
+    if(coll_->get_last_coll_num()){
+      vector<vector<T>> sol_coll;
+      sol_coll = coll_->response(*A, b, false);
+      copy(sol_coll[0].begin(), sol_coll[0].end(), solution.data());
+    }else{
+      newton_iter<T, dim_>::linear_solver(A, b, solution);
+    }
     return 0;
   }
  private:

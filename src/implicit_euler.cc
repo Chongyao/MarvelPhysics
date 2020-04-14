@@ -111,7 +111,6 @@ int newton_iter<T, dim_>::linear_solver(const SMP_TYPE* A, const Eigen::Matrix<T
   
   __TIME_BEGIN__
  if (!(if_hes_constant_ && has_hes_computed_)){
-        cout << "AA" << endl;
         cg->compute(*A);        
  }
 
