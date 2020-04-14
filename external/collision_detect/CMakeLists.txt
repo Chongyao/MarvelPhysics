@@ -13,6 +13,6 @@ include_directories(${CUDA_HELPER_PATH})
 
 CUDA_ADD_LIBRARY(coll_v3 ${coll_cloth_header} ${coll_cloth_source} ${coll_cloth_cuda})
 target_link_libraries(coll_v3
-  GLU glut GL cublas
+  GLU glut GL
   ${CUDA_cusparse_LIBRARY}
 )

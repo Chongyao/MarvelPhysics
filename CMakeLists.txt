@@ -80,7 +80,7 @@ if (${APPLE})
 
 else ()
   add_subdirectory(external)
-  add_subdirectory(Point_Sys)
+  # add_subdirectory(Point_Sys)
   add_subdirectory(FEM)
   add_subdirectory(src)
   add_subdirectory(mprgp_solver)

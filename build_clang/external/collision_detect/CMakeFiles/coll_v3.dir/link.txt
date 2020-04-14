@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcoll_v3.a  CMakeFiles/coll_v3.dir/src/Collision.cpp.o CMakeFiles/coll_v3.dir/src/ccd.cpp.o CMakeFiles/coll_v3.dir/src/cmesh.cpp.o CMakeFiles/coll_v3.dir/src/cmodel.cpp.o CMakeFiles/coll_v3.dir/src/collid.cpp.o CMakeFiles/coll_v3.dir/src/cubic.cpp.o CMakeFiles/coll_v3.dir/src/tmbvh.cpp.o CMakeFiles/coll_v3.dir/src/coll_v3_generated_collision.cu.o
+/usr/bin/ranlib libcoll_v3.a
