@@ -4,6 +4,7 @@
 #include <Eigen/Core>
 #include "Point_Sys/src/gen_points.h"
 #include <libigl/include/igl/readOBJ.h>
+#include <libigl/include/igl/writeOBJ.h>
 #include "Point_Sys/src/get_nn.h"
 
 #include "io.h"
@@ -20,24 +21,24 @@ using namespace chrono;
 
 int main(int argc, char** argv){
   boost::property_tree::ptree pt;{
-    const string jsonfile_path = argv[1];
+    // const string jsonfile_path = argv[1];
     
-    cout << jsonfile_path << endl;
-    const size_t ext = jsonfile_path.rfind(".json");
-    if (ext != std::string::npos){
-      read_json(jsonfile_path, pt);
-      cout << "read json successful" <<endl;
-    }
-    else{
-      cout << "json file extension error" << endl;
-      return 0;
-    }
+    // cout << jsonfile_path << endl;
+    // const size_t ext = jsonfile_path.rfind(".json");
+    // if (ext != std::string::npos){
+    //   read_json(jsonfile_path, pt);
+    //   cout << "read json successful" <<endl;
+    // }
+    // else{
+    //   cout << "json file extension error" << endl;
+    //   return 0;
+    // }
   }
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>IMPORT MESH<<<<<<<<<<<<<<<<<<" << endl;
-  const string mesh_name = pt.get<string>("surf");
-  const string indir = pt.get<string>("indir");
-  const string outdir = pt.get<string>("outdir") + mesh_name;
+  const string mesh_name = pt.get<string>("surf","dragon");
+  const string indir = pt.get<string>("indir", "../../Point_Sys/data/");
+  const string outdir = pt.get<string>("outdir", "../../Point_Sys/data/") + mesh_name;
   //mkdir
   boost::filesystem::path outpath(outdir);
   if ( !boost::filesystem::exists(outdir) )
@@ -54,9 +55,15 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points;
-  gen_points(nods, surf, pt.get<size_t>("num_in_axis"), points, true);
-  auto point_filename = outdir + "/" + mesh_name + "_points_" + ".vtk";
-  point_write_to_vtk(point_filename.c_str(), points.data(), points.cols());
+  const size_t num_in_axis = pt.get<size_t>("num_in_axis", 64);
+  cout << "[INFO]: num in axis: " << num_in_axis << endl;
+  gen_points(nods, surf, num_in_axis, points, true);
+  auto point_filename = outdir + "/" + mesh_name + "_points_" +to_string(points.cols());
+  cout << "[INFO]: output file :" << point_filename << endl;
+  point_write_to_vtk((point_filename + ".vtk").c_str(), points.data(), points.cols());
+  
+  MatrixXi surf_points = MatrixXi::Zero(0,0);
+  writeOBJ((point_filename + ".obj").c_str(), points.transpose(), surf_points);
 
   cout << points.rows() << " " << points.cols() << endl;
                                                                                   

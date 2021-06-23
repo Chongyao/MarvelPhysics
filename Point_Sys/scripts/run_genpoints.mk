@@ -1,6 +1,6 @@
 EXE = ../../build/bin/test_genpoints
 
-model_name = 53092_sf-G_G0_subdivide937772130937772130
+model_name = dragon
 IN_DIR = ../../Point_Sys/data
 OUT_DIR = ../../Point_Sys/result
 
