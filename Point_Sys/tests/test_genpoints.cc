@@ -55,9 +55,12 @@ int main(int argc, char** argv){
   
   cout << "[INFO]>>>>>>>>>>>>>>>>>>>Generate sampled points<<<<<<<<<<<<<<<<<<" << endl;
   MatrixXd points;
-  const size_t num_in_axis = pt.get<size_t>("num_in_axis", 64);
-  cout << "[INFO]: num in axis: " << num_in_axis << endl;
-  gen_points(nods, surf, num_in_axis, points, true);
+  // const size_t num_in_axis = pt.get<size_t>("num_in_axis", 25);
+  // cout << "[INFO]: num in axis: " << num_in_axis << endl;
+  // gen_points(nods, surf, num_in_axis, points, false);
+
+  const double interval = 0.01;
+  gen_points(nods, surf, interval, points, false);
   auto point_filename = outdir + "/" + mesh_name + "_points_" +to_string(points.cols());
   cout << "[INFO]: output file :" << point_filename << endl;
   point_write_to_vtk((point_filename + ".vtk").c_str(), points.data(), points.cols());

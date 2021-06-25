@@ -62,6 +62,48 @@ int get_inner_points(Eigen::MatrixXd &points, const Eigen::MatrixXi &surf, const
   return 0;
 }
 
+int gen_points(const MatrixXd &nods, const MatrixXi &surf, const double interval, MatrixXd &points, const bool save_surf_points){
+  //assert(num_in_axis > 1);
+  MatrixXd bdbox;
+
+  int res = build_bdbox(nods, bdbox);
+  cout << "bdbox: " << bdbox << endl;
+//   vector<double> intervals(3);
+
+// // #pragma omp parallel for 
+//   for(size_t i = 0; i < 3; ++i){
+//     intervals[i] = (bdbox(i, 1) - bdbox(i, 0))/(num_in_axis - 1);
+//   }
+
+  vector<size_t> num_in_axis(3);
+  for(size_t i = 0; i < 3; ++i){
+    num_in_axis[i] = ceil((bdbox(i, 1) - bdbox(i, 0)) / interval);
+  }
+
+  points.setZero(3, num_in_axis[0]*num_in_axis[1]*num_in_axis[2]);
+  const size_t num_in_plane = num_in_axis[1]*num_in_axis[2];
+// #pragma omp parallel for 
+  for(size_t i = 0; i < num_in_axis[0]; ++i){
+    points.block(0, num_in_plane*i, 1, num_in_plane) = MatrixXd::Ones(1, num_in_plane)*(bdbox(0, 0)+ interval*i);
+    for(size_t j = 0; j < num_in_axis[1]; ++j){
+      points.block(1, num_in_plane*i + num_in_axis[2]*j, 1, num_in_axis[2]) = MatrixXd::Ones(1, num_in_axis[2])*(bdbox(1,0) + interval*j);
+      for(size_t k = 0; k < num_in_axis[2]; ++k){
+        points(2, num_in_plane*i + num_in_axis[2]*j + k) = bdbox(2, 0) + interval*k;
+      }
+    }
+  }
+
+  cout << "[INFO]genarate raw points done. size is " <<points.cols() << endl;
+  res = get_inner_points(points, surf, nods, save_surf_points);
+  cout << "after select: "  << points.cols() << endl;
+  if (save_surf_points){
+    MatrixXd points_inc_nods(3, nods.cols() + points.cols());
+    points_inc_nods.block(0, 0, 3, nods.cols()) = nods;
+    points_inc_nods.block(0, nods.cols(), 3, points.cols()) = points;
+    points = points_inc_nods;
+  }
+  return 0;
+}
 int gen_points(const MatrixXd &nods, const MatrixXi &surf, const size_t &num_in_axis, MatrixXd &points, const bool save_surf_points){
   //assert(num_in_axis > 1);
   MatrixXd bdbox;
