@@ -36,3 +36,4 @@ external/include
 external/lib
 .vscode
 *build/*
+data
